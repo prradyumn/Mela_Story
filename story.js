@@ -31,6 +31,16 @@ function waitClick(node) { return new Promise(r => node.addEventListener('click'
 
 // office: counter + chairs drawn over anyone standing behind the counter
 function officeFG(s) { return el('div', 'bg', s, null, { left: '0px', width: '1919px', backgroundImage: `url(${IMG.office_fg.src})`, zIndex: 7, pointerEvents: 'none' }); }
+// Guddu behind the counter, identical in every office shot. The counter + register stack (office_fg, z7) hide him from the waist down;
+// a soft wall shadow (z4) and counter contact shade (z8) sit him in the room, and a warm grade matches the window light.
+function officeGuddu(s, pose) {
+  const x = 1130, ground = 996, scale = .92;   // just left of the register stack, so it overlaps his arm only
+  const g = char(s, 'guddu', x, pose, { ground, scale, flip: true, z: 5 });
+  Object.values(g.imgs).forEach(i => i.style.filter = 'drop-shadow(0 10px 8px rgba(60,30,5,.28)) sepia(.14) saturate(.94) brightness(.95)');
+  el('div', '', s, null, { position: 'absolute', left: (g.x - 250) + 'px', top: (g.ground - g.h - 10) + 'px', width: '380px', height: (g.h * .62) + 'px', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(70,35,10,.30), rgba(70,35,10,0))', filter: 'blur(14px)', zIndex: 4, pointerEvents: 'none' });
+  el('div', '', s, null, { position: 'absolute', left: (g.x - 190) + 'px', top: '628px', width: '360px', height: '46px', background: 'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(60,28,8,.34), rgba(60,28,8,0))', mixBlendMode: 'multiply', zIndex: 8, pointerEvents: 'none' });
+  return g;
+}
 // ---------------- TITLE ----------------
 
 // ---------- flow helpers ----------
@@ -66,14 +76,14 @@ async function title() {
   goat.wrap.style.cursor = 'pointer'; goat.wrap.style.pointerEvents = 'auto'; goat.body.style.pointerEvents = 'auto';
   goat.wrap.querySelectorAll('img').forEach(i => i.style.pointerEvents = 'auto');
   goat.wrap.addEventListener('click', () => { sfx('goat', 1); gsap.timeline().to(goat.body, { y: -50, duration: .3, ease: 'power2.out' }).to(goat.body, { y: 0, duration: .34, ease: 'power2.in' }); });
-  // title board
-  const sg = sign(ui, `<div style="font-size:100px;line-height:1">The Mela Before Sunset</div><div style="font-size:40px;margin-top:12px;color:#6b3d16;font-family:Fredoka;font-weight:700;text-shadow:none">Addition and subtraction by estimation</div>`, 900, 500, 56, 'titleboard');
-  sg.querySelector('.board').style.background = 'linear-gradient(#fff3d6,#f2d9a2)';
-  sg.querySelector('.board').style.color = '#b5361d';
-  sg.querySelector('.board').style.textShadow = '0 5px 0 rgba(90,45,12,.25)';
-  dropSign(tl, .4, sg);
+  // Pari and Aaru welcome us at the gate (left), Gudiya is on the right; the title is spoken (t0), not shown on a card
+  const pari = char(s, 'pari', 300, 'happy', { ground: 1045 });
+  const aaru = char(s, 'aaru', 540, 'shout', { ground: 1055 });
+  tl.fromTo(pari.wrap, { x: -520, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease: 'power3.out' }, .5);
+  tl.fromTo(aaru.wrap, { x: -760, opacity: 0 }, { x: 0, opacity: 1, duration: 1.1, ease: 'power3.out' }, .75);
   tl.call(() => voice('t0'), null, 1.3);
-  const start = reg(goButton(ui, 'Start ▶', 900, 820), 'start');
+  jump(tl, 2.6, aaru, 45, 1);
+  const start = reg(goButton(ui, 'Play', 960, 820), 'start');
   tl.to(start, { scale: 1, duration: .6, ease: 'back.out(2.5)' }, 2.6);
   tl.to(start, { scale: 1.06, duration: .7, yoyo: true, repeat: -1, ease: 'sine.inOut' }, 3.3);
   birds(s, 5, 90);
@@ -103,21 +113,31 @@ async function hookA() {
   tl.fromTo(world, { scale: 1.08 }, { scale: 1, duration: 6, ease: 'sine.out' }, 0);
   tl.call(() => reveal(50, 80), null, 0);
   let t = .8;
-  const ost = sign(s, `<div>Mela Day in Apnapur!</div><div id="mon" style="font-size:46px;color:#ffe08a;margin-top:6px">Money: ₹0</div>`, 960, 360, 64, 'meladay');
-  dropSign(tl, t + 1.2, ost);
-  const money = { v: 0 };
-  tl.to(money, { v: 600000, duration: 2.2, ease: 'power2.out', onUpdate: () => { const m = ost.querySelector('#mon'); if (m) m.textContent = 'Money: ' + inr(money.v); } }, t + 6.2);
-  tl.call(() => sfx('coins', .9), null, t + 6.3);
+  // MELA MONEY board: the same green/gold board the child pays from in level 3. Only the number is new info here
+  // (the rest is in the narration), so it drops in just before "The Panchayat has…" and counts up in round ₹50,000 steps,
+  // landing on ₹6,00,000 as n1 says "six lakh rupees" (8.4–9.5s into the voice; the voice starts at t+.1)
+  const ost = sign(s, `<div style="font-size:34px;letter-spacing:.12em;color:#f3d27a">MELA MONEY</div><div class="amt" style="font-size:112px;line-height:1.05;display:inline-block;min-width:520px">₹0</div>`, 960, 330, 56, 'melamoney');
+  Object.assign(ost.querySelector('.board').style, { background: 'linear-gradient(#237a43,#1a5c33)', border: '8px solid #d9a93a', borderRadius: '22px', color: '#fff3c4', textShadow: '0 5px 0 rgba(10,40,20,.45)', boxShadow: '0 16px 0 rgba(58,34,15,.25), inset 0 0 0 4px rgba(255,225,140,.35)' });
+  const amt = ost.querySelector('.amt');
+  dropSign(tl, t + 6.9, ost);
+  const c0 = t + 7.75, c1 = t + 9.4, steps = 12;
+  for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
+  tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
+  tl.fromTo(amt, { scale: 1 }, { scale: 1.16, duration: .18, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
   t = narrate(tl, t, 'n1', T('n1'));
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);
   t = say(tl, s, t + .3, 'b1', baba, T('b1'), { p: 'ask' });
   tl.to(world, { x: -110, scale: 1.13, duration: 2.5, ease: 'sine.inOut' }, t - .4);
+  // Guddu is muddled: scratching his head while each number pops out of it as he says it (g1 word times from Whisper;
+  // the voice starts .05s after the bubble). On "Let me write it all down!" they drop into his notebook and he writes.
   pose(tl, t, guddu, 'scratch');
-  const gEnd = say(tl, s, t + .2, 'g1', guddu, T('g1'));
-  pose(tl, t + (DUR.g1 || 5) * .55, guddu, 'write');
-  tl.call(() => sfx('scribble', .7), null, t + (DUR.g1 || 5) * .55);
-  numbers(s, tl, t + .5, ['42,538', '+ 23,184', 'carry 1…', '= 65,7…?'], 1120, 760, (DUR.g1 || 5) + .8);
+  const gEnd = say(tl, s, t + .2, 'g1', guddu, T('g1')), vs = t + .25;
+  const gBubble = [...s.querySelectorAll('.bubble')].pop();
+  thoughts(s, tl, guddu, [{ txt: '42,538', at: vs + .8 }, { txt: '+ 23,184', at: vs + 3.4 }, { txt: 'carry 1…', at: vs + 6.45 }, { txt: '= 65,7…?', at: vs + 6.9 }],
+    { avoid: gBubble, until: vs + 7.25, sinkTo: { x: guddu.x - 30, y: guddu.ground - guddu.h * .55 } });
+  pose(tl, vs + 7.25, guddu, 'write');
+  tl.call(() => sfx('scribble', .7), null, vs + 7.3);
   tl.to(world, { x: 0, scale: 1, duration: .6, ease: 'power2.inOut' }, gEnd + .3);
   await playTL(tl);
   await irisOut(50, 50); NEXT_IN = 'iris';
@@ -256,7 +276,7 @@ async function level(n) {
     gsap.fromTo(bg, { x: 0 }, { x: -(2593 - 1920), duration: 14, ease: 'sine.inOut', yoyo: true, repeat: -1 });
     char(s, 'pari', 230, 'point', { ground: 1060, scale: .8 }); char(s, 'manju', 1720, 'teach', { ground: 1060, scale: .8, flip: true });
   } else if (n === 2) {
-    const gd = char(s, 'guddu', 1400, 'write', { ground: 940, scale: .85, flip: true, z: 5 });
+    officeGuddu(s, 'write');
     officeFG(s);
     char(s, 'pari', 760, 'point', { ground: 1072, scale: .82, z: 8 });
     reg(el('div', '', s, '<b>7</b> bills left', { position: 'absolute', left: '1380px', top: '330px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '40px', padding: '6px 20px', background: '#fffaf0', border: '4px solid #3a220f', borderRadius: '20px' }), 'billsleft');
@@ -316,7 +336,7 @@ async function bridge2() {
   SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '7 of 7 done!', flowers: 7 });
   const s = newScene();
   bgImg(s, 'bg_04_office', { left: '0px' });
-  const guddu = char(s, 'guddu', 1390, 'surprised', { ground: 945, scale: .95, flip: true, z: 5 });
+  const guddu = officeGuddu(s, 'surprised');
   officeFG(s);
   const pari = char(s, 'pari', 720, 'idle', { ground: 1074, scale: .92, z: 8 });
   warmTint(s, .45).style.zIndex = 9;

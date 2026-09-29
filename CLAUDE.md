@@ -67,8 +67,8 @@ Village of **Apnapur**. It is Mela day. The Panchayat has **₹6,00,000** to buy
 
 | # | id | Location / bg | What happens | Lines |
 |---|---|---|---|---|
-| 1 | `title` | gate | Title card, Start button | t0 |
-| 2 | `hookA` | chaupal | Narrator intro + money sign; Baba asks; Guddu starts adding with floating numbers | n1, b1, g1 |
+| 1 | `title` | gate | Pari (namaste) and Aaru welcome us on the left, Gudiya on the right. No title card: the title is spoken (t0). Start button | t0 |
+| 2 | `hookA` | chaupal | Narrator intro. The green **MELA MONEY** board (same look as level 3's `melamoney`) drops in and counts up in ₹50,000 steps, landing on ₹6,00,000 as n1 says "six lakh rupees". Baba asks; Guddu starts adding with floating numbers | n1, b1, g1 |
 | 3 | `hookB` | chaupal | Guddu alone, pages flying, sun tracker appears | n2 |
 | 4 | `hookC` | chaupal | Aaru and Gudiya run in: "ten crore!"; Pari: wild guess ✕ | r1, p1 |
 | 5 | `hookD` | chaupal (blurred close-up) | Rounding card 42,538→43,000 + 23,184→23,000 = 66,000; "Smart guess = Estimate" | p2 |
@@ -120,6 +120,7 @@ async function myScreen() {
 - `reg(el, name, kind)` registers the element for the editor and applies saved layout.
 - `bgImg`, `char`, `pose(tl,t,o,p)`, `setPose(o,p)`, `talk(tl,t,o,d,id)`, `jump(tl,t,o,h,times,up)`, `say`, `narrate`, `sign`, `dropSign`
 - `numbers`, `shake`, `birds`, `dust`, `petals`, `confetti`, `firework`, `jalebis`
+- `thoughts(s, tl, o, [{txt, at}], {avoid, until, sinkTo})`: numbers pop out of a character's head as they're said and hang around it, skipping any spot that overlaps `avoid` (their speech bubble) or leaves the stage. At `until` they get sucked into `sinkTo`. Used for Guddu's muddle in hookA, timed to g1's Whisper word times. He keeps the `scratch` pose until "Let me write…".
 - `sfx(name, gain, rate)` plays `au/sfx_<name>.mp3`.
 - `voice(id)`, `playMusic(id, {gain, fade})`, `stopVoices()`
 - `wait(sec)`
@@ -160,8 +161,8 @@ Image names are `a/<key>_<pose>.webp`. `char()` returns `{root, body, imgs, pose
 
 **Office z-order (level2 and bridge2).**
 
-- Guddu stands **behind** the counter at z 5.
-- `office_fg.webp` (the counter and chairs, cut from the bg) is at z 7.
+- Guddu stands **behind** the counter at z 5. Always create him with `officeGuddu(s, pose)` (story.js). It fixes his spot, size and warm grade for every office shot, and adds a soft wall shadow (z 4) and counter contact shade (z 8). The counter hides him from the waist down, and the register stack overlaps his arm.
+- `office_fg.webp` (the counter, chairs, **and the register stack + wooden tray that sit on the counter**, cut from the bg) is at z 7.
 - Pari is in front at z 8.
 - The tint is at z 9.
 

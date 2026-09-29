@@ -352,6 +352,23 @@ function fxLoop(now) {
 }
 requestAnimationFrame(fxLoop);
 // floating numbers around a point
+// thoughts: numbers that pop out of a character's head and hang around it (their muddle), each at the time it is said.
+// Slots that would overlap `avoid` (their speech bubble) or leave the stage are skipped. At `until` they are sucked into `sinkTo`.
+function thoughts(s, tl, o, items, { avoid = null, until = null, sinkTo = null } = {}) {
+  const hx = o.x, hy = o.ground - o.h * .84, M = 24;
+  const bx = avoid && { l: parseFloat(avoid.style.left) - M, t: parseFloat(avoid.style.top) - M, r: parseFloat(avoid.style.left) + parseFloat(avoid.style.width) + M, b: parseFloat(avoid.style.top) + parseFloat(avoid.style.height) + M };
+  const slots = [[-280, -30], [240, -10], [-310, 95], [255, 110], [-240, -140], [215, -140], [-330, 210], [265, 220]]
+    .map(([dx, dy]) => ({ x: hx + dx, y: hy + dy }))
+    .filter(p => { const l = p.x - 150, r = p.x + 150, t = p.y - 36, b = p.y + 36;
+      return l > 40 && r < W - 40 && t > 40 && (!bx || r < bx.l || l > bx.r || b < bx.t || t > bx.b); });
+  items.forEach(({ txt, at }, i) => {
+    const p = slots[i % slots.length], n = el('div', 'numfloat', s, txt, { left: p.x + 'px', top: p.y + 'px', zIndex: 21 });
+    gsap.set(n, { xPercent: -50, yPercent: -50, opacity: 0, scale: .3, x: hx - p.x, y: hy - p.y });
+    tl.to(n, { opacity: 1, scale: 1, x: 0, y: 0, rotate: (i % 2 ? 1 : -1) * (5 + i * 2), duration: .55, ease: 'back.out(2)' }, at);
+    tl.to(n, { y: -16, duration: 1.1, yoyo: true, repeat: 3, ease: 'sine.inOut' }, at + .55);
+    if (until != null) tl.to(n, { x: (sinkTo || { x: hx }).x - p.x, y: (sinkTo || { y: hy }).y - p.y, scale: .15, opacity: 0, rotate: 0, duration: .45, ease: 'power2.in', overwrite: 'auto' }, until + i * .07);
+  });
+}
 function numbers(s, tl, t, list, cx, cy, dur = 4) {
   list.forEach((txt, i) => {
     const n = el('div', 'numfloat', s, txt, { left: cx + 'px', top: cy + 'px' });
