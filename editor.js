@@ -2,6 +2,7 @@
 // Open with ?edit=1 in the URL or press E. Pause, drag things, then Export JSON.
 (() => {
   const q = new URLSearchParams(location.search);
+  const LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   let on = false, paused = false, sel = null, drag = null;
   const css = document.createElement('style');
   css.textContent = `
@@ -121,7 +122,8 @@
   // keys
   addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
-    if (e.key === 'e' || e.key === 'E') { toggle(); return; }
+    // E toggles the editor only when testing locally; on the live site it needs ?edit=1 (so kids can't open it)
+    if ((e.key === 'e' || e.key === 'E') && (LOCAL || on)) { toggle(); return; }
     if (!on) return;
     if (e.key === ' ') { e.preventDefault(); setPaused(!paused); return; }
     if (!sel) return; const st = e.shiftKey ? 10 : 1, o = cur(sel);

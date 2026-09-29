@@ -1,6 +1,7 @@
-The_Mela_Before_Sunset.html
-mela_story_source.zip
-source/dist
-web
+# not part of the website
+dist
 voice_samples
+build.py
+layout.json
+CLAUDE.md
 .DS_Store

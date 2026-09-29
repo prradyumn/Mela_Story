@@ -14,7 +14,7 @@ An interactive **motion-graphic story + math game** for **Grade 6** students on 
 ## 2. How to run
 
 ```bash
-cd source            # the folder containing index.html
+cd Mela_Story        # this folder: the one and only index.html lives here
 python3 -m http.server 8123
 # open http://localhost:8123/
 ```
@@ -28,25 +28,30 @@ URL parameters:
 | `?scene=hookD` | Run **only** that screen, then stop. Best for iterating. |
 | `?from=level2` | Start from that screen and continue the flow. |
 | `?speed=3` | Speed up all waits and timelines, for quick checks. |
-| `?edit=1` | Open the layout editor (§7). You can also press **E**. |
+| `?edit=1` | Open the layout editor (§7). Pressing **E** also works, but only locally (localhost or file://). |
 
 Screen ids are listed in §4.
 
 **Single-file build**, for sharing: `python3 build.py` → `dist/The_Mela_Before_Sunset.html` (about 11.6 MB). It inlines CSS, fonts, images and audio as base64 into `window.EMBED`, which `engine.js` checks before fetching files. Rebuild after every change you want to share. The single file embeds the **MP3** audio (it must play anywhere, including iOS Safari).
 
-**Vercel deploy:** `python3 build.py --web` → `../web/` (static site: Ogg Opus audio + MP3 fallback, css/js cache-busted with `?v=hash`, **no layout editor**). `Mela_Story/vercel.json` runs that build on Vercel and serves `web/`; `.vercelignore` skips the big single-file build and zip. Deploy from the `Mela_Story/` folder (`npx vercel --prod`, or import the repo with Root Directory = `Mela_Story`, framework "Other").
+**Vercel deploy:** there is no build step. This folder *is* the site, and Vercel serves `index.html` and the files next to it as they are. `vercel.json` sets cache headers (html/js/css always revalidate, so a new deploy shows up at once). `.vercelignore` keeps `dist/`, `voice_samples/`, `build.py`, `layout.json` and this file out of the upload. Deploy from this folder with `npx vercel --prod`, or import the repo into Vercel (framework "Other", no build command). On the live site the layout editor opens only with `?edit=1`.
 
 ## 3. Files
+
+Everything lives in this one folder. There is a single `index.html`, and no `source/` or `web/` copies.
 
 ```
 index.html     layer structure + script order: gsap → layout.js → engine.js → story.js → editor.js
 style.css      fonts (@font-face), bubbles, narrator panel, signs, cards, HUD, buttons, wipe
 engine.js      reusable engine: loading, audio, characters, acting, bubbles, HUD, particles, transitions
 story.js       the story itself: dialogue text (TXT), screens, LEVELS data, FLOW, main()
-editor.js      temporary layout editor (IIFE); safe to delete for production
+editor.js      temporary layout editor (IIFE); E key only works locally, the live site needs ?edit=1
 layout.json    saved manual layout edits (source of truth)
 layout.js      GENERATED from layout.json by build.py → window.LAYOUT_DEFAULT
-build.py       single-file builder (default) and Vercel site builder (--web)
+build.py       builds the shareable single file dist/The_Mela_Before_Sunset.html (+ regenerates layout.js)
+dist/          GENERATED single-file build, not deployed
+voice_samples/ Pari voice experiments + tools (not deployed; see voice_samples/pari/tools/README.md)
+vercel.json    Vercel config: static, no build, cache headers
 favicon.svg    marigold tab icon
 a/  *.webp     backgrounds (height 1080), characters (900px tall cutouts), dialogue boxes db5–db8, parch, office_fg, button art btn_l/btn_m/btn_r (Gemini-generated)
 au/ *.ogg      voice lines, music, SFX in Ogg Opus (voices 48k mono, SFX 64k, music 80k); loaded first
@@ -179,7 +184,7 @@ WebAudio buses: `musicBus`, `voiceBus` (voice ducks the music), `sfxBus`.
 
 ## 7. Layout editor (temporary)
 
-Open it with `?edit=1` or the **E** key.
+Open it with `?edit=1`, or with the **E** key when running locally.
 
 - **Playback:** pause/play (it suspends the global GSAP timeline and the audio), scrub the timeline, and jump to any screen.
 - **Moving objects:** click an object to select it. Picking uses `elementsFromPoint` because `#ui` captures pointer events. Then:
