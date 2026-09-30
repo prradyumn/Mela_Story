@@ -31,7 +31,7 @@ addEventListener('resize', fit); fit();
 
 // ---------- assets ----------
 const IMG = {}, BUF = {}, DUR = {};
-const IMAGES = ['bg_01_gate', 'bg_02_chaupal', 'bg_03_bazaar', 'bg_04_office', 'bg_05_mela', 'bg_05_mela_dusk',
+const IMAGES = ['bg_01_gate', 'bg_02_chaupal', 'bg_03_bazaar', 'bg_04_office', 'bg_05_mela', 'bg_05_mela_dusk', 'bg_ins_sweets',
   'db5', 'db6', 'db7', 'db8', 'parch', 'office_fg', 'pari_idle', 'pari_point', 'pari_happy', 'aaru_run', 'aaru_shout', 'aaru_jump', 'baba_idle', 'baba_ask',
   'guddu_write', 'guddu_scratch', 'guddu_surprised', 'guddu_proud', 'manju_teach', 'gudiya_idle', 'gudiya_hop'];
 const AUDIO = ['m_title', 'm_village_long', 'm_hurry', 'm_festive',
@@ -260,6 +260,10 @@ function say(tl, s, t, id, o, text, { gap = .35, hold = .15, p = null } = {}) {
   tl.to(b, { opacity: 0, scale: .85, y: -14, duration: .25, ease: 'power2.in' }, t + d + hold);
   return t + d + hold + gap;
 }
+// voiceOver: the narrator is voice only, with no text on screen. Same timing as narrate(): the voice starts at t+.1,
+// and it returns t + duration + .75, the moment the next beat may start.
+function voiceOver(tl, t, id) { const d = DUR[id] || 3; tl.call(() => voice(id), null, t + .1); return t + d + .75; }
+// narrate: the parchment narrator panel (text on screen). Not used by the story any more; kept for reference.
 function narrate(tl, t, id, text, { gap = .4 } = {}) {
   text = LAYOUT.text[id] || text;
   const d = DUR[id] || 3, n = reg(el('div', 'narr', ui), 'narrator_' + id);

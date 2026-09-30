@@ -53,7 +53,7 @@ dist/          GENERATED single-file build, not deployed
 voice_samples/ Pari voice experiments + tools (not deployed; see voice_samples/pari/tools/README.md)
 vercel.json    Vercel config: static, no build, cache headers
 favicon.svg    marigold tab icon
-a/  *.webp     backgrounds (height 1080), characters (900px tall cutouts), dialogue boxes db5–db8, parch, office_fg, button art btn_l/btn_m/btn_r (Gemini-generated)
+a/  *.webp     backgrounds at 2x (height 2160, upscaled 4x from the originals with Real-ESRGAN x4plus, then set to exactly 2x the old 1080 plates so the layout is unchanged), bg_ins_sweets (4K sweet-stall close-up painted by Gemini 3 Pro Image from the bazaar, used for the "sweets" shot), characters (1350px tall, rebuilt from the 1536px originals with the same per-pose scale and offset as before), dialogue boxes db5–db8, parch, office_fg, button art btn_l/btn_m/btn_r (Gemini-generated)
 au/ *.ogg      voice lines, music, SFX in Ogg Opus (voices 48k mono, SFX 64k, music 80k); loaded first
 au/ *.mp3      the same files as MP3: masters + fallback when the browser can't decode Ogg (older Safari / iOS)
 f/  *.woff2    Baloo 2, Poppins 600, Fredoka (latin + devanagari subsets for ₹)
@@ -68,8 +68,8 @@ Village of **Apnapur**. It is Mela day. The Panchayat has **₹6,00,000** to buy
 | # | id | Location / bg | What happens | Lines |
 |---|---|---|---|---|
 | 1 | `title` | gate | Pari (namaste) and Aaru welcome us on the left, Gudiya on the right. No title card: the title is spoken (t0). Start button | t0 |
-| 2 | `hookA` | chaupal | Narrator intro. The green **MELA MONEY** board (same look as level 3's `melamoney`) drops in and counts up in ₹50,000 steps, landing on ₹6,00,000 as n1 says "six lakh rupees". Baba asks; Guddu starts adding with floating numbers | n1, b1, g1 |
-| 3 | `hookB` | chaupal | Guddu alone, pages flying, sun tracker appears | n2 |
+| 2 | `hookA` | gate → mela dusk → bazaar → mela → chaupal | **Opening montage** under n1: full frame (same aspect ratio as the rest of the story, no cinema bars), one slow camera move per shot, each cut on the spoken word. Shots: push through the gate ("Mela day in Apnapur") → dusk bulb strings ("lights") → sweet stall ("sweets") → pull back from the giant wheel. Then the chaupal: the green MELA MONEY board counts up to ₹6,00,000 on "six lakh rupees", and the sunset tracker pops in on "sun goes down". n1 is voice only. Then Baba asks; Guddu's muddle (`thoughts`) | n1, b1, g1 |
+| 3 | `hookB` | chaupal | Guddu alone, pages flying, sun starts to sink (the tracker is already on from hookA) | n2 |
 | 4 | `hookC` | chaupal | Aaru and Gudiya run in: "ten crore!"; Pari: wild guess ✕ | r1, p1 |
 | 5 | `hookD` | chaupal (blurred close-up) | Rounding card 42,538→43,000 + 23,184→23,000 = 66,000; "Smart guess = Estimate" | p2 |
 | 6 | `hookE` | chaupal | Aaru jumps; "Go to the bazaar" sign | p3 |
@@ -157,12 +157,17 @@ Image names are `a/<key>_<pose>.webp`. `char()` returns `{root, body, imgs, pose
 - Box geometry (`DB`) holds w, h, tip and the inner text rect.
 - Always `await document.fonts.load('600 32px Poppins')` before measuring (main() already does this).
 
-**Narrator.** The `.narr` parchment panel sits top-left in Poppins 32px.
+**Narrator.** The narrator is **voice only**: no narration text anywhere (no panel, no subtitles). Use `voiceOver(tl, t, id)`. It plays the voice at t+.1 and returns the time the next beat may start. The old parchment panel `narrate()` is still in engine.js but unused. Speech bubbles for characters stay.
+
+**One aspect ratio.** The whole story is full-frame 16:9. Don't add letterbox or cinema bars to single scenes.
+
+**Cinematic shots.** `shot(parent, bg)` puts a background on its own camera layer. `camMove(tl, shot, t, dur, {x,y,s}, {x,y,s})` eases the camera (keeps stage point x,y centred at zoom s, and never shows the image edge).
 
 **Office z-order (level2 and bridge2).**
 
 - Guddu stands **behind** the counter at z 5. Always create him with `officeGuddu(s, pose)` (story.js). It fixes his spot, size and warm grade for every office shot, and adds a soft wall shadow (z 4) and counter contact shade (z 8). The counter hides him from the waist down, and the register stack overlaps his arm.
 - `office_fg.webp` (the counter, chairs, **and the register stack + wooden tray that sit on the counter**, cut from the bg) is at z 7.
+  It must stay pixel-aligned with `bg_04_office.webp`. If the office bg ever changes, re-cut it with the same mask.
 - Pari is in front at z 8.
 - The tint is at z 9.
 

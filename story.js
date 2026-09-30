@@ -101,6 +101,21 @@ async function title() {
 
 
 // ---------------- HOOK A (row 2): chaupal, morning ----------------
+// ---------- cinematic shots (hookA opening montage) ----------
+// shot(): a full-stage layer holding one background on a "camera" element. camMove() eases the camera from a to b,
+// where {x, y} is the stage point to keep centred and s the zoom; the image edges never come into view.
+function shot(parent, bg, z = 15) {
+  const wrap = el('div', '', parent, null, { position: 'absolute', left: 0, top: 0, width: W + 'px', height: H + 'px', overflow: 'hidden', zIndex: z, pointerEvents: 'none' });
+  const cam = el('div', '', wrap, null, { position: 'absolute', left: 0, top: 0, height: H + 'px', transformOrigin: '0 0' });
+  const b = bgImg(cam, bg, { left: '0px' }); cam.style.width = b.style.width;
+  return { wrap, cam, bw: parseFloat(b.style.width) };
+}
+function camMove(tl, sh, t, dur, a, b, ease = 'sine.inOut') {
+  const p = { ...a }, apply = () => gsap.set(sh.cam, { scale: p.s,
+    x: Math.min(0, Math.max(W - sh.bw * p.s, W / 2 - p.x * p.s)), y: Math.min(0, Math.max(H - H * p.s, H / 2 - p.y * p.s)) });
+  apply(); tl.to(p, { ...b, duration: dur, ease, onUpdate: apply }, t);
+}
+
 async function hookA() {
   SCN = 'hookA'; hudState({ sun: 0, sunVis: false });
   const s = newScene();
@@ -108,23 +123,56 @@ async function hookA() {
   birds(s, 4, 60);
   const baba = char(s, 'baba', 420, 'idle', { ground: 1040 });
   const guddu = char(s, 'guddu', 1480, 'write', { ground: 1040, flip: true });
+  const grade = warmTint(s, 0);
   playMusic('m_village_long', { gain: .85, fade: 1.5 });
   const tl = gsap.timeline({ paused: true });
-  tl.fromTo(world, { scale: 1.08 }, { scale: 1, duration: 6, ease: 'sine.out' }, 0);
   tl.call(() => reveal(50, 80), null, 0);
-  let t = .8;
-  // MELA MONEY board: the same green/gold board the child pays from in level 3. Only the number is new info here
-  // (the rest is in the narration), so it drops in just before "The Panchayat has…" and counts up in round ₹50,000 steps,
-  // landing on ₹6,00,000 as n1 says "six lakh rupees" (8.4–9.5s into the voice; the voice starts at t+.1)
+  // ---- opening montage: one slow camera move per shot, each cut on the word (n1 voice starts at V) ----
+  const V = .9, cut = [V + 2.85, V + 4.6, V + 5.45, V + 7.45];   // "Tonight…" | "sweets" | "a big giant wheel" | "The Panchayat…"
+  let prev = null;   // crossfade in on the cut, then hide the shot underneath so it can't show through later
+  const xf = (sh, at) => { gsap.set(sh.wrap, { opacity: 0 }); tl.to(sh.wrap, { opacity: 1, duration: .35, ease: 'sine.inOut' }, at - .2);
+    if (prev) tl.set(prev.wrap, { opacity: 0 }, at + .2); prev = sh; };
+  // 1 "Today is Mela day in Apnapur." push through the gate from the title screen
+  const g = shot(s, 'bg_01_gate'); prev = g;
+  const wl = LAYOUT.items['title.welcome'] || {};
+  el('div', '', g.cam, 'Welcome to Apnapur', { position: 'absolute', left: (1072 + (wl.dx || 0)) + 'px', top: (212 + (wl.dy || 0)) + 'px', transform: 'translate(-50%,-50%)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '66px', color: '#5a2d0c', opacity: .92, textShadow: '0 2px 0 rgba(255,220,160,.6), 0 -1px 0 rgba(0,0,0,.35)', whiteSpace: 'nowrap' });
+  el('div', 'tint', g.wrap, null, { background: 'repeating-conic-gradient(from 0deg at 88% 8%, rgba(255,240,180,.2) 0 7deg, transparent 7deg 16deg)', mixBlendMode: 'screen' });
+  birds(g.wrap, 3, 120);
+  for (let i = 0; i < 14; i++) { const pe = el('div', '', g.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: '-30px', width: '14px', height: '9px', borderRadius: '50%', background: ['#f7b733', '#e8870e', '#ff9f1c'][i % 3] });
+    tl.fromTo(pe, { y: Math.random() * 300 }, { y: 700 + Math.random() * 400, x: 60 + Math.random() * 120, rotate: 540, duration: 3.6, ease: 'none' }, 0); }
+  camMove(tl, g, 0, cut[0] + .3, { x: 960, y: 540, s: 1 }, { x: 1000, y: 600, s: 1.3 }, 'power1.inOut');
+  // 2 "Tonight there will be lights," a dreamy glimpse of the Mela at dusk, panning along the bulb strings
+  const d = shot(s, 'bg_05_mela_dusk'); xf(d, cut[0]);
+  for (let i = 0; i < 16; i++) { const k = el('div', '', d.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: (80 + Math.random() * 520) + 'px', width: (18 + Math.random() * 30) + 'px', height: '0', paddingBottom: '0', borderRadius: '50%' });
+    k.style.height = k.style.width; k.style.background = 'radial-gradient(circle, rgba(255,214,120,.85), rgba(255,170,60,0) 70%)'; k.style.filter = 'blur(2px)';
+    tl.fromTo(k, { opacity: 0 }, { opacity: .9, x: 40 + Math.random() * 60, duration: 1.6, yoyo: true, repeat: 1, ease: 'sine.inOut' }, cut[0] + Math.random() * .5); }
+  el('div', 'tint', d.wrap, null, { background: 'radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(25,10,35,.55))' });
+  tl.call(() => sfx('sparkle', .45), null, cut[0] + .2);
+  camMove(tl, d, cut[0] - .2, cut[1] - cut[0] + .6, { x: 620, y: 330, s: 1.5 }, { x: 1150, y: 330, s: 1.5 });
+  // 3 "sweets" the bazaar's sweet stall, from a dedicated close-up painting (bg_ins_sweets, 4K, repainted from bg_03_bazaar)
+  const w = shot(s, 'bg_ins_sweets'); xf(w, cut[1]);
+  camMove(tl, w, cut[1] - .2, cut[2] - cut[1] + .6, { x: 1000, y: 560, s: 1.04 }, { x: 1080, y: 600, s: 1.14 });
+  // 4 "and a big giant wheel." start tight on the wheel and pull back and up to show how big it is
+  const m = shot(s, 'bg_05_mela'); xf(m, cut[2]);
+  camMove(tl, m, cut[2] - .2, cut[3] - cut[2] + .5, { x: 1390, y: 520, s: 2.2 }, { x: 1330, y: 430, s: 1.3 }, 'power2.out');
+  // 5 "The Panchayat has ₹6,00,000…" the story begins: the montage fades to the chaupal, first faces
+  tl.to(m.wrap, { opacity: 0, duration: .5, ease: 'sine.inOut' }, cut[3] - .2);
+  tl.fromTo(world, { scale: 1.08 }, { scale: 1, duration: 6, ease: 'sine.out', immediateRender: false }, cut[3] - .2);
+  // MELA MONEY board: the same green/gold board the child pays from in level 3. It drops in as the chaupal appears and counts
+  // up in round ₹50,000 steps, landing on ₹6,00,000 as n1 says "six lakh rupees" (voice 9.06–9.52s)
   const ost = sign(s, `<div style="font-size:34px;letter-spacing:.12em;color:#f3d27a">MELA MONEY</div><div class="amt" style="font-size:112px;line-height:1.05;display:inline-block;min-width:520px">₹0</div>`, 960, 330, 56, 'melamoney');
   Object.assign(ost.querySelector('.board').style, { background: 'linear-gradient(#237a43,#1a5c33)', border: '8px solid #d9a93a', borderRadius: '22px', color: '#fff3c4', textShadow: '0 5px 0 rgba(10,40,20,.45)', boxShadow: '0 16px 0 rgba(58,34,15,.25), inset 0 0 0 4px rgba(255,225,140,.35)' });
   const amt = ost.querySelector('.amt');
-  dropSign(tl, t + 6.9, ost);
-  const c0 = t + 7.75, c1 = t + 9.4, steps = 12;
+  dropSign(tl, cut[3] - .05, ost);
+  const c0 = cut[3] + .55, c1 = V + 9.3, steps = 12;
   for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
   tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
   tl.fromTo(amt, { scale: 1 }, { scale: 1.16, duration: .18, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
-  t = narrate(tl, t, 'n1', T('n1'));
+  // 6 "But the shops close when the sun goes down." the light warms and the sunset tracker appears on "sun"
+  tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 11.3);
+  tl.to(sunEl, { opacity: 1, duration: .6 }, V + 12.84); tl.call(() => sfx('rise', .6), null, V + 12.84);
+  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false }, V + 12.84);
+  let t = voiceOver(tl, V - .1, 'n1');   // voice only: the pictures carry the story, no narration text
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);
   t = say(tl, s, t + .3, 'b1', baba, T('b1'), { p: 'ask' });
@@ -144,7 +192,7 @@ async function hookA() {
 }
 // ---------------- HOOK B (row 3a): Guddu keeps writing, the sun sinks ----------------
 async function hookB() {
-  SCN = 'hookB'; hudState({ sun: 0, sunVis: false });
+  SCN = 'hookB'; hudState({ sun: 0, sunVis: true });   // the tracker already popped in at the end of hookA
   const s = newScene();
   bgImg(s, 'bg_02_chaupal', { left: '0px' });
   const tint = warmTint(s, 0.15);
@@ -153,8 +201,6 @@ async function hookB() {
   tl.call(() => reveal(50, 50), null, 0);
   tl.to(tint, { opacity: .5, duration: 8 }, 0);
   tl.fromTo(world, { scale: 1.02 }, { scale: 1.12, duration: 9, ease: 'sine.inOut' }, 0);
-  tl.to(sunEl, { opacity: 1, duration: .6 }, 1); tl.call(() => sfx('rise', .6), null, 1);
-  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)' }, 1);
   sunTo(tl, 1.4, .12, 3);
   tl.call(() => sfx('scribble', .6), null, .6);
   for (let i = 0; i < 6; i++) {
@@ -165,7 +211,7 @@ async function hookB() {
     tl.to(pg, { y: '+=500', opacity: 0, duration: 1.4, ease: 'power1.in' }, 3.1 + i * .7);
     tl.call(() => sfx('paper', .4), null, 1.5 + i * .7);
   }
-  const u = narrate(tl, .6, 'n2', T('n2'));
+  const u = voiceOver(tl, .6, 'n2');
   tl.set({}, {}, u + .3);
   await playTL(tl);
   await cutTo();
@@ -371,7 +417,7 @@ async function endA() {
   tl.call(() => reveal(), null, 0);
   tl.fromTo(world, { scale: 1.1 }, { scale: 1, duration: 10, ease: 'sine.out' }, 0);
   const n3s = .6, d3 = DUR.n3 || 8;
-  const t = narrate(tl, n3s, 'n3', T('n3'));
+  const t = voiceOver(tl, n3s, 'n3');
   tl.to(dusk, { opacity: 1, duration: 3, ease: 'sine.inOut' }, n3s + .3);
   sunTo(tl, n3s, 1, 3); tl.to(sunEl, { opacity: 0, duration: .8 }, n3s + 3);
   bulbs.forEach((b, i) => { tl.to(b, { background: '#ffe47a', boxShadow: '0 0 30px 12px rgba(255,210,90,.85)', duration: .2 }, n3s + d3 * .3 + i * .22); tl.call(() => sfx('tick', .8, 1 + i * .1), null, n3s + d3 * .3 + i * .22); });
@@ -420,7 +466,7 @@ async function endC() {
   jump(tl, r3s + (DUR.r3 || 3) * .6, goat, 60, 3, .3);
   tl.call(() => setPose(goat, 'idle'), null, r3s + (DUR.r3 || 3) * .6 + 3);
   tl.to(world, { scale: 1.05, duration: 6, ease: 'sine.inOut' }, r3s);
-  t = narrate(tl, t + .8, 'n4', T('n4'));
+  t = voiceOver(tl, t + .8, 'n4');
   await playTL(tl);
   const b = reg(goButton(ui, 'Get my badge ★', 960, 260), 'badgebtn'); gsap.to(b, { scale: 1, duration: .5, ease: 'back.out(2.5)' });
   await waitClick(b);
