@@ -76,7 +76,7 @@
   const SPOTS = {   // x, y = feet on stage · s = scale · side = which side the bubble sits · bubble = fixed bubble spot (desk)
     pari:  { front: { x: 150,  y: 1050, s: 1, side: 'L' }, back: { x: 140,  y: 770, s: .8, side: 'L' },
              desk: { x: 140, y: 778, s: 1, side: 'L', clip: 532, bubble: { left: 214, bottom: 692 } } },
-    manju: { front: { x: 1745, y: 1050, s: 1, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
+    manju: { front: { x: 1715, y: 958, s: .95, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
              desk: { x: 1772, y: 778, s: 1, side: 'R', clip: 534 } },
     guddu: { front: { x: 1745, y: 1050, s: 1, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
              desk: { x: 800, y: 870, s: 1, side: 'L', tail: 'R', clip: 534, bubble: { left: 214, bottom: 692 } } }

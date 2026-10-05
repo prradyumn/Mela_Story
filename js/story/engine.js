@@ -53,9 +53,13 @@ async function loadAll(onProg) {
   try { voiceAn = AC.createAnalyser(); voiceAn.fftSize = 1024; voiceSamples = new Float32Array(voiceAn.fftSize); voiceBus.connect(voiceAn); voiceAn.connect(master); }
   catch (e) { voiceAn = null; voiceBus.connect(master); }   // the analyser passes the voice through unchanged (drives the talking mouths)
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
-  const total = IMAGES.length + AUDIO.length; let done = 0;
+  // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
+  // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
+  const LATER = /^(pari_explain|manju_talk|guddu_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
-  const pImg = IMAGES.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
+  const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
+  later.forEach(n => { IMG[n] = new Image(); });
   const decode = async url => { const r = await fetch(url); if (!r.ok) throw new Error(r.status + ' ' + url); const ab = await r.arrayBuffer(); return new Promise((ok, no) => AC.decodeAudioData(ab, ok, no)); };
   const pAu = AUDIO.map(async n => {
     try { BUF[n] = await decode(auURL(n)).catch(e => { if (SRC[n] || !OGG) throw e; return decode(auURL(n, 'mp3')); }); DUR[n] = BUF[n].duration; }
@@ -63,6 +67,7 @@ async function loadAll(onProg) {
     tick();
   });
   await Promise.all([...pImg, ...pAu]);
+  later.forEach(n => { IMG[n].src = imgURL(n); });
 }
 // ---------- audio unlock (Safari / iPad / embedded previews need this inside a real tap) ----------
 let AUDIO_UNLOCKED = false; window.EDIT_PAUSED = false;

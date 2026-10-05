@@ -18,7 +18,7 @@
     if (!loading[id]) loading[id] = (async () => {
       const urls = [];
       const emb = window.EMBED && (EMBED[`game/vo/${id}.mp3`]);
-      if (emb) urls.push(emb); else urls.push(...(OGG ? ['ogg', 'mp3', 'wav'] : ['mp3', 'wav']).map(e => GA(`vo/${id}.${e}`)));
+      if (emb) urls.push(emb); else urls.push(...(OGG ? ['ogg', 'mp3'] : ['mp3']).map(e => GA(`vo/${id}.${e}`)));
       for (const u of urls) {
         try {
           const r = await fetch(u); if (!r.ok) continue;

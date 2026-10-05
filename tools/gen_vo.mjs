@@ -1,11 +1,11 @@
 // tools/gen_vo.mjs: makes every game voice line with Gemini TTS from the terminal (the same requests as voice_studio.html:
-// same model, voices, prompt format and spoken number words). Writes assets/game/vo/<id>.wav, skipping files already there.
+// same model, voices, prompt format and spoken number words). Writes _source/game_vo_masters/<id>.wav, skipping files already there.
 //   GEMINI_API_KEY=... node tools/gen_vo.mjs [--force] [id ...]      then: tools/convert_vo.sh
 // The key comes only from the environment; never write it into a file in this folder.
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(ROOT, 'assets/game/vo');
+const OUT = path.join(ROOT, '_source/game_vo_masters');   // .wav masters (not part of the app); tools/convert_vo.sh makes the ogg/mp3
 const KEY = process.env.GEMINI_API_KEY; if (!KEY) { console.error('set GEMINI_API_KEY'); process.exit(1); }
 const MODEL = process.env.TTS_MODEL || 'gemini-3.8-flash-tts';
 
