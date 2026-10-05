@@ -1,0 +1,27 @@
+{
+  "image": "pari_happy_talk.png",
+  "imageWidth": 2048,
+  "imageHeight": 1536,
+  "frameWidth": 1024,
+  "frameHeight": 1536,
+  "columns": 2,
+  "rows": 1,
+  "frameCount": 2,
+  "firstFrame": 0,
+  "lastFrame": 1,
+  "spacing": 0,
+  "margin": 0,
+  "order": "row-major",
+  "anchor": "bottom-center",
+  "artStyle": "smooth",
+  "frameRate": null,
+  "loop": false,
+  "phaser": {
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "startFrame": 0,
+    "endFrame": 1,
+    "margin": 0,
+    "spacing": 0
+  }
+}

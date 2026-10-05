@@ -1,0 +1,207 @@
+/* Game layer styles — everything is scoped under #game so it never touches the story (css/story.css). */
+#game{
+  --ink:#3a220f; --ink-soft:#7a4a22; --cream:#fffaf0; --wood:#5a3212;
+  --saffron:#e8870e; --gold:#f7b733; --red:#b5361d; --stamp:#c0392b; --green:#3fa34d; --blue:#2f62c9;
+}
+#game *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+#game{position:absolute;inset:0;z-index:45;overflow:hidden;font-family:Poppins,sans-serif;color:var(--ink)}
+#game .abs{position:absolute}
+#game .hidden,#game.hidden{display:none!important}
+#game img{-webkit-user-drag:none;user-select:none;pointer-events:none}
+/* ---------- background ---------- */
+#game #gBg{position:absolute;left:-96px;top:-54px;width:2112px;height:1188px;background:url(../assets/game/bg_bazaar.webp) center/cover no-repeat;will-change:transform}
+/* ---------- HUD ---------- */
+#game #gHud{position:absolute;left:0;top:0;width:1920px;height:200px;z-index:30}
+#game .gchip{left:40px;top:34px;height:78px;padding:0 30px;display:flex;align-items:center;background:var(--cream);border:4px solid var(--wood);border-radius:40px;font:800 30px/1 Baloo;box-shadow:0 6px 0 rgba(58,34,15,.25)}
+#game .round-btn{width:96px;height:96px;border-radius:50%;background:var(--cream);border:4px solid var(--wood);box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#game .round-btn svg{width:52px;height:52px}
+#game .round-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(58,34,15,.25)}
+#game #btnSpeaker{left:40px;top:112px}
+#game #btnMusic{left:52px;top:222px;width:72px;height:72px}
+#game #btnMusic svg{width:36px;height:36px}
+#game #btnMusic.off{opacity:.5}
+#game #mariPlate{left:690px;top:26px;width:540px;height:92px;border-radius:46px;background:rgba(255,250,240,.9);border:4px solid var(--wood);box-shadow:0 6px 0 rgba(58,34,15,.2)}
+#game .mari{position:absolute;top:10px;width:64px;height:64px}
+#game .mari svg{width:100%;height:100%;overflow:visible}
+#game .mari .m-on{opacity:0}
+#game .mari.lit .m-on{opacity:1}
+#game #sunPanel{left:1570px;top:14px;width:320px;height:160px;border-radius:30px;background:rgba(255,250,240,.55)}
+#game #sunPanel svg{position:absolute;left:10px;top:0;width:300px;height:160px;overflow:visible}
+#game .glow-ring{position:absolute;border:8px solid var(--gold);border-radius:60px;box-shadow:0 0 28px 8px rgba(247,183,51,.9);opacity:0;pointer-events:none}
+/* ---------- coach (avatar + bubble) ---------- */
+#game #coach{position:absolute;inset:0;z-index:40;pointer-events:none}
+/* Full-body coaches (positions + clipping set per level in hud.js → SPOTS): Pari left, Manju right (L1), Guddu behind
+   the desk (L2). .desk = cut at the office desk's top edge so the stamps stay clear. */
+#game .coachFig{left:0;top:0;width:0;height:0;opacity:0}
+#game .coachFig img{position:absolute;bottom:0;left:0;transform:translateX(-50%);opacity:0;pointer-events:none;filter:drop-shadow(0 8px 8px rgba(60,30,5,.28))}
+#game .coachFig .pc-shadow{position:absolute;left:0;bottom:-13px;width:210px;height:30px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(60,30,5,.33),rgba(60,30,5,0) 70%)}
+#game .coachFig.desk img{filter:sepia(.08) brightness(.97)}
+/* bubble beside a coach on the right (Manju) / tail pointing right (Guddu at the desk) */
+#game #bubble.posR{left:auto;right:214px;transform-origin:100% 100%}
+#game #bubble.tailR::before{left:auto;right:-36px;border-width:16px 0 16px 34px;border-color:transparent transparent transparent var(--wood)}
+#game #bubble.tailR::after{left:auto;right:-27px;border-width:12px 0 12px 28px;border-color:transparent transparent transparent #fcf2dd}
+#game #avatar{left:36px;top:318px;width:150px;height:150px;border-radius:50%;overflow:hidden;background:#fff1c9;border:5px solid var(--wood);box-shadow:0 5px 0 rgba(58,34,15,.3)}
+#game #avatar img{position:absolute}
+#game #bubble{left:214px;bottom:692px;width:470px;padding:30px 30px 26px;background:linear-gradient(#fffaf0,#fbefd6);border:4px solid var(--wood);border-radius:30px;font:600 27px/1.45 Poppins;color:var(--ink);box-shadow:0 6px 0 rgba(58,34,15,.22);transform-origin:0 100%}
+#game #bubble::before,#game #bubble::after{content:'';position:absolute;left:-30px;bottom:26px;border-style:solid}
+#game #bubble::before{border-width:16px 34px 16px 0;border-color:transparent var(--wood) transparent transparent;left:-36px;bottom:22px}
+#game #bubble::after{border-width:12px 28px 12px 0;border-color:transparent #fcf2dd transparent transparent;left:-27px;bottom:26px}
+#game #bubbleName{position:absolute;right:26px;top:-19px;padding:4px 14px 2px;border-radius:14px;background:var(--blue);color:#fff;font:800 18px/1.3 Baloo;letter-spacing:.06em;text-transform:uppercase}
+#game #bubbleText b{color:var(--saffron)}
+/* ---------- price tag ---------- */
+#game #tagRig{position:absolute;left:0;top:0;width:1920px;height:520px;z-index:12;transform-origin:960px 118px;pointer-events:none}
+#game #rope{position:absolute;left:957px;top:110px;width:6px;height:124px;background:linear-gradient(90deg,#5b3517,#8a5a2b,#5b3517);border-radius:3px}
+#game #tag{position:absolute;top:188px;height:297px;min-width:400px;padding:114px 40px 0 26px;display:flex;align-items:flex-start;gap:12px;background:url(../assets/game/ui_price_tag.webp) center/100% 100% no-repeat;filter:drop-shadow(0 10px 8px rgba(58,34,15,.25));transform-style:preserve-3d}
+#game #tagIcon{width:120px;height:120px;object-fit:contain;flex:none}
+#game #tagText{display:flex;flex-direction:column;padding-top:4px}
+#game #tagName{font:800 34px/1 Baloo;color:var(--ink);margin-bottom:-2px}
+#game #tagPrice{font:700 60px/1.15 Fredoka;color:var(--ink);white-space:nowrap}
+#game #tagPrice .d{display:inline-block;position:relative}
+#game #tagPrice .d.glow{color:var(--saffron)}
+#game #tagPrice .d.glow::after{content:'';position:absolute;left:-10px;right:-10px;top:4px;bottom:0;border-radius:50%;background:radial-gradient(rgba(247,183,51,.75),rgba(247,183,51,0) 70%);z-index:-1;animation:digitPulse 1s ease-in-out infinite}
+#game #tagPrice .d.glow{text-decoration:underline;text-decoration-thickness:5px;text-underline-offset:6px}
+@keyframes digitPulse{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.25);opacity:1}}
+#game #tagStamp{position:absolute;left:150px;top:150px;padding:2px 18px 0;border:6px solid var(--stamp);border-radius:14px;color:var(--stamp);font:700 54px/1.1 Fredoka;background:rgba(255,250,240,.55);transform:rotate(-6deg);opacity:0;white-space:nowrap;mix-blend-mode:multiply}
+/* ---------- number line ---------- */
+#game #numline{position:absolute;inset:0;z-index:14;pointer-events:none}
+#game #nlBar{position:absolute;left:285px;top:740px;width:1350px;height:105px}
+#game .nl-tick{position:absolute;width:34px;height:102px}
+#game .nl-tick.mid{width:24.8px;height:74.4px}
+#game .nl-label{position:absolute;top:832px;font:700 40px/1 Fredoka;color:var(--ink);white-space:nowrap;transform:translateX(-50%)}
+#game .nl-label.mid{font:500 30px/1 Fredoka;color:var(--ink-soft);top:834px}
+#game .marker{position:absolute;width:234px;height:198px;z-index:16;pointer-events:none;transform-origin:114px 177px}
+#game .marker img{width:100%;height:100%}
+#game .marker span{position:absolute;left:23px;top:55px;width:186px;height:66px;display:flex;align-items:center;justify-content:center;font:700 40px/1 Fredoka;color:var(--ink);white-space:nowrap}
+/* ---------- 3-slice buttons ---------- */
+#game .gbtn{position:absolute;height:120px;min-width:300px;padding:0 64px 14px;display:flex;align-items:center;justify-content:center;font:700 48px/1 Fredoka;color:var(--ink);cursor:pointer;z-index:20;
+  --l:url(../assets/game/btn_c_l.webp);--m:url(../assets/game/btn_c_m.webp);--r:url(../assets/game/btn_c_r.webp);
+  background:var(--l) left top/auto 100% no-repeat,var(--r) right top/auto 100% no-repeat,var(--m) center top/calc(100% - 140px) 100% no-repeat;
+  filter:drop-shadow(0 6px 4px rgba(58,34,15,.25));transition:filter .2s}
+#game .gbtn:active{transform:translateY(3px)}
+#game .gbtn.cta,#game .gbtn.glow{--l:url(../assets/game/btn_l.webp);--m:url(../assets/game/btn_m.webp);--r:url(../assets/game/btn_r.webp);color:#fff;text-shadow:0 3px 0 rgba(150,70,0,.55)}
+#game .gbtn.cta{font:800 46px/1 Baloo;padding-bottom:18px}
+#game .gbtn.correct{--l:url(../assets/game/btn_g_l.webp);--m:url(../assets/game/btn_g_m.webp);--r:url(../assets/game/btn_g_r.webp);color:#fff;text-shadow:0 3px 0 rgba(20,90,30,.55)}
+#game .gbtn.wrong{--l:url(../assets/game/btn_x_l.webp);--m:url(../assets/game/btn_x_m.webp);--r:url(../assets/game/btn_x_r.webp);color:#fff;text-shadow:0 3px 0 rgba(120,20,20,.55)}
+#game .gbtn.faded{filter:grayscale(.7) opacity(.45);pointer-events:none}
+#game .gbtn.pulse{animation:btnPulse 1.1s ease-in-out infinite}
+#game .gbtn.glow{animation:btnGlow 1s ease-in-out infinite}
+@keyframes btnPulse{0%,100%{filter:drop-shadow(0 6px 4px rgba(58,34,15,.25))}50%{filter:drop-shadow(0 0 22px rgba(247,183,51,1)) drop-shadow(0 0 8px rgba(255,220,120,1))}}
+@keyframes btnGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(247,183,51,.8))}50%{filter:drop-shadow(0 0 30px rgba(255,200,60,1))}}
+#game .gbtn .tick-badge{position:absolute;right:-6px;top:-10px;width:56px;height:56px;border-radius:50%;background:var(--green);border:4px solid #fff;display:flex;align-items:center;justify-content:center;transform:scale(0)}
+#game .gbtn .tick-badge svg{width:30px;height:30px}
+#game .gbtn.locked{pointer-events:none}
+/* ---------- Gudiya ---------- */
+#game #gudiya{position:absolute;left:0;top:0;z-index:18;pointer-events:none;will-change:transform}
+#game #gudiya .gbody{position:absolute;transform-origin:50% 100%}
+#game #gudiya .flip{position:absolute;left:0;top:0;width:100%;height:100%}
+#game #gudiya img,#game #gudiya .sheet{position:absolute;left:0;top:0;width:100%;height:100%}
+#game #gudiya .gshadow{position:absolute;left:-60px;top:-14px;width:120px;height:24px;border-radius:50%;background:radial-gradient(rgba(58,34,15,.35),rgba(58,34,15,0) 70%)}
+#game #bleat{left:1660px;top:640px;width:190px;height:161px;z-index:19;background:url(../assets/game/db6.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;padding:0 0 30px 12px;font:800 32px/1 Baloo;color:var(--ink);opacity:0;transform-origin:30% 100%}
+/* ---------- cart ---------- */
+#game #cart{left:1486px;top:162px;width:420px;height:250px;z-index:25;opacity:0;pointer-events:none}
+#game #cart .cart-img{position:absolute;left:0;top:0;width:420px;height:242.7px}
+#game #cartItems{position:absolute;inset:0}
+#game #cartItems img{position:absolute;width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(58,34,15,.3))}
+#game #cartCount{position:absolute;left:6px;top:60px;padding:6px 14px 4px;border-radius:20px;background:var(--red);border:3px solid var(--cream);color:var(--cream);font:700 26px/1 Fredoka;white-space:nowrap}
+/* ---------- rule strip, hand, stamp fx ---------- */
+#game #rule{left:960px;top:962px;height:102px;padding:0 40px 0 22px;display:flex;align-items:center;gap:18px;z-index:22;transform:translate(-50%,0);background:var(--cream);border:4px solid #c98a4a;border-radius:51px;font:600 30px/1 Poppins;color:var(--ink);white-space:nowrap;box-shadow:0 6px 0 rgba(58,34,15,.18);opacity:0}
+#game #rule .bulb{width:62px;height:62px;border-radius:50%;background:#ffe9a8;border:3px solid #d99a20;display:flex;align-items:center;justify-content:center}
+#game #rule .bulb svg{width:36px;height:36px}
+#game #hand{width:150px;height:150px;z-index:26;opacity:0}
+/* ---------- overlays ---------- */
+#game .overlay{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center}
+#game .overlay .dim{position:absolute;inset:0;background:rgba(29,18,8,.45)}
+#game .gcard{position:relative;background:rgba(255,250,240,.96);border:6px solid var(--wood);border-radius:48px;box-shadow:0 12px 30px rgba(58,34,15,.35);text-align:center}
+#game #titleCard{width:900px;padding:56px 60px 70px}
+#game #titleCard .lvl{font:800 34px/1 Baloo;color:var(--saffron);letter-spacing:.08em;text-transform:uppercase}
+#game #titleCard h1{font:800 104px/1.05 Baloo;margin:14px 0 6px}
+#game #titleCard p{font:600 34px/1.3 Poppins;color:var(--ink-soft);margin-bottom:46px}
+#game #titleCard .gbtn{position:relative;margin:0 auto;width:360px}
+#game #titleIcons{display:flex;justify-content:center;gap:16px;margin:0 0 34px}
+#game #titleIcons img{width:96px;height:96px;object-fit:contain}
+#game #doneCard{width:800px;height:880px;position:absolute;left:730px;top:180px;padding-top:24px}
+#game #doneCard h2{font:800 96px/1.1 Baloo}
+#game #doneCard .sub{font:600 30px/1.3 Poppins;color:var(--ink-soft)}
+#game #doneStars{position:relative;height:150px;margin-top:10px}
+#game #doneStars img{position:absolute;top:20px;width:120px;height:120px}
+#game #doneStars img:nth-child(1){left:190px}
+#game #doneStars img:nth-child(2){left:330px;top:0;width:140px;height:140px}
+#game #doneStars img:nth-child(3){left:490px}
+#game #doneCart{position:absolute;left:150px;top:330px;width:500px}
+#game #doneCta{left:170px;top:732px;width:460px;font-size:40px;white-space:nowrap}
+#game #doneScore{position:absolute;left:0;right:0;top:690px;font:600 26px/1 Poppins;color:var(--ink-soft)}
+/* ---------- particles ---------- */
+#game #gFx{position:absolute;inset:0;z-index:55;pointer-events:none}
+#game .spark{position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(#fff6c8,#f7b733 60%,rgba(247,183,51,0) 70%)}
+#game .confetti{position:absolute;width:16px;height:26px;border-radius:3px}
+#game .gdust{position:absolute;width:40px;height:22px;border-radius:50%;background:radial-gradient(rgba(214,170,110,.9),rgba(214,170,110,0) 70%)}
+#game .flyer{position:absolute;z-index:56;pointer-events:none}
+/* toast (dev / level hand-off) */
+#game #gToast{left:960px;top:40px;transform:translateX(-50%);z-index:70;padding:14px 28px;border-radius:30px;background:var(--ink);color:var(--cream);font:600 26px/1 Poppins;opacity:0}
+#game #btnSkip{left:1702px;top:968px;z-index:45;display:flex;align-items:center;gap:8px;padding:14px 26px 12px;border-radius:40px;background:rgba(255,250,240,.92);border:4px solid var(--wood);font:800 30px/1 Baloo;color:var(--ink);cursor:pointer;box-shadow:0 5px 0 rgba(58,34,15,.25)}
+#game #btnSkip svg{width:28px;height:28px}
+#game #btnSkip:active{transform:translateY(3px)}
+
+/* ================= Level 2 · Panchayat office ================= */
+#game #l2{position:absolute;inset:0}
+#game #pile2{left:1650px;top:520px;width:250px;height:200px}
+#game #pile2 .pile-art{position:absolute;left:0;top:40px;width:250px;height:150px}
+#game #pileLeft{position:absolute;left:30px;top:0;width:190px;height:44px;border-radius:22px;background:var(--cream);border:3px solid var(--wood);font:800 24px/38px Baloo;text-align:center;white-space:nowrap}
+#game #basket2{left:1650px;top:725px;width:250px;height:190px}
+#game #basket2 .basket-art{position:absolute;left:0;top:0;width:250px;height:178.4px}
+#game #basketBalls{position:absolute;inset:0}
+#game #basketBalls img{position:absolute;width:62px;height:62px}
+#game .basket-tag{position:absolute;left:78px;top:90px;width:99px;text-align:center;font:800 21px/1 Baloo;letter-spacing:.06em;color:var(--ink-soft)}
+/* the bill */
+#game #bill2{left:1000px;top:196px;width:620px;height:775px;transform-origin:50% 100%;filter:drop-shadow(0 12px 10px rgba(58,34,15,.28))}
+#game #bill2 .paper{position:absolute;left:0;top:0;width:620px;height:775px}
+#game #bill2 .b-title{position:absolute;left:100px;top:26px;font:800 52px/1.1 Baloo;color:var(--red)}
+#game #bill2 .b-sub{position:absolute;left:104px;top:82px;font:600 20px/1 Poppins;color:var(--ink-soft)}
+#game #bill2 .b-item{position:absolute;left:100px}
+#game #bi1{top:136px}#game #bi2{top:272px}
+#game #bill2 .b-name{font:600 30px/1.2 Poppins;color:var(--ink)}
+#game #bill2 .b-row{display:flex;align-items:center;gap:22px;margin-top:-2px}
+#game #bill2 .b-price{font:700 64px/1.15 Fredoka;color:var(--ink);white-space:nowrap;border-radius:12px}
+#game #bill2 .b-price.glow{animation:priceGlow 1.2s ease-in-out 1}
+@keyframes priceGlow{0%,100%{background:transparent}40%{background:rgba(247,183,51,.45)}}
+#game #bill2 .b-chip{padding:4px 16px 2px;border-radius:14px;border:3px solid #2f62c9;background:#e6efff;color:#2f62c9;font:700 34px/1.25 Fredoka;white-space:nowrap;opacity:0}
+#game #bill2 .b-chip.yellow{border-color:#e0a81c;background:#fff1b8;color:#8a5a10}
+#game #bill2 .b-rule{position:absolute;left:96px;top:428px;width:470px;height:0;border-top:3px dashed var(--ink-soft)}
+#game #bill2 .b-total{position:absolute;left:100px;top:448px;font:800 40px/1.1 Baloo;color:var(--ink)}
+#game #bill2 .b-box{position:absolute;left:100px;top:516px;width:300px;height:130px;border-radius:22px;border:4px dashed #c98a4a;background:rgba(255,248,230,.6);display:flex;align-items:center;justify-content:center;font:700 96px/1 Fredoka;color:#c98a4a}
+#game #bill2 .b-mark{position:absolute;left:82px;top:512px;width:460px;height:150px;transform:rotate(5deg);opacity:0}
+#game #bill2 .b-mark img{position:absolute;left:0;top:0;width:460px;height:147px}
+#game #bill2 .b-mark span{position:absolute;left:0;top:44px;width:460px;text-align:center;font:700 48px/1.1 Fredoka;color:#c0392b;opacity:.92;white-space:nowrap}
+/* answer stamps */
+#game .stamp2{position:absolute;top:553px;width:250px;height:333px;cursor:pointer;z-index:20;transform-origin:50% 100%;filter:drop-shadow(0 8px 6px rgba(58,34,15,.3))}
+#game .stamp2 .art{position:absolute;left:0;top:0;width:250px;height:333px}
+#game .stamp2.pressed .art{height:292px;top:41px}
+#game .stamp2 .about{position:absolute;left:0;top:215px;width:250px;text-align:center;font:800 18px/1 Baloo;letter-spacing:.12em;color:#fff3d6;pointer-events:none}
+#game .stamp2 .val{position:absolute;left:17px;top:248px;width:217px;height:35px;display:flex;align-items:center;justify-content:center;font:700 32px/1 Fredoka;color:var(--ink);white-space:nowrap;pointer-events:none}
+#game .stamp2 .tick{position:absolute;left:192px;top:96px;width:56px;height:56px;border-radius:50%;background:var(--green);border:4px solid #fff;display:flex;align-items:center;justify-content:center;transform:scale(0)}
+#game .stamp2 .tick svg{width:30px;height:30px}
+#game .stamp2.glow{animation:stampGlow 1s ease-in-out infinite}
+#game .stamp2.pulse{animation:stampGlow 1.1s ease-in-out 3}
+#game .stamp2.wrong{filter:drop-shadow(0 0 18px rgba(200,40,30,1)) drop-shadow(0 0 6px rgba(200,40,30,1))}
+#game .stamp2.wrong .val{color:var(--red)}
+#game .stamp2.correct{filter:drop-shadow(0 0 20px rgba(63,163,77,1)) drop-shadow(0 0 6px rgba(63,163,77,1))}
+#game .stamp2.correct .val{color:#2e7d32}
+#game .stamp2.faded{opacity:.38;pointer-events:none}
+#game .stamp2.locked{pointer-events:none}
+@keyframes stampGlow{0%,100%{filter:drop-shadow(0 8px 6px rgba(58,34,15,.3))}50%{filter:drop-shadow(0 0 26px rgba(247,183,51,1)) drop-shadow(0 0 8px rgba(255,220,120,1))}}
+#game #inkPad{left:812px;top:790px;width:200px;height:120px;opacity:0;z-index:19}
+#game #ball2{left:0;top:0;width:220px;height:220px;opacity:0;z-index:31;pointer-events:none}
+#game #crumpleCv{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;z-index:30;opacity:0}
+/* level complete */
+#game #done2Card{position:absolute;left:560px;top:190px;width:800px;height:860px;padding-top:24px}
+#game #done2Card h2{font:800 88px/1.1 Baloo}
+#game #done2Card .sub{font:600 28px/1.3 Poppins;color:var(--ink-soft)}
+#game #done2Stars{position:relative;height:150px;margin-top:6px}
+#game #done2Stars img{position:absolute;top:20px;width:120px;height:120px}
+#game #done2Stars img:nth-child(1){left:200px}#game #done2Stars img:nth-child(2){left:330px;top:0;width:140px;height:140px}#game #done2Stars img:nth-child(3){left:480px}
+#game #done2Basket{position:absolute;left:170px;top:330px;width:460px;height:380px}
+#game #done2Basket .basket-art{position:absolute;left:0;top:40px;width:460px;height:328px}
+#game #done2Basket .balls img{position:absolute;width:110px;height:110px}
+#game #done2Basket .basket-tag{left:143px;top:200px;width:182px;font-size:36px}
+#game #done2Score{position:absolute;left:0;right:0;top:708px;font:600 26px/1 Poppins;color:var(--ink-soft)}
+#game #done2Cta{left:80px;top:744px;width:640px;font-size:42px;white-space:nowrap}

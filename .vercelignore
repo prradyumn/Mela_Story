@@ -1,7 +1,10 @@
 # not part of the website
+_source
+tools
 dist
-voice_samples
-build.py
-layout.json
 CLAUDE.md
+README.md
+js/story/layout.json
 .DS_Store
+.vscode
+assets/game/vo/*.wav

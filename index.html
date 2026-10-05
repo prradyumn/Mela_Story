@@ -3,8 +3,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>The Mela Before Sunset</title>
 <link rel="icon" href="favicon.svg">
-<link rel="stylesheet" href="style.css">
-<script src="gsap.min.js"></script>
+<link rel="stylesheet" href="css/story.css">
+<link rel="stylesheet" href="css/game.css">
+<script src="js/vendor/gsap.min.js"></script>
 </head><body>
 <div id="app"><div id="stage">
   <div id="shaker" class="layer"><div id="world" class="layer"></div></div>
@@ -16,8 +17,26 @@
   <div id="skip">Skip ⏭</div>
   <div id="loader"><h1>The Mela Before Sunset</h1><div class="bar"><i></i></div><p id="lp">Loading Apnapur…</p></div>
 </div></div>
-<script src="layout.js"></script>
-<script src="engine.js"></script>
-<script src="story.js"></script>
-<script src="editor.js"></script>
+<!-- story -->
+<script src="js/story/layout.js"></script>
+<script src="js/story/engine.js"></script>
+<script src="js/story/story.js"></script>
+<!-- game (plugs into story.js through window.GAME_LEVELS) -->
+<script src="js/vendor/three.min.js"></script>
+<script src="js/game/data/level1.js"></script>
+<script src="js/game/data/level2.js"></script>
+<script src="js/game/markup.js"></script>
+<script src="js/game/markup2.js"></script>
+<script src="js/game/audio.js"></script>
+<script src="js/game/stage.js"></script>
+<script src="js/game/hud.js"></script>
+<script src="js/game/gudiya.js"></script>
+<script src="js/game/scene.js"></script>
+<script src="js/game/level1.js"></script>
+<script src="js/game/crumple.js"></script>
+<script src="js/game/scene2.js"></script>
+<script src="js/game/level2.js"></script>
+<script src="js/game/game.js"></script>
+<!-- layout editor (?edit=1, or E when local) -->
+<script src="js/story/editor.js"></script>
 </body></html>

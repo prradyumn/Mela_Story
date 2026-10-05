@@ -1,0 +1,119 @@
+S.No,Scene Description (Location and Angles),Visual Assests,Dialogues,On screen text (OST)
+1,"TITLE SCREEN
+Location: Apnapur village entry gate.
+Angle: Wide front view of the gate ""Welcome to Apnapur"". Gudiya the goat stands near the gate and looks at the camera.","BG: Village Entry Gate (English)
+Character: Gudiya
+Prop: game title board on cream paper
+Button: Start
+SFX: cycle bell when Start is tapped
+BGM: BGM Village 1 (soft, loops)",No dialogue.,"The Mela Before Sunset
+Addition and subtraction by estimation
+[Start]"
+2,"HOOK – SCREEN 1 (the situation)
+Location: Chaupal under the big banyan tree, next to the Panchayat Bhawan. Morning, bright sun.
+Angle: Wide shot. Baba stands on the left. Guddu Bhaiya stands on the right with a fat notebook and a pen.
+Action: The narrator box shows first. Then Baba asks his question. Guddu Bhaiya scratches his head and writes very fast.","BG: Panchayat Bhawan (chaupal)
+Characters: Baba, Guddu Bhaiya
+Props: fat notebook, pen, Mela bunting on the tree
+Anim: the character who speaks bounces gently
+BGM: BGM Village 1","NARRATOR: Today is Mela day in Apnapur! Tonight there will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for the Mela. But the shops close when the sun goes down.
+
+BABA: Guddu, is our money enough?
+
+GUDDU BHAIYA: Wait… 42,538 plus 23,184… carry one… Let me write it all down!","Mela Day in Apnapur!
+Money: ₹6,00,000
+[Next]"
+3,"HOOK – SCREEN 2 (the problem and the mission)
+Location: Same chaupal. The sun is a little lower (warm orange light).
+Angle: Wide shot. Aaru runs in from the left with Gudiya. Guddu Bhaiya is in the middle, still writing. Pari stands on the right.
+Action: Aaru shouts a wild number. Pari shakes her head, smiles, and points toward the bazaar.","BG: Panchayat Bhawan (chaupal) + warm tint
+Characters: Aaru, Guddu Bhaiya, Pari, Gudiya
+Anim: small sun icon appears top-right (Sunset tracker starts)
+BGM: BGM Village 1","NARRATOR: Guddu Bhaiya adds every number fully. It takes a long time. The sun is going down.
+
+AARU: Easy! The total is ten crore!
+
+PARI: Aaru, that is a wild guess. Let's make a smart guess.
+
+PARI: First, we change each price to a round number. Round numbers are easy to add. A smart guess like this is called an estimate.
+
+PARI: Come! Let's go to the bazaar.","Smart guess = Estimate
+[Go to the bazaar]"
+4,"LEVEL 1 SETTING – Aakoli Bazaar (used for the level 1 screens)
+Location: Busy bazaar street with 7 stalls in a row.
+Angle: Side view of the street. The background slides a little to the right for each new shop, so the child feels they are walking down the bazaar.
+Action: At each shop a price tag swings on a string. Pari stands bottom-left. Manju Mausi appears only on the teaching screen (bottom-right, at her tea and sweet shop).","BG: Aakoli Bazaar (wide, pans left→right)
+Characters: Pari; Manju Mausi (teaching screen)
+Props: hanging price tag (cream card on string), number line (brown bar, mid-point mark), 2 wooden answer buttons, red arrow marker, red stamp
+HUD: level chip ""Aakoli Bazaar · Round the price tags"", 7 marigolds, sunset tracker, ""Shop X of 7"" chip
+SFX: bell (correct), goat bleat (wrong)","See the Game sheet, screens 4–13, for every line.","Aakoli Bazaar · Round the price tags
+Shop 1 of 7 … Shop 7 of 7
+Rule strip: Hundreds digit 5 or more → go up. Less than 5 → stay down."
+5,"BRIDGE 1 (end of level 1)
+Location: Far end of Aakoli Bazaar street.
+Angle: Mid shot. Pari on the left, Aaru on the right, both happy.
+Action: All 7 marigolds glow. Aaru does a little jump. Pari points toward the Panchayat office.","BG: Aakoli Bazaar (panned to the far end)
+Characters: Pari, Aaru
+HUD: 7 marigolds lit
+SFX: bell + short cheer","AARU: All the prices are round numbers now! Correct-correct!
+
+PARI: Well done! The shopkeepers sent their bills to the Panchayat office. Let's check them.","7 of 7 done!
+[Go to the office]"
+6,"LEVEL 2 SETTING – Panchayat office (used for the level 2 screens)
+Location: Inside the Panchayat office. Wooden counter, files, fan, window with grill.
+Angle: Front view of the counter. Pari bottom-left. Guddu Bhaiya bottom-right, writing in his notebook the whole time.
+Action: A pile of 7 bills sits on the desk (top-right). One bill slides to the centre for each question. When it is done, it flies to the 'done' pile (top-left).","BG: Govt. Office Interior 2
+Characters: Pari, Guddu Bhaiya
+Props: bill on lined paper (2 items + 'About total: ?'), pile of bills with ""X bills left"" label, 'done' pile, blue handwriting for round numbers, red 'About ₹…' stamp, 3 wooden answer buttons
+HUD: level chip ""Panchayat office · Add the bills"", 7 marigolds, sunset tracker
+SFX: paper swish, bell, goat bleat","See the Game sheet, screens 14–23, for every line.","Panchayat office · Add the bills
+Bill 1 … Bill 7
+About total: ?
+7 bills left … 1 bill left"
+7,"BRIDGE 2 (end of level 2)
+Location: Panchayat office, inside.
+Angle: Mid shot. Pari on the left, Guddu Bhaiya on the right with his notebook open.
+Action: The 'done' pile has all 7 bills. Guddu Bhaiya looks at the pile, then at his notebook, very surprised.","BG: Govt. Office Interior 2
+Characters: Pari, Guddu Bhaiya
+Props: 'done' pile of 7 bills
+SFX: bell","GUDDU BHAIYA: All seven bills? So fast? I am still on page two!
+
+PARI: The shopkeepers are waiting at the Mela Ground. Baba has the money. Let's go and pay them.","7 of 7 done!
+[Go to the Mela Ground]"
+8,"LEVEL 3 SETTING – Mela Ground (used for the level 3 screens)
+Location: Mela Ground with a merry-go-round, a boat swing and food stalls. Late afternoon, the light slowly turns orange with each payment.
+Angle: Wide shot. Baba bottom-left beside a green 'Mela Money' board. Pari bottom-right.
+Action: A string of 7 bulbs hangs across the top, all off at the start. Each shopkeeper's bill card slides in on the right of the board. After each payment, one bulb lights up.","BG: Village Mela Ground (tint gets warmer each payment)
+Characters: Baba, Pari
+Props: green 'Mela Money' board with gold border + money bar, bill card, minus sign, string of 7 bulbs, 3 wooden answer buttons
+HUD: level chip ""Mela Ground · Pay and find money left"", 7 marigolds, sunset tracker, ""Payment X of 7"" chip
+SFX: coins, bell, goat bleat","See the Game sheet, screens 24–32, for every line.","Mela Ground · Pay and find money left
+MELA MONEY: ₹6,00,000 → About ₹…
+Payment 1 of 7 … Payment 7 of 7"
+9,"ENDING
+Location: Mela Ground at sunset. The sky turns orange and purple. All the Mela lights are on. The giant wheel turns.
+Angle: Wide shot. Aaru, Pari and Gudiya on the left. Baba and Guddu Bhaiya on the right.
+Action: Guddu Bhaiya holds up his notebook. Pari smiles. Aaru jumps. Gudiya hops.","BG: Village Mela Ground + dusk tint
+Characters: Aaru, Pari, Gudiya, Baba, Guddu Bhaiya
+Props: string of 7 lit bulbs, Guddu's notebook
+SFX: festive crowd, bell
+BGM: BGM Village 1 (louder, festive)","NARRATOR: The sun goes down. The Mela lights come on! The giant wheel starts to turn. We bought everything, and there is still money left.
+
+GUDDU BHAIYA: I finished! Exactly ₹83,380 is left.
+
+PARI: We said about ₹84,000. That is nearly the same!
+
+AARU: Correct-correct! Now jalebi for everyone!
+
+NARRATOR: The Sarpanch gives you a gold badge.","₹83,380 ≈ ₹84,000
+[Get my badge]"
+10,"BADGE / RESULT SCREEN
+Location: Same Mela Ground at night, softly blurred behind a cream card.
+Angle: Front, card in the centre.
+Action: A gold badge spins in and lands in the middle. Confetti falls. Voice says the badge name.","BG: Village Mela Ground + dusk tint (blurred)
+Props: gold badge ""Apnapur's Smart Guess Star"", cream result card, confetti
+Button: Play again
+SFX: bell, cheer",VOICE: You are Apnapur's Smart Guess Star!,"You saved the Mela!
+Smart Guess Star!
+You rounded 7 prices, added 7 bills and paid 7 shopkeepers.
+[Play again]"

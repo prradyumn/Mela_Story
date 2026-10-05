@@ -1,65 +1,94 @@
-# CLAUDE.md — "The Mela Before Sunset"
+# CLAUDE.md — "The Mela Before Sunset" (story + game)
 
-Context for any Claude session (VS Code, CLI, Cowork) working in this folder. Read this first.
+Context for any Claude session (VS Code, CLI, Cowork) working in this folder. **Read this first.**
 
 ## 1. What this is
 
-An interactive **motion-graphic story + math game** for **Grade 6** students on **addition and subtraction by estimation** (rounding to the nearest thousand, then adding and subtracting round numbers).
+An interactive **motion-graphic story + maths game** for **Grade 6** on **addition and subtraction by estimation**
+(round to the nearest thousand, then add / subtract the round numbers).
 
-- A single web page, **HTML + CSS + JS**, with no framework and no build step during development. GSAP is the only library, vendored as `gsap.min.js`.
-- The story plays **continuously**. It is **not** a slide deck and has no "Next" buttons. Buttons appear only where the child must act (Start, level launch, "Get my badge").
-- **Current state:** the **story is finished**. The **3 game levels are placeholders** (a "GAME PLUGS IN HERE" card plus a "Play demo ▶" button that lights 7 marigolds).
-- **Plan:** build the **game as a standalone module first**, then **integrate it into the story** through the `window.GAME_LEVELS` hook (§8). Don't rewrite the story to fit the game. The game plugs into the story.
+- **One web app:** `index.html` + plain HTML/CSS/JS. No framework, no build step while developing. GSAP is the only library (`js/vendor/gsap.min.js`).
+- The **story** plays continuously (no slide deck, no Next buttons). It is finished.
+- The **game** plugs into the story through `window.GAME_LEVELS[n](api)` (§8).
+  - **Level 1 · Aakoli Bazaar is built** (`js/game/`): how-to → teach → 7 shops → level complete, then the story's `bridge1` continues.
+  - **Level 2 · Panchayat office is built** (`js/game/*2.js`, §8.5): how-to → try one → 7 bills (stamp the round total) → complete, then `bridge2`.
+  - **Level 3 is still the story's placeholder** ("GAME PLUGS IN HERE" card + "Play demo ▶"). Build it the same way (§8.4).
+- Design source: Figma file **"The Mela Before Sunset — Game Flows"** <https://www.figma.com/design/IN41gDRxuDd3crVbfeBEnU>.
+  Page **"★ L1 · Clean build (game-ready)"** is what L1 implements (21 annotated frames); **"★ L2 · Clean build (game-ready)"** is what L2 implements (26 frames, L2 components on the Assets page). Pages **★ G3 / ★ G4** hold the gamified designs for the next levels.
+- Pedagogy source: the storyboard `_source/notes/The_Mela_before_Sunset_-_Game.csv` (screens 4–34). **Never change the numbers, the 2-choice / 3-choice format or the 3-strike rule** without the user.
 
 ## 2. How to run
 
 ```bash
-cd Mela_Story        # this folder: the one and only index.html lives here
+cd Mela_Story
 python3 -m http.server 8123
 # open http://localhost:8123/
 ```
 
-Use Chrome or Safari. Audio needs a user gesture, so the loader says "Tap to begin". Opening `index.html` via `file://` usually works too, but a server is safer for audio decoding.
+Use Chrome or Safari (audio needs the "Tap to begin" gesture). `file://` mostly works, but use the server.
 
-URL parameters:
-
-| Param | Effect |
+| URL param | Effect |
 |---|---|
-| `?scene=hookD` | Run **only** that screen, then stop. Best for iterating. |
-| `?from=level2` | Start from that screen and continue the flow. |
-| `?speed=3` | Speed up all waits and timelines, for quick checks. |
-| `?edit=1` | Open the layout editor (§7). Pressing **E** also works, but only locally (localhost or file://). |
+| `?scene=level1` | Run **only** that screen, then stop. Best for iterating. (Works for every id in §4.) |
+| `?from=hookE` | Start at that screen and continue the flow. |
+| `?speed=3` | Speed up all GSAP time (story + game). |
+| `?scene=level1&shop=4` | Game: skip how-to/teach and start at shop 4. |
+| `?edit=1` | Layout editor (§7). **E** also works locally. |
 
-Screen ids are listed in §4.
-
-**Single-file build**, for sharing: `python3 build.py` → `dist/The_Mela_Before_Sunset.html` (about 11.6 MB). It inlines CSS, fonts, images and audio as base64 into `window.EMBED`, which `engine.js` checks before fetching files. Rebuild after every change you want to share. The single file embeds the **MP3** audio (it must play anywhere, including iOS Safari).
-
-**Vercel deploy:** there is no build step. This folder *is* the site, and Vercel serves `index.html` and the files next to it as they are. `vercel.json` sets cache headers (html/js/css always revalidate, so a new deploy shows up at once). `.vercelignore` keeps `dist/`, `voice_samples/`, `build.py`, `layout.json` and this file out of the upload. Deploy from this folder with `npx vercel --prod`, or import the repo into Vercel (framework "Other", no build command). On the live site the layout editor opens only with `?edit=1`.
+- **Single-file build** (to share/email): `python3 tools/build.py` → `dist/The_Mela_Before_Sunset.html` (~36 MB). It inlines all CSS, fonts, story images/audio **and the game art + game VO (mp3)** into `window.EMBED`. Rebuild after changes you want to share.
+- **Vercel:** no build. This folder is the site. `vercel.json` sets cache headers; `.vercelignore` keeps `_source/`, `tools/`, `dist/`, docs out of the upload. Deploy with `npx vercel --prod`.
+- **Git:** this folder is the repo (`main`, GitHub remote). The October 2026 reorganisation moved files (see §3) — commit it as one "restructure" commit.
 
 ## 3. Files
 
-Everything lives in this one folder. There is a single `index.html`, and no `source/` or `web/` copies.
-
 ```
-index.html     layer structure + script order: gsap → layout.js → engine.js → story.js → editor.js
-style.css      fonts (@font-face), bubbles, narrator panel, signs, cards, HUD, buttons, wipe
-engine.js      reusable engine: loading, audio, characters, acting, bubbles, HUD, particles, transitions
-story.js       the story itself: dialogue text (TXT), screens, LEVELS data, FLOW, main()
-editor.js      temporary layout editor (IIFE); E key only works locally, the live site needs ?edit=1
-layout.json    saved manual layout edits (source of truth)
-layout.js      GENERATED from layout.json by build.py → window.LAYOUT_DEFAULT
-build.py       builds the shareable single file dist/The_Mela_Before_Sunset.html (+ regenerates layout.js)
-dist/          GENERATED single-file build, not deployed
-voice_samples/ Pari voice experiments + tools (not deployed; see voice_samples/pari/tools/README.md)
-vercel.json    Vercel config: static, no build, cache headers
-favicon.svg    marigold tab icon
-a/  *.webp     backgrounds at 2x (height 2160, upscaled 4x from the originals with Real-ESRGAN x4plus, then set to exactly 2x the old 1080 plates so the layout is unchanged), bg_ins_sweets (4K sweet-stall close-up painted by Gemini 3 Pro Image from the bazaar, used for the "sweets" shot), characters (1350px tall, rebuilt from the 1536px originals with the same per-pose scale and offset as before), dialogue boxes db5–db8, parch, office_fg, button art btn_l/btn_m/btn_r (Gemini-generated)
-au/ *.ogg      voice lines, music, SFX in Ogg Opus (voices 48k mono, SFX 64k, music 80k); loaded first
-au/ *.mp3      the same files as MP3: masters + fallback when the browser can't decode Ogg (older Safari / iOS)
-f/  *.woff2    Baloo 2, Poppins 600, Fredoka (latin + devanagari subsets for ₹)
+index.html              story stage + script order: gsap → story (layout, engine, story) → game (data … game.js) → editor
+css/story.css           story styles (fonts @font-face, bubbles, signs, cards, HUD, buttons, wipe)
+css/game.css            game styles — every rule scoped under #game, so it never touches the story
+js/vendor/gsap.min.js
+js/vendor/three.min.js  Three.js r149 UMD — only used by js/game/crumple.js (L2 paper squash)
+js/story/engine.js      reusable engine: loading, audio buses, characters, acting, bubbles, HUD, particles, transitions
+js/story/story.js       the story: dialogue (TXT), screens, LEVELS, FLOW, main()
+js/story/editor.js      temporary layout editor
+js/story/layout.json    saved layout edits (source of truth) → tools/build.py writes js/story/layout.js
+js/game/data/level1.js  ALL L1 content: lines (storyboard wording), 7 prices, qLines(), allLines(), spoken()
+js/game/markup.js       builds <div id="game"> inside #stage; GA(path) = game asset URL (or EMBED data URI)
+js/game/audio.js        SND: game audio through the story engine (sfx, VO via BUF/voice(), replay)
+js/game/stage.js        ST: number-line geometry (NL, vx), fmt/rs, particles, flyImg
+js/game/hud.js          HUD (chip, 7 marigolds, sun tracker) + COACH (avatar + speech bubble, say/update)
+js/game/gudiya.js       GUDIYA actor (sprite-ready poses: idle / hop / trot; leapTo, hopTo, trotTo, bleat, cheer)
+js/game/scene.js        SC: price tag, number line, red/green markers, answer buttons, cart, rule strip, hand
+js/game/level1.js       L1 flow: banner → how-to → teach → 7 shops (3-strike) → complete. LEVEL1_RUN()
+js/game/data/level2.js  ALL L2 content: howto, example, teach (try one), 7 bills, oops/hint/nudge/idle, qLines(), allLines()
+js/game/markup2.js      builds the L2 layer #l2 (pile, basket, bill paper, 3 stamps, ink pad, ball, #crumpleCv, #done2 card)
+js/game/crumple.js      CRUMPLE: Three.js paper crumple / un-crumple of the bill (2D fallback without WebGL)
+js/game/scene2.js       L2SC: Bill (enter, write, chips, mark, crumpleTo), Stamps (show, press = ink → thump → mark), Pile, Basket
+js/game/level2.js       L2 flow: banner → how-to → try one → 7 bills (3-strike) → complete. LEVEL2_RUN()
+js/game/game.js         window.GAME_LEVELS[1] / [2] = the hooks the story calls
+assets/fonts/           Baloo 2, Poppins 600, Fredoka (latin + devanagari subsets for ₹)
+assets/story/           story images (*.webp): backgrounds 2x, characters, mouths *_m, walk/run/trot frames, pari_explain_0–35 + pari_walk_0–19 (ludo.ai sheets), db5–db8, btn_*
+assets/audio/           story + shared audio: voices (t0, n1–n4, b1, g1–g3, p1–p6, r1–r3, x1), music m_*, sfx_* (.ogg Opus + .mp3)
+assets/game/            game art (*.webp): bg_bazaar, number line nl_*, cart_*, price tag, 3-slice buttons btn*_l/m/r, icons ic_*, characters
+assets/game/            + L2: office_desk, bill_paper, bill_pile, checked_basket, ink_pad, paper_ball_1-3, stamp_mark, stamp_tool(_pressed), guddu_scratch/proud/surprised
+assets/game/vo/         game voice lines L1_* (done) and L2_* (to generate) .wav/.ogg/.mp3 — made with tools/voice_studio.html
+tools/build.py          single-file build → dist/
+tools/voice_studio.html Gemini TTS for every game line (key pasted in the browser, never saved)
+tools/convert_vo.sh     wav → trimmed -16 LUFS mp3 80k + ogg opus 48k (same as story voices)
+dist/                   GENERATED single file (tracked, not deployed)
+_source/                NOT part of the app (not deployed):
+  figma_assets/         clean backgrounds bgc_*, nl_*/cart_* PNG masters, previews; g2/ = the 11 L2 PNG masters
+  art_package/          character art tools (import_sheets.py → assets/story), refs, raw sprites
+  Mela_Sprite_Sheets/   ChatGPT talking/movement sheets (input of import_sheets.py talk|cycles)
+  manju_sprites/, guddu_sprites/  ludo.ai 6x6 talking sheets (import_sheets.py talk2 → assets/story/manju_talk_0–35, guddu_talk_0–35)
+  aaru_sprites/         ludo.ai 6x6 sheet: Aaru running right, 36 frames that loop as a whole (import_sheets.py aaru2 → assets/story/aaru_run_0–35)
+  pari_sprites/         ludo.ai 6x6 sheets: sheet_a = Pari explaining, sheet_b = Pari walking (input of import_sheets.py pari2; walk loop = frames 7–26)
+  voice_samples/        Pari voice experiments (Indic Parler-TTS "Riya")
+  game_ui_assets/       original game UI PNGs (ic_*, ui_*, sk_*, map_mela)
+  notes/                storyboard CSVs, GAME_UI_PLAN.md, GAME_UI_PACKAGE.md, contact sheets
+  archive/Mela_Game_v1_standalone/   the first stand-alone game build (reference only)
 ```
 
-The original user assets (character sheets, backgrounds, Union dialogue-box PNGs and the storyboard CSV) are in the parent folder `character_package 2/`.
+The original user art (character sheets, backgrounds, Union dialogue PNGs) is in the parent folder `character_package 2/`.
 
 ## 4. Story → screens (`FLOW` in story.js)
 
@@ -73,7 +102,7 @@ Village of **Apnapur**. It is Mela day. The Panchayat has **₹6,00,000** to buy
 | 4 | `hookC` | chaupal | Aaru and Gudiya run in: "ten crore!"; Pari: wild guess ✕ | r1, p1 |
 | 5 | `hookD` | chaupal (blurred close-up) | Rounding card 42,538→43,000 + 23,184→23,000 = 66,000; "Smart guess = Estimate" | p2 |
 | 6 | `hookE` | chaupal | Aaru jumps; "Go to the bazaar" sign | p3 |
-| 7 | `level1` | bazaar (2593px wide, pans) | **GAME L1**: round price tags at 7 shops | — |
+| 7 | `level1` | game layer (clean bazaar) | **GAME L1 (built)**: round price tags at 7 shops → `js/game/` | game VO L1_* |
 | 8 | `bridge1` | bazaar | Aaru celebrates, Pari sends us to the office | r2, p4 |
 | 9 | `level2` | office | **GAME L2**: estimate the total of 7 bills | — |
 | 10 | `bridge2` | office | Guddu amazed ("still on page two"); off to the Mela | g2, p5 |
@@ -83,9 +112,9 @@ Village of **Apnapur**. It is Mela day. The Panchayat has **₹6,00,000** to buy
 | 14 | `endC` | mela dusk | Aaru: jalebi for everyone! Jalebi rain; narrator: gold badge; "Get my badge" button | r3, n4 |
 | 15 | `badge` | — | Badge screen, "Play again" loops the flow | — |
 
-The dialogue text lives in `TXT` at the top of `story.js`. Voice files use the same ids (`au/<id>.ogg` + `au/<id>.mp3`). If you change a line's text, **regenerate its voice** (§9), or the audio won't match.
+The dialogue text lives in `TXT` at the top of `story.js`. Voice files use the same ids (`assets/audio/<id>.ogg` + `.mp3`). If you change a line's text, **regenerate its voice** (§9), or the audio won't match.
 
-## 5. Engine essentials (engine.js)
+## 5. Story engine essentials (js/story/engine.js)
 
 **Stage.** It is fixed at **1920×1080** and scaled to fit the window (`fit()`), so always use stage pixel coordinates. Layers from bottom to top:
 
@@ -121,14 +150,17 @@ async function myScreen() {
 - `bgImg`, `char`, `pose(tl,t,o,p)`, `setPose(o,p)`, `talk(tl,t,o,d,id)`, `jump(tl,t,o,h,times,up)`, `say`, `narrate`, `sign`, `dropSign`
 - `numbers`, `shake`, `birds`, `dust`, `petals`, `confetti`, `firework`, `jalebis`
 - `thoughts(s, tl, o, [{txt, at}], {avoid, until, sinkTo})`: numbers pop out of a character's head as they're said and hang around it, skipping any spot that overlaps `avoid` (their speech bubble) or leaves the stage. At `until` they get sucked into `sinkTo`. Used for Guddu's muddle in hookA, timed to g1's Whisper word times. He keeps the `scratch` pose until "Let me write…".
-- `sfx(name, gain, rate)` plays `au/sfx_<name>.mp3`.
+- `move(tl, t, o, cycle, from, to, dur, {ease, end, enter})`: walk/run/trot (`'walk'` Pari, `'run'` Aaru, `'trot'` Gudiya). Slides the character from x offset `from` to `to` while the cycle frames play. The frame follows the distance travelled, so the feet never slide. The frames face right and are mirrored when moving left. `enter: true` places them at `from` at once (entrance from off screen); `end` is the pose to settle into. Used for the entrances (title, hookC) and the exits (hookE, bridge1, bridge2).
+- **Acting while talking:** acts use mode 'iol' (Pari explain) or 'pp' (Manju/Guddu talk: forward and back, then glide back to frame 0). Guddu's `talk` plays on g2 (bridge2, end 'surprised') and g3 (endB, end 'proud'); officeGuddu() grades his frames too. `say(..., { act: 'explain', end: 'happy' })` plays `CH[key].acts.explain` instead of the pose + mouth: frames 0–4 hands come apart, 5–30 loop while the voice plays (her mouth moves in the drawing), 31–35 hands back together, then the `end` pose (namaste `happy` matches the last frame). Used for Pari's explaining lines p2 (hookD), p4 (bridge1), p5 (bridge2), p6 (endB); p1/p3 keep `point` (she points at Aaru / the way). Skip jumps straight to the end pose; walking cancels an act.
+- **Talking mouths:** `say()` turns the speaker's mouth on for the line. The pose image and its overlay `assets/story/<key>_<pose>_m.webp` alternate in step with the voice loudness (an AnalyserNode on `voiceBus`). With no audio, the mouth flaps at a speech rhythm. Which poses have one is `CH[key].talk` (`{pose: 'open'|'closed'}`, the mouth the overlay shows).
+- `sfx(name, gain, rate)` plays `assets/audio/sfx_<name>` (ogg, mp3 fallback).
 - `voice(id)`, `playMusic(id, {gain, fade})`, `stopVoices()`
 - `wait(sec)`
 - `sunTo(tl, t, p, dur)` and `sunPos(p)`: `p` runs 0→1 across the sky.
 - `setFlowers(n)` sets 0–7 marigolds.
 - `irisOut`/`irisIn`, `fadeOut`/`fadeIn`
 
-In story.js: `T(id)`, `reveal`, `cutTo`, `hudState`, `panel`, `officeFG`, `warmTint`, `goButton`, `waitClick`.
+In js/story/story.js: `T(id)`, `reveal`, `cutTo`, `hudState`, `panel`, `officeFG`, `warmTint`, `goButton`, `waitClick`.
 
 **Characters (`CH`):**
 
@@ -141,7 +173,7 @@ In story.js: `T(id)`, `reveal`, `cutTo`, `hudState`, `panel`, `officeFG`, `warmT
 | manju | Manju Mausi (shopkeeper) | 580 | teach |
 | gudiya | Gudiya (goat) | 250 | idle, hop |
 
-Image names are `a/<key>_<pose>.webp`. `char()` returns `{root, body, imgs, pose, key}`. Ground is the y of the feet.
+Image names are `assets/story/<key>_<pose>.webp`. `char()` returns `{root, body, imgs, pose, key}`. Ground is the y of the feet.
 
 **Acting.** Each character's style comes from `ACT` (period, lift, lean, intro, jitter), and each line's mood from `MOOD` via `LINE_MOOD[id]`. `talk()` does **one** emphasis beat, then slow nods, then settles. **Don't tween `scaleY` on `.body`**, because that conflicts with the idle breathing tween.
 
@@ -177,7 +209,7 @@ Keep this order so no one looks like they're standing on a chair.
 
 ## 6. Audio
 
-WebAudio buses: `musicBus`, `voiceBus` (voice ducks the music), `sfxBus`.
+WebAudio buses: `musicBus`, `voiceBus` (voice ducks the music), `sfxBus`. Music level: `MUSIC_LEVEL` 0.4, ducked to `MUSIC_DUCK` 0.14 under voices (engine.js; lowered from 0.55/0.2 in Oct 2026 — the user found it overwhelming).
 
 - `unlockAudio()` runs on the first gesture. A 🔇 "Tap for sound" pill appears whenever the AudioContext isn't running.
 - `SKIPPING` (set while the Skip button fast-forwards) suppresses voice and SFX.
@@ -200,7 +232,7 @@ Open it with `?edit=1`, or with the **E** key when running locally.
 
 Edits are saved to localStorage `mela_layout`, and **Export JSON** downloads `mela_layout.json`.
 
-**To make edits permanent:** replace `layout.json` with the exported file, then run `python3 build.py`, which regenerates `layout.js`.
+**To make edits permanent:** replace `js/story/layout.json` with the exported file, then run `python3 tools/build.py`, which regenerates `js/story/layout.js`.
 
 Load priority is **localStorage > layout.js default**. Clear localStorage to see the baked defaults.
 
@@ -213,28 +245,12 @@ Schema:
 
 Overrides use CSS `translate` and `scale` (individual properties), so they stack with GSAP transforms without conflicts. Element keys are `SCN + '.' + name`.
 
-## 8. GAME INTEGRATION CONTRACT (the important part)
+## 8. GAME (the important part)
 
-`level(n)` in story.js sets up the scene first:
-
-- the background
-- the characters
-- the HUD chip
-- the sun at `LEVELS[n].sun[0]`
-- 0/7 flowers
-- `m_hurry` music
-
-Then it checks for a game:
-
-```js
-window.GAME_LEVELS = {
-  1: async (api) => { /* play level 1; resolve when finished */ },
-  2: async (api) => { ... },
-  3: async (api) => { ... },
-};
-```
-
-If `GAME_LEVELS[n]` exists, the placeholder card is hidden and the story **awaits your promise**. When the promise resolves, the story iris-wipes to the next bridge screen. Load the game script **after story.js is parsed but before the level runs**. Simplest: add `<script src="game.js"></script>` after `story.js` in `index.html`. `build.py` inlines every `<script src>` it finds in index.html automatically.
+### 8.1 Contract with the story
+`level(n)` in story.js builds its scene (bg, characters, HUD chip, sun at `LEVELS[n].sun[0]`, 0/7 flowers, `m_hurry` music),
+then — if `window.GAME_LEVELS[n]` exists — hides the placeholder card and **awaits** it. When the promise resolves the story
+iris-wipes to the next bridge. Game scripts load after story.js (see index.html); `tools/build.py` inlines every `<script src>`.
 
 `api` contains:
 
@@ -250,25 +266,46 @@ If `GAME_LEVELS[n]` exists, the placeholder card is hidden and the story **await
 | `setSun(p)` / `sunTo(p, dur)` | move the sun; go from `level.sun[0]` → `level.sun[1]` as items are solved |
 | `wait(sec)` | respects `?speed=` |
 
-**Level specs** (from the storyboard; the full game sheet, screens 4–32, is still to come from the user):
+### 8.2 How Level 1 is wired (`js/game/game.js`)
+- The game is its own layer `<div id="game">` (z 45: above story `#ui`/`#hud`, below `#fade`/`#wipe`/`#loader`), built by `markup.js` at load and hidden.
+- `GAME_LEVELS[1](api)`: sets `LEVEL1.sun = api.level.sun`, hides the story scene + story HUD, shows `#game`, runs `LEVEL1_RUN({ startAt, skipIntro, embedded:true })`,
+  then `api.setFlowers(7)`, `api.setSun(level.sun[1])`, hides `#game` and shows the story HUD again → story continues to `bridge1`.
+- In the story, the game's complete card skips its own Aaru/Pari lines because `bridge1` says them (r2, p4).
+- **Audio:** `SND` uses the story engine globals (`sfx`, `voice`, `stopVoices`, `BUF`, `DUR`, `AC`). Game VO files are decoded once into `BUF['L1_…']` and played with `voice()`, so they duck the music like story lines. No VO yet → lines show for a reading time (`ST.readTime`), and the 🔊 button uses the browser voice.
+- **Assets:** always reference game art through `GA('file.webp')` (JS) or `url(../assets/game/…)` (CSS) so the single-file build can embed it.
+- **Coach (hud.js → `CAST`, `SPOTS`):** full-body talking sprites, same frames as the story's `CH[key].acts` (`IMG[...]`, nothing stored twice); each plays its loop while its VO plays, back-to-back lines keep it going. **Pari** (explain) left: L1 feet at (140, 778) just above the left answer button, L2 same spot behind the desk (cut at y 532). **Manju Mausi** (talk) L1 right at (1772, 778), mirrored so her finger points in; the bubble moves right (`#bubble.posR.tailR`); `COACH.dismiss('manju')` after the teach. **Guddu Bhaiya** (talk) L2 behind the desk at (800, 870) between the bubble and the bill (cut at y 534); `COACH.present('guddu')` at L2 start, the bubble's tail flips to him (`.tailR`). Aaru still uses the round `#avatar` (no sprite yet). `COACH.pariSpot` = 'stand' (L1) | 'desk' (L2).
+- **Naming:** game globals are `ST, SC, HUD, COACH, GUDIYA, SND, GA, LEVEL1, LEVEL1_RUN`; game ids/classes that could clash are prefixed (`#gBg #gHud #gChip #gFx #gToast #gSun`, `.gbtn .gcard .gchip .gbody .gshadow .gdust .m-on/.m-off`). Keep new game CSS under `#game`.
 
-- **L1 · Aakoli Bazaar:** 7 shops with price tags. The child rounds each price to the nearest **thousand**. Rule: hundreds digit ≥ 5 → round up, < 5 → round down. Manju Mausi and Pari are present, and the bazaar bg is 2593px wide and pans.
-- **L2 · Panchayat Office:** 7 bills. Round each one, then add the round numbers to **estimate the total**. Guddu writes behind the counter, and a "7 bills left" badge (`reg` name `billsleft`) should count down.
-- **L3 · Mela Ground:** pay 7 shopkeepers from **₹6,00,000** (the green "MELA MONEY" board, `reg` name `melamoney`). Round each bill, then **subtract** it from the remaining money.
-- The ending says the exact money left is **₹83,380** and the estimate is **about ₹84,000**. **The game data must produce these numbers**, or `TXT.g3`/`TXT.p6` and their voices must be regenerated.
-- **Feedback ideas already in the assets:**
-  - `sfx_cycle_bell` for correct answers
-  - `sfx_goat` / Gudiya hop for wrong answers (gentle)
-  - `ding` plus a marigold per item
-  - `coins` for paying
-  - `stamp` for approving a bill
-- Keep it kid-friendly: large tap targets (≥120px), Indian number format (`inr()` in story.js gives `₹6,00,000`), and no fail state. Retry with a hint.
+### 8.3 Level 1 design rules (agreed with the user — keep them)
+- **One new thing at a time:** tag drops in (bubble: first sentence) → number line draws + red arrow slides to the price → two answer buttons pop in at the ends of the line.
+- **No Next buttons, no tap to continue.** The game moves on by itself: intro/teach lines advance when their VO ends (+0.6 s), the level banner after 2.2 s, and the level-complete card after 3 s (tapping "Go to the office" only goes sooner). The only taps are the answers and **Skip ⏭** (jumps to Shop 1). The teach round shows the hand on 35,000.
+- **3-strike (storyboard):** wrong 1 → "Oops…" + red wiggle + Gudiya bleat · wrong 2 → hint line + hundreds digit glows + rule strip · wrong 3 → nudge line + wrong fades + right glows + hand. **10 s idle** → idle line once + pulse + arrow bounce.
+- **Correct:** bell + green ✓ → red arrow pops → **Gudiya leaps onto the line at the price and hops to the round number** (hops ∝ distance) → green arrow lands above her → tag flips to a red stamp → **the cart moment** (`Cart.moment`, user request Oct 2026): the line, buttons and markers clear, the cart rolls in from the left to the centre (×1.3 at 960, 628; wheels on the sand), the item drops into it from the tag (coins + ding, n / 7 pops, sparks), then **Gudiya leaps beside the cart and jumps for joy** (`GUDIYA.joy`) → the cart rolls back to its corner (`Cart.home`) while the marigold flies to the HUD and the sun steps → next shop after 2 s.
+- **Stars:** first try gold · after Oops/Hint silver · after hand none. Level: ≥6 gold → 3★, ≥4 → 2★, else 1★ (`window.GAME_RESULT.level1`).
+- Clean backgrounds, low cognitive load, big targets (buttons 320×120), Indian number format, no fail state.
+- Gudiya's hop is **sprite-ready**: replace `GUDIYA_POSES.hop` with a sheet (`{sheet, cols, rows, frames, fps, aspect, cx, foot, face, once:true}`) — nothing else changes. The user will supply the sprite.
 
-**Recommended workflow:** build `game.js` so it works stand-alone first. For example, open `index.html?scene=level1` and it runs just that level with the story scene around it. Once all 3 levels work, run the full flow without `?scene` and rebuild.
+### 8.4 Building Level 3 (next)
+1. Design reference: Figma page ★ G3 (Mela · "Light the Mela"); make a clean build page like L1/L2 first.
+2. Content: add `js/game/data/level3.js` from the storyboard — exact numbers and lines; 3 answer choices.
+3. Reuse ST/SC/HUD/COACH/GUDIYA/SND; add level-specific pieces (bill paper card, Mela money board, bulb string) as new modules; register `GAME_LEVELS[2]` / `[3]` in `game.js`.
+4. Add the new VO ids to `allLines()` so the Voice Studio picks them up.
+5. **Maths check before building L3:** the storyboard's seven exact bills total ₹5,16,835 → exact money left **₹83,165**, but the story ending (`TXT.g3`, endB banner, g3 voice) says **₹83,380**. Ask the user which to change (fixing the story line + re-voicing g3 is the smaller change). The running estimate ends at ₹84,000 ✓.
+6. The story's L3 placeholder has a MELA MONEY board (`melamoney`) — the game layer covers it; reuse the idea inside the game.
+
+### 8.5 How Level 2 is wired
+- `GAME_LEVELS[2](api)` hides the story scene + HUD, runs `LEVEL2_RUN({ startAt, skipIntro })`, then `setFlowers(7)`, `setSun(level.sun[1])`. `GAME_LEVELS[1]` hides `#l2`, so the levels never show each other's pieces.
+- Test one bill: `?scene=level2&bill=N` (1–7). Whole hand-off: `?from=bridge1`.
+- Layout (Figma ★ L2): office_desk is the `#gBg`; bill paper 620×775 at (1000,196) is the hero; 3 stamps at x 50 + i·265, y 553 (w 250); pile (1650,520) shows "n bills left"; CHECKED basket (1650,725). **No race panel** (user: only if necessary).
+- Round: a paper ball flies off the pile and **un-crumples** into the bill → the items write in → Pari asks → 3 stamps rise. Correct: blue chips show the rounding → the stamp dips in the ink pad, thumps the bill (pressed art, squash, shake, red sparks) → stamp mark with the value → marigold, sun step → the bill **crumples into a ball** and drops into the basket.
+- **Crumple** (`crumple.js`): the bill is redrawn on a canvas (`L2SC.Bill.drawBill`, 1.5×) and mapped on a 26×32 plane in an orthographic Three.js scene in stage px; vertices lerp to a lumpy sphere (R 108) + creases, flat-shaded Lambert. No WebGL → 2D squash.
+- Same rules as L1 (§8.3): no taps but answers + Skip, auto-advance, 3-strike (Oops + Gudiya bleat / yellow hint chips / fade + glow + hand), 10 s idle, stars.
+- Coach: full-body Pari in L2 too — L2 sets `COACH.pariSpot = 'desk'` (same spot as L1, cut at the desk's top edge y 532 so the stamps stay clear) and back to `'stand'` at the end. `COACH.fullPari = false` would fall back to the round avatar. Guddu Bhaiya speaks via the round avatar (`WHO.guddu`, guddu_scratch.webp).
+- VO ids are `L2_*` (42 lines from `LEVEL2.allLines()`); Voice Studio lists L1 + L2 = 92 lines, Guddu = Fenrir voice. Until generated, L2 lines show for a reading time.
 
 ## 9. Regenerating assets
 
-- **Voices:** Gemini TTS `gemini-3.8-flash-tts`. Use this prompt format, because a plain "You are…" instruction gets read aloud:
+- **Story voices:** Gemini TTS `gemini-3.8-flash-tts`, prompt format:
   ```
   # AUDIO PROFILE: <Name>
   <short persona>
@@ -277,10 +314,14 @@ If `GAME_LEVELS[n]` exists, the placeholder card is hidden and the story **await
   #### TRANSCRIPT
   <line>
   ```
-  - Voices: narrator **Sulafat**, Baba **Algenib**, Guddu **Fenrir**, Pari **Leda**, Aaru **Puck**, announcer **Sadachbia**.
-  - Save the result as `au/<id>.mp3`, then make the Ogg: `ffmpeg -i au/<id>.mp3 -c:a libopus -b:a 48k -ac 1 au/<id>.ogg` (music: `-b:a 80k -vbr constrained`). Line timing follows voice duration automatically.
-- **Music:** Lyria (`lyria-3-clip-preview` about 30s; `lyria-3.5` for long tracks).
-- **API key:** never commit an API key to this folder. Use an env var such as `GEMINI_API_KEY`.
+  Voices: narrator **Sulafat**, Baba **Algenib**, Guddu **Fenrir**, Pari **Leda**, Aaru **Puck**, announcer **Sadachbia**; game adds Manju Mausi **Gacrux**.
+  Save `assets/audio/<id>.mp3`, then `ffmpeg -i <id>.mp3 -c:a libopus -b:a 48k -ac 1 <id>.ogg` (music `-b:a 80k -vbr constrained`).
+- **Game voices (terminal):** `GEMINI_API_KEY=… node tools/gen_vo.mjs` (same model, voices, prompts and spoken numbers as the studio; skips lines that exist, `--force id…` remakes some), then `tools/convert_vo.sh`. All 50 L1 lines were made this way (Oct 2026) and checked by transcribing them back with Gemini. The `.wav` masters stay in `assets/game/vo/` but are kept off Vercel (`.vercelignore`); the game loads `.ogg`, then `.mp3`.
+- **Game voices (browser):** open `tools/voice_studio.html` (Chrome; via the local server if `file://` blocks the request) → paste key → choose this folder → **Generate missing lines** → writes `assets/game/vo/L1_*.wav`. Then `tools/convert_vo.sh` for ogg/mp3 (needed for the single-file build). Big numbers are spoken in Indian English words by `LEVEL1.spoken()`.
+  Cloud/agent shells may not reach `generativelanguage.googleapis.com` (egress policy); then use the studio in the browser. The local Mac terminal can.
+- **Sprites/mouths:** `python3 _source/art_package/tools/import_sheets.py talk|cycles|pari2` → writes into `assets/story/`. Manju Mausi's sprites are coming next: give her an `acts.explain` the same way and a full-body coach like Pari's.
+- **Music:** Lyria (`lyria-3-clip-preview` ≈30 s; `lyria-3.5` long).
+- **API keys: never write a key into any file in this folder** (no .env either). Ask the user to paste it into the Voice Studio, or use an env var for a one-off script outside the repo.
 
 ## 10. Gotchas
 
@@ -292,3 +333,20 @@ If `GAME_LEVELS[n]` exists, the placeholder card is hidden and the story **await
 - All coordinates are 1920×1080 stage px. Don't use `vw`/`vh` inside the stage.
 - Audio won't start without a gesture, and preview panes and some embedded viewers block it. Test in real Chrome.
 - `?scene=` runs one screen and stops. `?from=` continues and loops.
+- Game: if you rename a game id or class, update `js/game/markup.js`, `css/game.css` and the JS that queries it together.
+- Game: `newScene()` does not clear `#game` (it is outside `#world/#ui`) — `level1.js → reset()` resets it at every run (the story loops on "Play again").
+- Game VO missing → the game fetches 3 ids, sees none and stops asking (`SND.preload`) and shows lines for a reading time instead. (L1 has all its VO now.)
+- Running git from the Cowork device shell can leave `.git/index.lock` behind — delete it if git in VS Code says another process is running.
+
+
+## 11. Status & next steps (Oct 2026)
+
+- [x] Story complete · [x] Level 1 game (clean, storyboard-faithful, plugged in) · [x] project restructured
+- [x] L1 voices generated (50 lines, Gemini TTS) and converted · [x] game progresses on its own (no tap to continue)
+- [ ] Listen through L1 once with sound and tweak timing if any line feels rushed
+- [ ] Gudiya hop sprite sheet from the user → `GUDIYA_POSES.hop`
+- [x] Level 2 (Panchayat office, 7 bills, stamps + Three.js paper crumple) — §8.5
+- [ ] Generate L2 voices in tools/voice_studio.html (it skips the L1 files that exist), then tools/convert_vo.sh
+- [ ] Level 3 (Mela ground, pay & money left) — §8.4
+- [ ] Resolve ₹83,380 vs ₹83,165 before L3
+- [ ] Rebuild `dist/` and deploy when a level is done

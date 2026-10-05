@@ -1,0 +1,112 @@
+[
+  {
+    "sheet": "aaru_jump_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "aaru_run.png",
+    "frames": 4,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 2,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "aaru_shout_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "baba_ask_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "guddu_proud_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "guddu_scratch_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "guddu_surprised_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "gudiya_trot.png",
+    "frames": 4,
+    "frameWidth": 1024,
+    "frameHeight": 1024,
+    "columns": 2,
+    "rows": 2,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "pari_happy_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "pari_point_talk.png",
+    "frames": 2,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 1,
+    "spacing": 0,
+    "margin": 0
+  },
+  {
+    "sheet": "pari_walk.png",
+    "frames": 4,
+    "frameWidth": 1024,
+    "frameHeight": 1536,
+    "columns": 2,
+    "rows": 2,
+    "spacing": 0,
+    "margin": 0
+  }
+]
