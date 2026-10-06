@@ -60,8 +60,7 @@
         await Bill.chips('blue');
         await Stamps.press(right, L.ans);
         if (!teach) {
-          const k = HUD.lit; await HUD.lightNext(1310, 760);
-          HUD.sun(D.sun[0] + (D.sun[1] - D.sun[0]) * (k + 1) / 7);
+          HUD.lit++; HUD.setLit(HUD.lit);                              // count kept (the story gets 7 flowers); no marigold plate in L2
           result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
         }
         await okLine;
@@ -157,12 +156,12 @@
     const ov = $('#done2'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#done2Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
-    ov.querySelector('.balls').innerHTML = Array.from({ length: 7 }, (_, i) => `<img src="${GA('paper_ball_3.webp')}" style="left:${30 + (i % 4) * 95 + (i > 3 ? 48 : 0)}px;top:${i > 3 ? 0 : 36}px">`).join('');
+    ov.querySelector('.balls').innerHTML = Array.from({ length: 7 }, (_, i) => `<div class="pkt" style="left:${30 + (i % 4) * 95 + (i > 3 ? 48 : 0)}px;top:${i > 3 ? 0 : 36}px"></div>`).join('');
     $('#done2Score').textContent = `${gold} of 7 on the first try`;
     SND.sfx('confetti'); confetti(90);
     await gsap.fromTo('#done2Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
     for (let i = 0; i < 3; i++) { gsap.fromTo(imgs[i], { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.5)' }); if (i < nStars) SND.sfx('sparkle'); await wait(.3); }
-    gsap.from('#done2Basket .balls img', { y: -120, opacity: 0, duration: .45, stagger: .08, ease: 'bounce.out' });
+    gsap.from('#done2Basket .balls .pkt', { y: -120, opacity: 0, duration: .45, stagger: .08, ease: 'bounce.out' });
     const cta = $('#done2Cta'); cta.classList.add('pulse');
     // moves on by itself once the card has been seen; tapping the button just goes a little sooner (same as Level 1)
     await Promise.race([wait(3), new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }))]);
@@ -173,12 +172,12 @@
   function reset() {
     skipping = false; result.stars = [];
     $('#l2').classList.remove('hidden'); $('#done2').classList.add('hidden'); $('#done2Cta').classList.remove('pulse');
-    Bill.hide(); Stamps.S.forEach(s => s.className = 'stamp2 hidden'); Basket.set(0); Pile.set(7);
+    Bill.hide(); $('#pack2').innerHTML = ''; Stamps.S.forEach(s => s.className = 'stamp2 hidden'); Basket.set(0); Pile.set(7);
     gsap.set(['#inkPad', '#ball2', '#crumpleCv'], { opacity: 0 }); gsap.set('#done2Card', { clearProps: 'transform,opacity' });
     // anything Level 1 left behind
     ['#coach', '#btnSkip', '#gudiya', '#doneOv', '#tagRig', '#numline', '#marker', '#markerGreen', '#titleOv'].forEach(s => $(s).classList.add('hidden'));
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';
-    const bg = $('#gBg'); gsap.set(bg, { clearProps: 'all' }); Object.assign(bg.style, { left: '0px', top: '0px', width: '1920px', height: '1080px', backgroundImage: `url(${GA('office_desk.webp')})` });
+    const bg = $('#gBg'); gsap.set(bg, { clearProps: 'all' }); Object.assign(bg.style, { left: '0px', top: '0px', width: '1920px', height: '1080px', backgroundImage: `url(${GA('office_desk_l2.webp')})` });   // taller wall, slimmer desk (top edge y 740)
   }
   async function run({ startAt = 0, skipIntro = false } = {}) {
     window.L2_ACTIVE = true; COACH.pariSpot = 'desk';   // full-body Pari behind the desk
@@ -189,6 +188,7 @@
     await banner();
     HUD.show();
     COACH.present('guddu');                      // Guddu Bhaiya is at his desk for the whole level
+    gsap.set(['#sunPanel', '#gChip', '#mariPlate', '#glowMari'], { autoAlpha: 0 });   // L2: no sun, chip or marigolds — characters + bill get the room
     if (!skipIntro) {
       skipBtn(true);
       await howto(); await teach();
@@ -197,7 +197,7 @@
     }
     for (let i = startAt; i < 7; i++) await billRound(D.bills[i], i);
     const res = await complete();
-    window.L2_ACTIVE = false; COACH.pariSpot = 'stand';
+    window.L2_ACTIVE = false; COACH.pariSpot = 'stand'; gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });
     return res;
   }
   window.LEVEL2_RUN = run;

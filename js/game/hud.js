@@ -75,11 +75,11 @@
   const SA = n => (window.IMG && IMG[n] && IMG[n].src) || (window.EMBED && EMBED[n]) || `assets/story/${n}.webp`;
   const SPOTS = {   // x, y = feet on stage · s = scale · side = which side the bubble sits · bubble = fixed bubble spot (desk)
     pari:  { front: { x: 150,  y: 1050, s: 1, side: 'L' }, back: { x: 140,  y: 770, s: .8, side: 'L' },
-             desk: { x: 140, y: 778, s: 1, side: 'L', clip: 532, bubble: { left: 214, bottom: 692 } } },
+             desk: { x: 190, y: 1151, s: 1.5, side: 'L', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } },   // L2: big, behind the desk
     manju: { front: { x: 1715, y: 958, s: .95, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
              desk: { x: 1772, y: 778, s: 1, side: 'R', clip: 534 } },
     guddu: { front: { x: 1745, y: 1050, s: 1, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
-             desk: { x: 800, y: 870, s: 1, side: 'L', tail: 'R', clip: 534, bubble: { left: 214, bottom: 692 } } }
+             desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
   };
   const spotOf = key => SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
   function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false }) {
@@ -93,7 +93,7 @@
       /* stand on the current spot; animate = glide there (stepping forward / back) */
       place(animate) {
         const sp = spotOf(key); A.spot = sp;
-        box.style.clipPath = sp.clip ? `inset(-800px -500px ${sp.y - sp.clip}px -500px)` : 'none';
+        box.style.clipPath = sp.clip ? `inset(-1000px -600px ${(sp.y - sp.clip) / sp.s}px -600px)` : 'none';   // clip is in unscaled px: divide by the scale
         box.classList.toggle('desk', !!sp.clip);
         gsap.killTweensOf(box, 'left,top,scale');
         (animate ? gsap.to : gsap.set)(box, { left: sp.x, top: sp.y, scale: sp.s, ...(animate ? { duration: .6, ease: 'power2.inOut' } : {}) });
@@ -143,6 +143,7 @@
     const sp = actor ? actor.spot : { side: 'L', bubble: { left: 214, bottom: 692 } };
     b.classList.toggle('posR', sp.side === 'R'); b.classList.toggle('tailR', sp.side === 'R' || sp.tail === 'R');
     let v;
+    b.style.width = sp.bubble && sp.bubble.width ? sp.bubble.width + 'px' : '';
     if (sp.bubble) v = { left: sp.bubble.left, bottom: sp.bubble.bottom };
     else {
       const hh = actor.h * sp.s, face = sp.y - .9 * hh, bottom = 1080 - (face + 38);

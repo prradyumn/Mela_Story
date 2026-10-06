@@ -145,7 +145,7 @@
       Cart.items.push(iconSrc); Cart.n = Cart.items.length; render();
       const im = $('#cartItems').lastElementChild;
       gsap.fromTo(im, { y: -18, scaleY: .8 }, { y: 0, scaleY: 1, duration: .35, ease: 'bounce.out' });
-      SND.sfx('coins');
+      SND.sfx('pop', .45);
       gsap.fromTo(c, { rotation: 0 }, { rotation: -2.5, duration: .1, yoyo: true, repeat: 1, transformOrigin: '70% 95%' });
       gsap.fromTo('#cartCount', { scale: 1.6 }, { scale: 1, duration: .4, ease: 'back.out(3)' });
       ST.sparks(tx, ty, 10, 70);
@@ -165,7 +165,7 @@
       await ST.flyImg(iconSrc, from.x, from.y, tx, ty, { size: 150, endSize: 90 * C.s, lift: 170, dur: .8 });
       Cart.items.push(iconSrc); Cart.n = Cart.items.length; render();
       gsap.fromTo($('#cartItems').lastElementChild, { y: -22, scaleY: .75 }, { y: 0, scaleY: 1, duration: .4, ease: 'bounce.out' });
-      SND.sfx('coins'); SND.sfx('ding');
+      SND.sfx('pop', .45); SND.sfx('ding');            // a soft drop into the cart (coins are for paying, in L3)
       gsap.fromTo(c, { y: dy }, { y: dy + 10, duration: .1, yoyo: true, repeat: 1 });
       gsap.fromTo('#cartCount', { scale: 1.8 }, { scale: 1, duration: .45, ease: 'back.out(3)' });
       ST.sparks(tx, ty, 16, 110);

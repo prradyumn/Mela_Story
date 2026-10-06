@@ -14,16 +14,29 @@ const studio = fs.readFileSync(path.join(ROOT, 'tools/voice_studio.html'), 'utf8
 const VOICE = eval('(' + studio.match(/const DEFAULT = (\{[^}]*\})/)[1] + ')');
 const PROFILE = eval('(' + studio.match(/const PROFILE = (\{[\s\S]*?\n\});/)[1] + ')');
 
-const win = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/game/data/level1.js'), 'utf8'), { window: win });
+// every game level's lines (same list as the Voice Studio: L1 + L2 …); numbers are spoken with LEVEL1.spoken()
+const win = {}, ctx = vm.createContext({ window: win });
+for (const f of ['level1.js', 'level2.js']) { const p = path.join(ROOT, 'js/game/data', f); if (fs.existsSync(p)) vm.runInContext(fs.readFileSync(p, 'utf8'), ctx); }
 const D = win.LEVEL1;
+const ALL = [...D.allLines(), ...(win.LEVEL2 ? win.LEVEL2.allLines() : [])];
 const args = process.argv.slice(2), force = args.includes('--force'), only = args.filter(a => !a.startsWith('--'));
-const lines = D.allLines().filter(l => !only.length || only.includes(l.id));
+const lines = ALL.filter(l => !only.length || only.includes(l.id));
 
 const prompt = l => { const p = PROFILE[l.who]; return `# AUDIO PROFILE: ${p.name}\n${p.persona}\n### DIRECTOR'S NOTES\nStyle: ${p.style}\n#### TRANSCRIPT\n${D.spoken(l.text)}`; };
 const wav = (pcm, rate) => { const h = Buffer.alloc(44); h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVEfmt ', 8); h.writeUInt32LE(16, 16);
   h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24); h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34);
   h.write('data', 36); h.writeUInt32LE(pcm.length, 40); return Buffer.concat([h, pcm]); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+// Gemini TTS ends every clip with a ~120-190 ms loud, DC-offset burst after the speech (heard as a "thud" when a line ends).
+// Cut it, and the silence before it stays: a final loud run of <= 300 ms that follows >= 150 ms of silence (10 ms windows, -40 dB).
+function stripEndBurst(pcm, rate) {
+  const s = new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length >> 1), win = Math.round(rate / 100), nW = Math.floor(s.length / win);
+  const db = i => { let e = 0; for (let j = i * win; j < (i + 1) * win; j++) e += (s[j] / 32768) ** 2; return 10 * Math.log10(Math.max(1e-12, e / win)); };
+  let k = nW - 1, b = 0, g = 0;
+  while (k >= 0 && db(k) > -40) { b++; k--; }
+  while (k >= 0 && db(k) <= -40) { g++; k--; }
+  return (b > 0 && b <= 30 && g >= 15) ? pcm.subarray(0, (nW - b) * win * 2) : pcm;
+}
 
 async function tts(l) {
   const body = { contents: [{ parts: [{ text: prompt(l) }] }],
@@ -40,7 +53,7 @@ async function tts(l) {
     const part = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     if (!part) { console.log(`  ${l.id}: no audio (${j.candidates?.[0]?.finishReason}), retrying`); await sleep(3000); continue; }
     const rate = parseInt((part.inlineData.mimeType.match(/rate=(\d+)/) || [])[1] || '24000', 10);
-    return wav(Buffer.from(part.inlineData.data, 'base64'), rate);
+    return wav(stripEndBurst(Buffer.from(part.inlineData.data, 'base64'), rate), rate);
   }
   throw new Error(`${l.id}: gave up after 8 tries`);
 }

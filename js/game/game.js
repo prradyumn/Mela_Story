@@ -7,7 +7,7 @@ window.GAME_LEVELS = window.GAME_LEVELS || {};
 window.GAME_LEVELS[1] = async (api) => {
   const root = document.getElementById('game');
   const q = new URLSearchParams(location.search);
-  LEVEL1.sun = api.level.sun.slice(); COACH.fullPari = true; COACH.pariSpot = 'stand';                    // the story decides where the sun is in level 1
+  LEVEL1.sun = api.level.sun.slice(); COACH.fullPari = true; COACH.pariSpot = 'stand'; gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });                    // the story decides where the sun is in level 1
 
   // the game has its own background, HUD and coach: hide the story's scene + HUD underneath
   document.getElementById('l2').classList.add('hidden'); gsap.set('#gBg', { clearProps: 'all' });

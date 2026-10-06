@@ -6,8 +6,10 @@
      A missing file is fine: the line stays on screen for a reading time.
    Engine globals used: AC, BUF, DUR, sfx, voice, stopVoices (classic scripts share one global scope). */
 (function () {
-  const NAME = { bell: 'cycle_bell' };          // game name → story sfx file (sfx_<name>)
-  const VOL = { bell: .55, ding: .6, goat: .7, pop: .5, whoosh: .45, swish: .4, stamp: .7, sparkle: .5, confetti: .6, tick: .35, boing: .5, rise: .45, bubble: .35, coins: .55 };
+  // game name → story sfx file (sfx_<name>). The game uses soft whoosh/swish (high hiss filtered out, level matched to the
+  // bell/ding) so tag drops, the line, Gudiya's leaps and the cart sound as gentle as the rest; the story keeps the originals.
+  const NAME = { bell: 'cycle_bell', whoosh: 'whoosh_soft', swish: 'swish_soft' };
+  const VOL = { bell: .55, ding: .6, goat: .7, pop: .5, whoosh: .4, swish: .35, stamp: .7, sparkle: .5, confetti: .6, tick: .35, boing: .5, rise: .45, bubble: .35, coins: .55 };
   const OGG = !!document.createElement('audio').canPlayType('audio/ogg; codecs="opus"');
   const loading = {}, missing = new Set();
   let current = null, pending = null, noVO = false;

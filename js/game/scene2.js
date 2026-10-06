@@ -1,11 +1,11 @@
-/* L2SC — Level 2 scene pieces: the bill (DOM + canvas twin for the crumple), the three answer stamps,
+/* L2SC — Level 2 scene pieces: the bill (DOM + canvas twin for the packing fold), the three answer stamps,
    bill pile, CHECKED basket, ink pad, and the stamp sequence. Coordinates match Figma "★ L2 · Clean build". */
 (function () {
   const { $, sparks, wait } = ST;
   const fmt = n => LEVEL1.fmt(n), rs = n => '₹' + fmt(n);
   const BILL = { x: 1000, y: 196, w: 620, h: 775 }, BC = { x: BILL.x + BILL.w / 2, y: BILL.y + BILL.h / 2 };
-  const SLOT = i => ({ left: 50 + i * 265, top: 553 });
-  const PILE_C = { x: 1775, y: 600 }, BASKET_C = { x: 1775, y: 742 };
+  const SLOT = i => ({ left: 50 + i * 265, top: 740 });                 // on the desk (top edge y 860, office_desk_l2)
+  const PILE_C = { x: 1775, y: 867 }, BASKET_C = { x: 1775, y: 944 };   // pile + basket drawn at 80% (css scale)
 
   /* ---------- the bill ---------- */
   const state = { title: '', items: [], show: 0, chips: null, chipVis: [false, false], total: false, mark: null };
@@ -50,29 +50,66 @@
     }
     return c;
   }
-  const ball = $('#ball2');
-  const placeBall = (x, y, s, rot = 0) => gsap.set(ball, { x: x - s / 2, y: y - s / 2, width: s, height: s, rotation: rot });
-  function arc(x0, y0, x1, y1, s0, s1, lift, dur, ease = 'power1.inOut') {
-    const o = { t: 0 };
-    return new Promise(res => gsap.to(o, { t: 1, duration: dur, ease, onUpdate() { const t = o.t; placeBall(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t - lift * Math.sin(Math.PI * t), s0 + (s1 - s0) * t, t * 300); }, onComplete: res }));
+  /* ---------- packing: the bill folds in half (bottom up), in half again (right over left), a red band ties the packet,
+     and it drops into the CHECKED basket. A new bill arrives the other way: a packet flies off the pile and unfolds.
+     Built from the bill's own canvas (drawBill) as CSS 3D pieces — no WebGL needed. ---------- */
+  const PK = $('#pack2'), PAPER_BACK = '#f6ecd6';
+  const PW = BILL.w, PH = BILL.h, QW = PW / 2, QH = PH / 2;
+  function piece(tex, sx, sy, sw, sh) {          // a part of the bill texture as its own canvas
+    const k = tex.width / PW, c = document.createElement('canvas'); c.width = sw * k; c.height = sh * k;
+    c.getContext('2d').drawImage(tex, sx * k, sy * k, sw * k, sh * k, 0, 0, sw * k, sh * k);
+    Object.assign(c.style, { position: 'absolute', left: 0, top: 0, width: sw + 'px', height: sh + 'px', backfaceVisibility: 'hidden' }); return c;
   }
+  const div = (css, parent = PK) => { const d = document.createElement('div'); Object.assign(d.style, { position: 'absolute', ...css }); parent.appendChild(d); return d; };
+  const back = (w, h, parent, flip) => div({ left: 0, top: 0, width: w + 'px', height: h + 'px', background: `linear-gradient(135deg, ${PAPER_BACK}, #efe2c6)`,
+    boxShadow: 'inset 0 0 0 2px rgba(122,74,34,.35)', backfaceVisibility: 'hidden', transform: flip }, parent);
+  /* builds the fold pieces at the bill's place and returns a paused timeline: progress 0 = flat bill, 1 = tied packet */
+  function foldTL(tex) {
+    PK.innerHTML = ''; gsap.set(PK, { opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 });
+    const root = div({ left: BILL.x + 'px', top: BILL.y + 'px', width: PW + 'px', height: PH + 'px', transformStyle: 'preserve-3d', filter: 'drop-shadow(0 10px 8px rgba(58,34,15,.28))' });
+    // fold 1: top half stays, bottom half turns up over it (shows the paper's back)
+    const top = piece(tex, 0, 0, PW, QH); root.appendChild(top);
+    const f1 = div({ left: 0, top: QH + 'px', width: PW + 'px', height: QH + 'px', transformStyle: 'preserve-3d', transformOrigin: '50% 0' }, root);
+    f1.appendChild(piece(tex, 0, QH, PW, QH)); back(PW, QH, f1, 'rotateX(180deg)');
+    // fold 2: the half-height packet — left quarter stays, right quarter turns over it
+    const s2 = div({ left: 0, top: 0, width: PW + 'px', height: QH + 'px', transformStyle: 'preserve-3d', visibility: 'hidden' }, root);
+    back(QW, QH, s2);
+    const f2 = div({ left: QW + 'px', top: 0, width: QW + 'px', height: QH + 'px', transformStyle: 'preserve-3d', transformOrigin: '0 50%' }, s2);
+    back(QW, QH, f2); back(QW, QH, f2, 'rotateY(180deg)');
+    // the red band that ties the packet
+    const band = div({ left: '-6px', top: (QH / 2 - 22) + 'px', width: (QW + 12) + 'px', height: '44px', background: 'linear-gradient(#d0442c,#a8321c)', borderRadius: '6px',
+      boxShadow: '0 3px 0 rgba(58,34,15,.25)', transformOrigin: '0 50%', visibility: 'hidden' }, root);
+    const knot = div({ left: (QW / 2 - 30) + 'px', top: (QH / 2 - 34) + 'px', width: '60px', height: '68px', borderRadius: '50%', background: 'radial-gradient(circle at 40% 35%, #e85a3f, #a8321c)',
+      boxShadow: '0 3px 0 rgba(58,34,15,.3)', visibility: 'hidden' }, root);
+    const tl = gsap.timeline({ paused: true });
+    tl.to(f1, { rotationX: 180, duration: .42, ease: 'power2.inOut' })
+      .set([top, f1], { visibility: 'hidden' }).set(s2, { visibility: 'visible' })
+      .to(f2, { rotationY: -180, duration: .36, ease: 'power2.inOut' })
+      .set(band, { visibility: 'visible' }).fromTo(band, { scaleX: 0 }, { scaleX: 1, duration: .25, ease: 'power2.out', immediateRender: false })
+      .set(knot, { visibility: 'visible' }).fromTo(knot, { scale: 0 }, { scale: 1, duration: .22, ease: 'back.out(3)', immediateRender: false });
+    tl.root = root; return tl;
+  }
+  const PACK_C = { x: BILL.x + QW / 2, y: BILL.y + QH / 2 };          // centre of the tied packet (before it flies)
+  function fly(x0, y0, x1, y1, s0, s1, lift, dur, ease = 'power1.inOut') {   // moves the whole packet layer along an arc
+    const o = { t: 0 };
+    return new Promise(res => gsap.to(o, { t: 1, duration: dur, ease, onUpdate() { const t = o.t, s = s0 + (s1 - s0) * t;
+      gsap.set(PK, { x: (x0 + (x1 - x0) * t) - PACK_C.x, y: (y0 + (y1 - y0) * t - lift * Math.sin(Math.PI * t)) - PACK_C.y, scale: s, rotation: 8 * Math.sin(Math.PI * t), transformOrigin: `${PACK_C.x}px ${PACK_C.y}px` }); }, onComplete: res }));
+  }
+  const PKT_S = .26;                                                    // packet size when it lands in the basket / sits on the pile
 
   const Bill = {
     state, drawBill,
     set(title, items) { Object.assign(state, { title, items, show: 0, chips: null, chipVis: [false, false], total: false, mark: null }); render(); },
     hide() { el.classList.add('hidden'); },
-    /* ball hops off the pile → grows → the 3D paper un-crumples flat into the bill (title only) */
+    /* a packet flies off the pile → the band comes off → it unfolds flat into the bill (title only) */
     async enter(fromPile = true) {
       render(); SND.sfx('paper', .6);
-      gsap.set(ball, { opacity: 1, attr: { src: GA('paper_ball_3.webp') } });
-      if (fromPile) await arc(PILE_C.x, PILE_C.y, BC.x, BC.y, 70, CRUMPLE.R * 2.1, 160, .55);
-      else { placeBall(BC.x, BC.y, CRUMPLE.R * 2.1); await gsap.fromTo(ball, { scale: .2 }, { scale: 1, duration: .3 }); }
-      const done = CRUMPLE.unCrumple(drawBill(), BC.x, BC.y, .75);
-      gsap.to(ball, { opacity: 0, duration: .12 });
-      const used3D = await done;
-      el.classList.remove('hidden'); gsap.set(el, { opacity: 1, scale: 1, rotation: 0 });
-      if (!used3D) await gsap.fromTo(el, { scale: .3, rotation: -20, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: .45, ease: 'back.out(1.6)' });
-      CRUMPLE.hide();
+      const tl = foldTL(drawBill()); tl.progress(1);
+      if (fromPile) await fly(PILE_C.x, PILE_C.y, PACK_C.x, PACK_C.y, PKT_S, 1, 160, .55);
+      else await gsap.fromTo(PK, { scale: .3, opacity: 0, transformOrigin: `${PACK_C.x}px ${PACK_C.y}px` }, { scale: 1, opacity: 1, duration: .3 });
+      gsap.set(PK, { x: 0, y: 0, scale: 1, rotation: 0 });
+      await new Promise(r => { tl.eventCallback('onReverseComplete', r); tl.reverse(); });
+      el.classList.remove('hidden'); gsap.set(el, { opacity: 1, scale: 1, rotation: 0 }); PK.innerHTML = '';
       gsap.fromTo(el, { scaleY: .97 }, { scaleY: 1, duration: .35, ease: 'elastic.out(1,.5)' });
     },
     /* write a line in (left → right reveal) */
@@ -94,16 +131,18 @@
     },
     glowPrices() { const ps = el.querySelectorAll('.b-price'); ps.forEach((p, i) => gsap.delayedCall(i * 1.1, () => { p.classList.remove('glow'); void p.offsetWidth; p.classList.add('glow'); })); },
     showMark(v) { state.mark = v; render(); return gsap.fromTo(el.querySelector('.b-mark'), { scale: 1.25, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: 'power3.out' }); },
-    /* the 3D crumple → ball → arc into the basket (or off-screen for practice) */
-    async crumpleTo(toBasket = true) {
-      const tex = drawBill();
+    /* fold, fold, tie → the packet drops into the CHECKED basket (or slides off-screen for practice) */
+    async crumpleTo(toBasket = true) { return Bill.packTo(toBasket); },
+    async packTo(toBasket = true) {
+      const tl = foldTL(drawBill());
       el.classList.add('hidden'); SND.sfx('paper', .7);
-      const used3D = await CRUMPLE.crumple(tex, BC.x, BC.y, .65);
-      placeBall(BC.x, BC.y, CRUMPLE.R * 2.1, 0); gsap.set(ball, { opacity: 1, scale: 1 }); CRUMPLE.hide();
-      if (!used3D) await gsap.fromTo(ball, { scale: 1.6 }, { scale: 1, duration: .25 });
+      await new Promise(r => { tl.eventCallback('onComplete', r); tl.play(0); });
+      SND.sfx('pop', .4);
+      await wait(.25);
       SND.sfx('whoosh', .35);
-      if (toBasket) { await arc(BC.x, BC.y, BASKET_C.x, BASKET_C.y - 6, CRUMPLE.R * 2.1, 64, 260, .7, 'power1.in'); gsap.set(ball, { opacity: 0 }); Basket.add(); }
-      else { await arc(BC.x, BC.y, 2150, 820, CRUMPLE.R * 2.1, 140, 200, .6, 'power1.in'); gsap.set(ball, { opacity: 0 }); }
+      if (toBasket) { await fly(PACK_C.x, PACK_C.y, BASKET_C.x, BASKET_C.y - 6, 1, PKT_S, 240, .7, 'power1.in'); Basket.add(); }
+      else await fly(PACK_C.x, PACK_C.y, 2200, 820, 1, .5, 180, .6, 'power1.in');
+      PK.innerHTML = ''; gsap.set(PK, { x: 0, y: 0, scale: 1, rotation: 0 });
     }
   };
 
@@ -131,10 +170,10 @@
       const s = S[i], art = s.querySelector('.art'), pad = $('#inkPad'), slot = SLOT(i);
       gsap.fromTo(pad, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: .35, ease: 'back.out(1.6)' });
       gsap.to(s.querySelector('.tick'), { scale: 1, duration: .3, ease: 'back.out(3)' });
-      await gsap.to(s, { left: 790, top: 470, duration: .45, ease: 'power2.inOut' });
-      await gsap.to(s, { top: 512, scaleY: .92, duration: .14, ease: 'power2.in' });          // dip
+      await gsap.to(s, { left: 790, top: 640, duration: .45, ease: 'power2.inOut' });
+      await gsap.to(s, { top: 680, scaleY: .92, duration: .14, ease: 'power2.in' });          // dip
       SND.sfx('tick', .4);
-      await gsap.to(s, { top: 440, scaleY: 1, duration: .2, ease: 'power2.out' });
+      await gsap.to(s, { top: 610, scaleY: 1, duration: .2, ease: 'power2.out' });
       gsap.to(pad, { opacity: 0, y: 80, duration: .3, delay: .2 });
       await gsap.to(s, { left: 1125, top: 430, duration: .4, ease: 'power2.inOut' });          // over the "?" box
       await gsap.to(s, { top: 504, duration: .12, ease: 'power3.in' });
@@ -159,7 +198,7 @@
   };
   const Basket = {
     n: 0,
-    set(n) { Basket.n = n; $('#basketBalls').innerHTML = Array.from({ length: Math.min(n, 7) }, (_, i) => `<img src="${GA('paper_ball_3.webp')}" style="left:${30 + ((i * 47) % 170)}px;top:${(i < 4 ? 0 : -22) + 12}px">`).join(''); },
+    set(n) { Basket.n = n; $('#basketBalls').innerHTML = Array.from({ length: Math.min(n, 7) }, (_, i) => `<div class="pkt" style="left:${26 + ((i * 47) % 170)}px;top:${(i < 4 ? 4 : -18) + 10}px;transform:rotate(${(i % 3 - 1) * 9}deg)"></div>`).join(''); },
     add() { Basket.set(Basket.n + 1); SND.sfx('tick', .4); const b = $('#basketBalls').lastElementChild; gsap.fromTo(b, { y: -30 }, { y: 0, duration: .35, ease: 'bounce.out' }); gsap.fromTo('#basket2', { scaleY: 1 }, { scaleY: .92, duration: .1, yoyo: true, repeat: 1, transformOrigin: '50% 100%' }); },
     glow() { return gsap.fromTo('#basket2', { filter: 'drop-shadow(0 0 0 rgba(247,183,51,0))' }, { filter: 'drop-shadow(0 0 22px rgba(247,183,51,1))', duration: .4, yoyo: true, repeat: 1 }); }
   };

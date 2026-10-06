@@ -36,7 +36,7 @@ const IMAGES = ['bg_01_gate', 'bg_02_chaupal', 'bg_03_bazaar', 'bg_04_office', '
   'guddu_write', 'guddu_scratch', 'guddu_surprised', 'guddu_proud', 'manju_teach', 'gudiya_idle', 'gudiya_hop'];
 const AUDIO = ['m_title', 'm_village_long', 'm_hurry', 'm_festive',
   'sfx_boing', 'sfx_bubble', 'sfx_coins', 'sfx_confetti', 'sfx_cycle_bell', 'sfx_ding', 'sfx_drumroll_hit', 'sfx_paper', 'sfx_pop',
-  'sfx_rise', 'sfx_scribble', 'sfx_sparkle', 'sfx_stamp', 'sfx_swish', 'sfx_tick', 'sfx_whoosh', 'sfx_goat',
+  'sfx_rise', 'sfx_scribble', 'sfx_sparkle', 'sfx_stamp', 'sfx_swish', 'sfx_tick', 'sfx_whoosh', 'sfx_goat', 'sfx_whoosh_soft', 'sfx_swish_soft',
   't0', 'n1', 'b1', 'g1', 'n2', 'r1', 'p1', 'p2', 'p3', 'r2', 'p4', 'g2', 'p5', 'n3', 'g3', 'p6', 'r3', 'n4', 'x1'];
 const SRC = window.EMBED || {};
 const imgURL = n => SRC[n] || `assets/story/${n}.webp`;
@@ -101,13 +101,15 @@ function playMusic(n, { fade = 1.2, gain = 1, loop = true, offset = 0 } = {}) {
 let voiceNow = null;
 function voice(n) {
   if (SKIPPING) return;
-  if (voiceNow) try { voiceNow.s.stop(); } catch (e) { }
+  if (voiceNow) fadeStop(voiceNow, AC.currentTime);
   voiceNow = play(n, { bus: voiceBus, gain: 1.15 });
   const t = AC.currentTime, d = DUR[n] || 2;
   musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t);
   musicBus.gain.linearRampToValueAtTime(MUSIC_DUCK, t + 0.25); musicBus.gain.setValueAtTime(MUSIC_DUCK, t + d); musicBus.gain.linearRampToValueAtTime(MUSIC_LEVEL, t + d + 0.8);
 }
-function stopVoices() { if (voiceNow) try { voiceNow.s.stop(); } catch (e) { } voiceNow = null; const t = AC.currentTime; musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(MUSIC_LEVEL, t); }
+// fade a voice out over a few ms before stopping it (an instant stop clicks)
+function fadeStop(h, t) { try { h.g.gain.cancelScheduledValues(t); h.g.gain.setValueAtTime(h.g.gain.value, t); h.g.gain.linearRampToValueAtTime(0, t + .03); h.s.stop(t + .04); } catch (e) { } }
+function stopVoices() { const t = AC.currentTime; if (voiceNow) fadeStop(voiceNow, t); voiceNow = null; musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t); musicBus.gain.linearRampToValueAtTime(MUSIC_LEVEL, t + .4); }
 
 // ---------- scene + camera ----------
 let SKIPPING = false, CUR = null;

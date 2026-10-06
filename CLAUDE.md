@@ -34,6 +34,7 @@ Use Chrome or Safari (audio needs the "Tap to begin" gesture). `file://` mostly 
 | `?speed=3` | Speed up all GSAP time (story + game). |
 | `?scene=level1&shop=4` | Game: skip how-to/teach and start at shop 4. |
 | `?edit=1` | Layout editor (§7). **E** also works locally. |
+| `?qa=1` | QA shortcuts: a small **QA** tab (top-left of the window) that opens **Level 1 · Bazaar** / **Level 2 · Office**; each reloads into that game (`?from=levelN`, keeps `?speed=`). Always on locally and in the single file (file://); on the live site only with `?qa=1`; `?qa=0` hides it. `js/qa.js`. |
 
 - **Single-file build** (to share/email): `python3 tools/build.py` → `dist/The_Mela_Before_Sunset.html` (~28 MB). It inlines all CSS, fonts, story images/audio **and the game art + game VO (mp3)** into `window.EMBED`. Rebuild after changes you want to share.
 - **Vercel:** no build. This folder is the site. `vercel.json` sets cache headers; `.vercelignore` keeps `_source/`, `tools/`, `dist/`, docs out of the upload. Deploy with `npx vercel --prod`.
@@ -217,7 +218,7 @@ WebAudio buses: `musicBus`, `voiceBus` (voice ducks the music), `sfxBus`. Music 
 **Files:**
 
 - **Music:** `m_title`, `m_village_long` (story), `m_hurry` (levels), `m_festive` (ending).
-- **SFX:** boing, bubble, coins, confetti, cycle_bell, ding, drumroll_hit, goat, paper, pop, rise, scribble, sparkle, stamp, swish, tick, whoosh.
+- **SFX:** boing, bubble, coins, confetti, cycle_bell, ding, drumroll_hit, goat, paper, pop, rise, scribble, sparkle, stamp, swish, tick, whoosh, **whoosh_soft, swish_soft**. The game maps whoosh/swish to the soft versions (`NAME` in js/game/audio.js: high hiss filtered out, level matched to the bell/ding — the user found the originals harsh in L1); the story keeps the originals for its iris wipes. The cart drop is a soft pop + ding (coins are for paying in L3).
 - **Voices:** t0, n1–n4, b1, g1–g3, p1–p6, r1–r3, x1.
 
 ## 7. Layout editor (temporary)
@@ -296,12 +297,12 @@ iris-wipes to the next bridge. Game scripts load after story.js (see index.html)
 ### 8.5 How Level 2 is wired
 - `GAME_LEVELS[2](api)` hides the story scene + HUD, runs `LEVEL2_RUN({ startAt, skipIntro })`, then `setFlowers(7)`, `setSun(level.sun[1])`. `GAME_LEVELS[1]` hides `#l2`, so the levels never show each other's pieces.
 - Test one bill: `?scene=level2&bill=N` (1–7). Whole hand-off: `?from=bridge1`.
-- Layout (Figma ★ L2): office_desk is the `#gBg`; bill paper 620×775 at (1000,196) is the hero; 3 stamps at x 50 + i·265, y 553 (w 250); pile (1650,520) shows "n bills left"; CHECKED basket (1650,725). **No race panel** (user: only if necessary).
-- Round: a paper ball flies off the pile and **un-crumples** into the bill → the items write in → Pari asks → 3 stamps rise. Correct: blue chips show the rounding → the stamp dips in the ink pad, thumps the bill (pressed art, squash, shake, red sparks) → stamp mark with the value → marigold, sun step → the bill **crumples into a ball** and drops into the basket.
-- **Crumple** (`crumple.js`): the bill is redrawn on a canvas (`L2SC.Bill.drawBill`, 1.5×) and mapped on a 26×32 plane in an orthographic Three.js scene in stage px; vertices lerp to a lumpy sphere (R 108) + creases, flat-shaded Lambert. No WebGL → 2D squash.
+- Layout (Oct 2026 recomposition, user: "reduce the wooden desk, characters + bills are the major components"): `office_desk_l2.webp` is the `#gBg` (office_desk re-cut: tall wall, only the desk top; **desk top edge y 860**). Bill 620×775 at (1000,196) is the hero; 3 stamps at x 50 + i·265, y 740; ink pad (812, 952); pile (1650, 775) and CHECKED basket (1650, 930) at 80%. Pari (190, 1151, ×1.5) and Guddu (815, 1193, ×1.45) behind the desk (clip y 862, divided by the scale in `place()`), bubble fixed between them (left 300, bottom 548, 420 wide). **L2 hides the chip, marigolds and sunset tracker** (`#gChip #mariPlate #sunPanel`, shown again after / in L1); the marigold count still runs (`HUD.lit`) so the story gets 7 flowers. **No race panel.**
+- Round: a paper ball flies off the pile and **un-crumples** into the bill → the items write in → Pari asks → 3 stamps rise. Correct: blue chips show the rounding → the stamp dips in the ink pad, thumps the bill (pressed art, squash, shake, red sparks) → stamp mark with the value → the bill is **packed** (`Bill.packTo`): folds in half bottom-up, in half again right-over-left, a red band + knot tie it, and the packet drops into the CHECKED basket. A new bill arrives the other way: a packet flies off the pile and unfolds (`Bill.enter`).
+- **Packing** (scene2.js `foldTL`): CSS 3D pieces cut from the bill's canvas twin (`drawBill`), no WebGL. The old Three.js crumple (`crumple.js` + `three.min.js`, 600 KB) is retired to `_source/archive/crumple/`; `Bill.crumpleTo` is kept as an alias of `packTo`.
 - Same rules as L1 (§8.3): no taps but answers + Skip, auto-advance, 3-strike (Oops + Gudiya bleat / yellow hint chips / fade + glow + hand), 10 s idle, stars.
 - Coach: full-body Pari in L2 too — L2 sets `COACH.pariSpot = 'desk'` (same spot as L1, cut at the desk's top edge y 532 so the stamps stay clear) and back to `'stand'` at the end. `COACH.fullPari = false` would fall back to the round avatar. Guddu Bhaiya speaks via the round avatar (`WHO.guddu`, guddu_scratch.webp).
-- VO ids are `L2_*` (42 lines from `LEVEL2.allLines()`); Voice Studio lists L1 + L2 = 92 lines, Guddu = Fenrir voice. Until generated, L2 lines show for a reading time.
+- VO ids are `L2_*` (42 lines from `LEVEL2.allLines()`), **all generated** (Oct 2026, `tools/gen_vo.mjs`, which now reads L1 + L2 = 92 lines like the Voice Studio; Guddu = Fenrir) and checked by transcribing them back (4 slips remade: a doubled line, invented "Okay…" openers). Guddu's teach line is 12.8 s: he speaks both numbers slowly, in character.
 
 ## 9. Regenerating assets
 
@@ -316,10 +317,11 @@ iris-wipes to the next bridge. Game scripts load after story.js (see index.html)
   ```
   Voices: narrator **Sulafat**, Baba **Algenib**, Guddu **Fenrir**, Pari **Leda**, Aaru **Puck**, announcer **Sadachbia**; game adds Manju Mausi **Gacrux**.
   Save `assets/audio/<id>.mp3` (re-encode to 56k mono like the others: `-ac 1 -b:a 56k`), then `ffmpeg -i <id>.mp3 -c:a libopus -b:a 48k -ac 1 <id>.ogg` (music `-b:a 80k -vbr constrained`).
-- **Game voices (terminal):** `GEMINI_API_KEY=… node tools/gen_vo.mjs` (same model, voices, prompts and spoken numbers as the studio; skips lines that exist, `--force id…` remakes some), then `tools/convert_vo.sh`. All 50 L1 lines were made this way (Oct 2026) and checked by transcribing them back with Gemini. The `.wav` masters live in `_source/game_vo_masters/` (gen_vo.mjs writes there, convert_vo.sh reads there); the game loads `.ogg`, then `.mp3`.
+- **Game voices (terminal):** `GEMINI_API_KEY=… node tools/gen_vo.mjs` (same model, voices, prompts and spoken numbers as the studio; skips lines that exist, `--force id…` remakes some), then `tools/convert_vo.sh`. All 92 game lines (L1 + L2) were made this way (Oct 2026) and checked by transcribing them back with Gemini. The `.wav` masters live in `_source/game_vo_masters/` (gen_vo.mjs writes there, convert_vo.sh reads there); the game loads `.ogg`, then `.mp3`.
 - **Game voices (browser):** open `tools/voice_studio.html` (Chrome; via the local server if `file://` blocks the request) → paste key → choose this folder → **Generate missing lines** → writes `assets/game/vo/L1_*.wav`. Then `tools/convert_vo.sh` for ogg/mp3 (needed for the single-file build). Big numbers are spoken in Indian English words by `LEVEL1.spoken()`.
   Cloud/agent shells may not reach `generativelanguage.googleapis.com` (egress policy); then use the studio in the browser. The local Mac terminal can.
 - **Asset masters (Oct 2026 size pass):** the originals of every image/audio file are in `_source/asset_masters/` before re-encoding (frames ~1.25× their largest on-screen size, webp q78; poses + mouths 1080 tall q85, same factor so they stay aligned; backgrounds same size q80; voice MP3s 56k mono; music and Ogg untouched). Re-encode from there if quality ever needs to go back up. Story images 17.2 → 12.6 MB, voice MP3s 4.9 → 3.5 MB, single file 36 → 28 MB.
+- **Game VO end click (fixed Oct 2026):** Gemini TTS ends every clip with a ~120–190 ms loud, DC-offset burst after the speech (heard as a "cable dropping" thud when a line ends). All 92 masters were trimmed (raw copies in `_source/game_vo_masters/_raw_with_end_click/`) and `gen_vo.mjs` strips it automatically (`stripEndBurst`). The engine also fades a voice out over 30 ms when it is cut (`fadeStop`) and ramps the music back up instead of jumping.
 - **Loading:** engine `loadAll` waits only for what the opening needs; the talking/explaining frames (`pari_explain`, `manju_talk`, `guddu_talk`) load in the background after it (`LATER`).
 - **Sprites/mouths:** `python3 _source/art_package/tools/import_sheets.py talk|cycles|pari2` → writes into `assets/story/`. Manju Mausi's sprites are coming next: give her an `acts.explain` the same way and a full-body coach like Pari's.
 - **Music:** Lyria (`lyria-3-clip-preview` ≈30 s; `lyria-3.5` long).

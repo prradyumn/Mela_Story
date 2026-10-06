@@ -17,6 +17,7 @@
     </div>
     ${stamp(0)}${stamp(1)}${stamp(2)}
     <img id="inkPad" class="abs" src="${GA('ink_pad.webp')}" alt="">
+    <div id="pack2"></div>
     <img id="ball2" class="abs" src="${GA('paper_ball_3.webp')}" alt="">
     <canvas id="crumpleCv" width="1920" height="1080"></canvas>
     <div class="overlay hidden" id="done2">
