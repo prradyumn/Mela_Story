@@ -31,8 +31,12 @@ for f in sorted(os.listdir('assets/story')):
 # MP3 in the single file: it gets emailed/shared and must play everywhere, including iOS Safari (no Ogg decoding there)
 for f in sorted(os.listdir('assets/audio')):
     if f.endswith('.mp3'): emb[os.path.splitext(f)[0]] = data_uri('assets/audio/' + f)
-for f in sorted(os.listdir('assets/game')):
-    if os.path.splitext(f)[1] in ('.webp', '.png'): emb['game/' + f] = data_uri('assets/game/' + f)
+for dp, dn, fs in os.walk('assets/game'):
+    if dp.startswith('assets/game/vo'): continue
+    for f in sorted(fs):
+        if os.path.splitext(f)[1] in ('.webp', '.png'):
+            rel = os.path.relpath(os.path.join(dp, f), 'assets/game').replace(os.sep, '/')
+            emb['game/' + rel] = data_uri(os.path.join(dp, f))
 vo = 'assets/game/vo'
 if os.path.isdir(vo):
     for f in sorted(os.listdir(vo)):

@@ -74,9 +74,9 @@
      COACH.fullPari = false falls back to the round avatar for everyone (Aaru always uses it: no sprite yet). */
   const SA = n => (window.IMG && IMG[n] && IMG[n].src) || (window.EMBED && EMBED[n]) || `assets/story/${n}.webp`;
   const SPOTS = {   // x, y = feet on stage · s = scale · side = which side the bubble sits · bubble = fixed bubble spot (desk)
-    pari:  { front: { x: 150,  y: 1050, s: 1, side: 'L' }, back: { x: 140,  y: 770, s: .8, side: 'L' },
+    pari:  { front: { x: 150,  y: 1050, s: 1, side: 'L' }, back: { x: 122, y: 1046, s: .72, side: 'L', tail: 'D', bubble: { left: 28, bottom: 420, width: 400 } },
              desk: { x: 190, y: 1151, s: 1.5, side: 'L', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } },   // L2: big, behind the desk
-    manju: { front: { x: 1715, y: 958, s: .95, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
+    manju: { front: { x: 1715, y: 958, s: .95, side: 'R' }, back: { x: 1800, y: 1046, s: .72, side: 'R', tail: 'D', bubble: { right: 28, bottom: 420, width: 400 } },
              desk: { x: 1772, y: 778, s: 1, side: 'R', clip: 534 } },
     guddu: { front: { x: 1745, y: 1050, s: 1, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
              desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
@@ -141,10 +141,11 @@
   function placeBubble(actor, animate) {
     const b = $('#bubble'); bubbleFor = actor;
     const sp = actor ? actor.spot : { side: 'L', bubble: { left: 214, bottom: 692 } };
-    b.classList.toggle('posR', sp.side === 'R'); b.classList.toggle('tailR', sp.side === 'R' || sp.tail === 'R');
+    const down = sp.tail === 'D';
+    b.classList.toggle('posR', sp.side === 'R'); b.classList.toggle('tailD', down); b.classList.toggle('tailR', !down && (sp.side === 'R' || sp.tail === 'R'));
     let v;
     b.style.width = sp.bubble && sp.bubble.width ? sp.bubble.width + 'px' : '';
-    if (sp.bubble) v = { left: sp.bubble.left, bottom: sp.bubble.bottom };
+    if (sp.bubble) v = sp.bubble.right != null ? { right: sp.bubble.right, bottom: sp.bubble.bottom } : { left: sp.bubble.left, bottom: sp.bubble.bottom };
     else {
       const hh = actor.h * sp.s, face = sp.y - .9 * hh, bottom = 1080 - (face + 38);
       v = sp.side === 'R' ? { right: 1920 - (sp.x - .1 * hh - 34), bottom } : { left: sp.x + .1 * hh + 34, bottom };
@@ -171,7 +172,14 @@
     /* Swap the bubble text for a longer version of the same line (no new VO) */
     update(line) { $('#bubbleText').innerHTML = line.text.replace(/(₹[\d,]+)/g, '<b>$1</b>'); SND.setCurrent(line); gsap.fromTo('#bubbleText', { opacity: .3 }, { opacity: 1, duration: .3 }); gsap.fromTo('#bubble', { scale: 1.03 }, { scale: 1, duration: .25 }); },
     /* Show a line, play its VO (or wait a reading time). Resolves when the line is done. */
+    /* L3: voice only — no bubble, no avatar, no full-body coach. The level draws its own talk waves via onTalk(who, on). */
+    voiceOnly: false, onTalk: null,
     say(line, { append } = {}) {
+      if (Coach.voiceOnly) {
+        SND.setCurrent(line); const my = ++sayN, who = line.who || 'pari';
+        if (Coach.onTalk) Coach.onTalk(who, true, line);
+        return SND.vo(line.vo, readTime(line.text)).then(() => { if (my === sayN && Coach.onTalk) Coach.onTalk(who, false, line); });
+      }
       Coach.show();
       const key = line.who || 'pari', w = WHO[key] || WHO.pari, actor = Coach.fullPari !== false && CAST[key];
       const spot = actor ? key + '@' + Coach.pariSpot : key;

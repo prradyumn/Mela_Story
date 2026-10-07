@@ -150,16 +150,18 @@
       gsap.fromTo('#cartCount', { scale: 1.6 }, { scale: 1, duration: .4, ease: 'back.out(3)' });
       ST.sparks(tx, ty, 10, 70);
     },
-    /* The cart moment (L1, after a correct answer): the cart rolls in to the centre of the stage, the item drops into it
-       from the tag, the cart bounces and the count goes up. home() sends it back to its corner (top right). */
+    /* The cart moment (L1, after a correct answer): the cart rolls in along the ground from off-screen left to the centre,
+       the item drops into it from the tag, the count goes up, and then it rolls on out to the right (leave()). */
     CEN: { x: 960, y: 628, s: 1.3 },        // centre of the cart on stage during the moment (wheels on the sand, y ~790)
     async moment(iconSrc, from) {
       const c = $('#cart'), C = Cart.CEN, dx = C.x - (1486 + 210), dy = C.y - (162 + 125);
       gsap.set(c, { transformOrigin: '50% 50%' });
       if (!Cart.shown) { Cart.shown = true; gsap.set(c, { x: dx - 1500, y: dy, scale: C.s, rotation: 0, opacity: 1 }); }
       SND.sfx('whoosh', .4);
-      await gsap.to(c, { x: dx, y: dy, scale: C.s, duration: .8, ease: 'back.out(1.1)' });
-      gsap.fromTo(c, { rotation: -3 }, { rotation: 0, duration: .5, ease: 'elastic.out(1,.35)' });
+      const bob = rollBob(c);
+      await gsap.to(c, { x: dx, duration: 1.1, ease: 'power2.out' });
+      bob.kill(); gsap.to(c, { y: dy, rotation: 0, duration: .15 });
+      gsap.fromTo(c, { rotation: -2 }, { rotation: 0, duration: .5, ease: 'elastic.out(1,.35)' });
       const i = Cart.items.length, [sx, sy] = SLOTS[i % 7];
       const tx = C.x + (sx - 210) * C.s, ty = C.y + (sy - 45 - 125) * C.s;
       await ST.flyImg(iconSrc, from.x, from.y, tx, ty, { size: 150, endSize: 90 * C.s, lift: 170, dur: .8 });
@@ -170,10 +172,19 @@
       gsap.fromTo('#cartCount', { scale: 1.8 }, { scale: 1, duration: .45, ease: 'back.out(3)' });
       ST.sparks(tx, ty, 16, 110);
     },
-    home() { return gsap.to('#cart', { x: 0, y: 0, scale: 1, rotation: 0, duration: .6, ease: 'power2.inOut' }); },
+    /* roll on out to the right, off the scene; ready to roll in again next time */
+    async leave() {
+      const c = $('#cart'); Cart.shown = false; SND.sfx('whoosh', .3);
+      const bob = rollBob(c);
+      await gsap.to(c, { x: '+=1500', duration: 1.1, ease: 'power2.in' });
+      bob.kill(); gsap.set(c, { opacity: 0, x: 0, y: 0, scale: 1, rotation: 0 });
+    },
+    home() { return Cart.leave(); },
     async show() { Cart.shown = true; SND.sfx('whoosh', .3); await gsap.fromTo('#cart', { x: 460, opacity: 1 }, { x: 0, opacity: 1, duration: .55, ease: 'back.out(1.3)' }); },
     async hide() { if (!Cart.shown) return; Cart.shown = false; await gsap.to('#cart', { x: 460, y: 0, scale: 1, duration: .4, ease: 'power2.in' }); }
   };
+  // the little up-and-down bump of wheels on the ground while the cart rolls
+  function rollBob(c) { const y = gsap.getProperty(c, 'y'); return gsap.fromTo(c, { y, rotation: -.6 }, { y: y - 5, rotation: .6, duration: .13, yoyo: true, repeat: -1, ease: 'sine.inOut' }); }
   function render() {
     $('#cartItems').innerHTML = Cart.items.map((src, i) => { const [x, y] = SLOTS[i % 7]; return `<img src="${src}" style="left:${x - 45}px;top:${y - 90}px;z-index:${i < 4 ? 1 : 2}">`; }).join('');
     $('#cartCount').textContent = `${Cart.items.length} / 7`;

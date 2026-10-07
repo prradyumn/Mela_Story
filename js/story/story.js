@@ -13,7 +13,7 @@ const TXT = {
   g2: 'All seven bills? So fast? I am still on page two!',
   p5: 'The shopkeepers are waiting at the Mela Ground. Baba has the money. Let’s go and pay them.',
   n3: 'The sun goes down. The Mela lights come on! The giant wheel starts to turn. We bought everything, and there is still money left.',
-  g3: 'I finished! Exactly ₹83,380 is left.',
+  g3: 'I finished! Exactly ₹83,165 is left.',   // Oct 2026: matches the L3 bills (₹6,00,000 − ₹5,16,835); g3 voice must say this too
   p6: 'We said about ₹84,000. That is nearly the same!',
   r3: 'Correct-correct! Now jalebi for everyone!',
   n4: 'The Sarpanch gives you a gold badge.',
@@ -441,7 +441,7 @@ async function endB() {
   const pari = char(s, 'pari', 400, 'happy', { ground: 1045, scale: .95 });
   const guddu = char(s, 'guddu', 1450, 'proud', { ground: 1045, scale: .95, flip: true });
   const baba = char(s, 'baba', 1760, 'idle', { ground: 1045, scale: .9, flip: true });
-  const eq = reg(el('div', 'ost-big', s, '₹83,380 <span style="color:#ffd83a">≈</span> ₹84,000', { position: 'absolute', left: '930px', top: '640px', fontSize: '88px', whiteSpace: 'nowrap', zIndex: 12 }), 'approx');
+  const eq = reg(el('div', 'ost-big', s, '₹83,165 <span style="color:#ffd83a">≈</span> ₹84,000', { position: 'absolute', left: '930px', top: '640px', fontSize: '88px', whiteSpace: 'nowrap', zIndex: 12 }), 'approx');
   gsap.set(eq, { xPercent: -50, scale: 0 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);

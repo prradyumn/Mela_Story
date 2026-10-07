@@ -16,9 +16,9 @@ const PROFILE = eval('(' + studio.match(/const PROFILE = (\{[\s\S]*?\n\});/)[1] 
 
 // every game level's lines (same list as the Voice Studio: L1 + L2 …); numbers are spoken with LEVEL1.spoken()
 const win = {}, ctx = vm.createContext({ window: win });
-for (const f of ['level1.js', 'level2.js']) { const p = path.join(ROOT, 'js/game/data', f); if (fs.existsSync(p)) vm.runInContext(fs.readFileSync(p, 'utf8'), ctx); }
+for (const f of ['level1.js', 'level2.js', 'level3.js']) { const p = path.join(ROOT, 'js/game/data', f); if (fs.existsSync(p)) vm.runInContext(fs.readFileSync(p, 'utf8'), ctx); }
 const D = win.LEVEL1;
-const ALL = [...D.allLines(), ...(win.LEVEL2 ? win.LEVEL2.allLines() : [])];
+const ALL = [...D.allLines(), ...(win.LEVEL2 ? win.LEVEL2.allLines() : []), ...(win.LEVEL3 ? win.LEVEL3.allLines() : [])];
 const args = process.argv.slice(2), force = args.includes('--force'), only = args.filter(a => !a.startsWith('--'));
 const lines = ALL.filter(l => !only.length || only.includes(l.id));
 

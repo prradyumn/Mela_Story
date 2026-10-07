@@ -49,6 +49,7 @@
       <label>Manju Mausi<select id="v_manju"></select></label>
       <label>Aaru<select id="v_aaru"></select></label>
       <label>Guddu<select id="v_guddu"></select></label>
+      <label>Baba<select id="v_baba"></select></label>
     </div>
     <div class="row" style="margin-top:14px">
       <button id="pick">1 · Choose the Mela_Story folder</button>
@@ -69,11 +70,12 @@
 
 <script src="../js/game/data/level1.js"></script>
 <script src="../js/game/data/level2.js"></script>
+<script src="../js/game/data/level3.js"></script>
 <script>
 const D = window.LEVEL1;
-const LINES = [...D.allLines(), ...window.LEVEL2.allLines()];
+const LINES = [...D.allLines(), ...window.LEVEL2.allLines(), ...window.LEVEL3.allLines()];
 const VOICES = ['Leda','Gacrux','Puck','Sulafat','Vindemiatrix','Achernar','Aoede','Kore','Autonoe','Callirrhoe','Despina','Erinome','Laomedeia','Pulcherrima','Zephyr','Charon','Fenrir','Algenib','Sadachbia','Iapetus','Umbriel'];
-const DEFAULT = { pari: 'Leda', manju: 'Gacrux', aaru: 'Puck', guddu: 'Fenrir' };
+const DEFAULT = { pari: 'Leda', manju: 'Gacrux', aaru: 'Puck', guddu: 'Fenrir', baba: 'Algenib' };
 const PROFILE = {
   pari:  { name: 'Pari', persona: 'A cheerful, clever 11-year-old girl from a village in India who is helping her friends get the Mela ready before sunset.',
            style: 'Warm, bright and encouraging, like a kind older friend. Natural Indian English accent. Clear and a little slower on numbers so a Grade 6 child can follow. Smile in the voice. Celebrate on "Yes!", gentle on "Oops".' },
@@ -81,11 +83,13 @@ const PROFILE = {
            style: 'Gentle, calm and affectionate, slightly slower pace, Indian English accent, teaching tone, like explaining to a beloved niece.' },
   guddu: { name: 'Guddu Bhaiya', persona: 'A kind but slow young clerk at the village Panchayat office who adds every number digit by digit in his big notebook.',
            style: 'Flustered, muttering, a little comic and overwhelmed, Indian English accent, trailing off at the end of the line.' },
+  baba:  { name: 'Baba', persona: 'A kind, wise village elder of Apnapur who looks after the Mela money for the Panchayat.',
+           style: 'Warm, slow and grandfatherly, deep and steady, Indian English accent. Proud and encouraging, a gentle smile in the voice.' },
   aaru:  { name: 'Aaru', persona: 'An excitable 8-year-old boy, Pari’s little brother, who loves the Mela.',
            style: 'Bouncy, gleeful and fast, Indian English accent. "Correct-correct!" is his happy catchphrase — say it with a big grin.' }
 };
 const $ = s => document.querySelector(s);
-for (const w of ['pari','manju','aaru','guddu']) { const sel = $('#v_' + w); sel.innerHTML = VOICES.map(v => `<option${v === DEFAULT[w] ? ' selected' : ''}>${v}</option>`).join(''); }
+for (const w of ['pari','manju','aaru','guddu','baba']) { const sel = $('#v_' + w); sel.innerHTML = VOICES.map(v => `<option${v === DEFAULT[w] ? ' selected' : ''}>${v}</option>`).join(''); }
 
 let dir = null;              // assets/vo directory handle
 const made = {};             // id -> Blob (wav)

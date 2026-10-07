@@ -1,0 +1,84 @@
+/* Level 3 · Mela Ground · Pay and find the money left ("Pari's money cart")
+   Lines are word-for-word from the storyboard ("The Mela before Sunset – Game", screens 24–32), with two agreed changes:
+   the how-to says "lights up one stall" (the design lights a stall, not a bulb), and the ending's exact money is ₹83,165.
+   Geometry is from mela_game_assets_webp/lane_layout.json + the Figma DEV SPEC (frame 137:343).
+   VO ids: L3_* in assets/game/vo/. Missing files → the line plays for a reading time (no bubbles in L3). */
+window.LEVEL3 = {
+  id: 3,
+  chip: 'Mela Ground',
+  sun: [0.6, 0.85],            // overwritten by the story (LEVELS[3].sun)
+  start: 600000,
+
+  // world (lane) geometry, 1 px = 1 stage px; the lane art is 5760×1080
+  hooks: [[350, 508], [1040, 507], [1730, 436], [2420, 436], [3110, 436], [3800, 522], [4490, 522]],
+  boxes: [[44, 636], [758, 1439], [1330, 2129], [2020, 2819], [2710, 3509], [3400, 4199], [4090, 4802]],   // stall x ranges (lit crossfade)
+  signs: [['FLOWERS', 346], ['SWEETS', 347], ['TENT HOUSE', 226], ['LIGHTS', 226], ['SOUND', 226], ['SNACKS', 369], ['FOOD', 380]],   // text, top y (centred on the hook x)
+  wheel: [5335, 424], pathTop: 780,
+  hookScreenX: 1180,           // camera = hook.x − 1180
+  finaleCam: 3840,
+
+  howto: [
+    { who: 'baba', vo: 'L3_howto_1', text: 'Here is the Mela money: ₹6,00,000. Seven shopkeepers will come for their money.', show: 'baba' },
+    { who: 'pari', vo: 'L3_howto_2', text: 'Each time we pay, the money gets less. Make the bill a round number in your head. Then take it away.', show: 'less' },
+    { who: 'pari', vo: 'L3_howto_3', text: 'Choose about how much money is left. Every payment lights up one stall of the Mela!', show: 'map' }
+  ],
+
+  teach: {
+    money: 200000, bill: 38760, choices: [161000, 239000, 151000], answer: 161000,
+    lines: [
+      { who: 'pari', vo: 'L3_teach_1', text: 'Let’s try one. We have ₹2,00,000. The bill is ₹38,760.', show: 'bill' },
+      { who: 'pari', vo: 'L3_teach_2', text: 'First, round the bill. ₹38,760 is about 39,000.', show: 'chip' },
+      { who: 'pari', vo: 'L3_teach_3', text: 'Now take it away. 2,00,000 minus 39,000 is 1,61,000. Tap About ₹1,61,000.', show: 'slates' }
+    ],
+    ok:    { who: 'pari', vo: 'L3_teach_ok',    text: 'Yes! About ₹1,61,000 is left.' },
+    baba:  { who: 'baba', vo: 'L3_teach_baba',  text: 'Very good. Now the real money: ₹6,00,000. Let’s pay!' },
+    oops:  { who: 'pari', vo: 'L3_teach_oops',  text: 'Oops! Try again. We are paying, so the money gets less.' },
+    hint:  { who: 'pari', vo: 'L3_teach_hint',  text: 'Hint: 200 thousand take away 39 thousand is 161 thousand.' },
+    nudge: { who: 'pari', vo: 'L3_teach_nudge', text: 'Tap About ₹1,61,000.' },
+    idle:  { who: 'pari', vo: 'L3_teach_idle',  text: 'Take the round number away from the money.' }
+  },
+
+  oops: { who: 'pari', vo: 'L3_oops', text: 'Oops! Try again. We are paying money, so the money gets less.' },
+  idle: { who: 'pari', vo: 'L3_idle', text: 'Round the bill first. Then take it away from the money.' },
+
+  // who = how Pari names the shopkeeper · choices in storyboard order
+  bills: [
+    { who: 'flower seller', badge: 'sk_flower', price: 65722,  choices: [534000, 666000, 524000] },
+    { who: 'sweet shop',    badge: 'sk_sweet',  price: 49278,  choices: [475000, 485000, 583000] },
+    { who: 'tent house',    badge: 'sk_tent',   price: 155959, choices: [641000, 319000, 329000] },
+    { who: 'light shop',    badge: 'sk_light',  price: 73222,  choices: [256000, 246000, 402000] },
+    { who: 'sound shop',    badge: 'sk_sound',  price: 74246,  choices: [172000, 330000, 182000] },
+    { who: 'snack stall',   badge: 'sk_snack',  price: 43377,  choices: [225000, 139000, 129000] },
+    { who: 'food stall',    badge: 'sk_food',   price: 55031,  choices: [84000, 194000, 74000] }
+  ],
+  completeCta: 'See the Mela at sunset'
+};
+
+(function (D) {
+  const fmt = n => window.LEVEL1.fmt(n), rs = n => '₹' + fmt(n);
+  const r1000 = n => Math.round(n / 1000) * 1000;
+  D.round = r1000;
+  /* money on the cart before payment i (0-based): ₹6,00,000, then the rounded running total */
+  D.moneyBefore = i => D.bills.slice(0, i).reduce((m, b) => m - r1000(b.price), D.start);
+  /* All lines for payment n (1–7), worded like the storyboard */
+  D.qLines = (b, n) => {
+    const have = D.moneyBefore(n - 1), r = r1000(b.price), ans = have - r;
+    if (!b.choices.includes(ans)) console.warn('L3 payment', n, 'answer not in choices', ans);
+    const haveTxt = n === 1 ? rs(have) : 'about ' + rs(have);
+    return {
+      ans, have, r,
+      ask:   { who: 'pari', vo: `L3_q${n}`,       text: `The ${b.who} wants ${rs(b.price)}. We have ${haveTxt}. About how much money is left?` },
+      ok:    { who: 'pari', vo: `L3_q${n}_ok`,    text: n === 7 ? `Yes! About ${rs(ans)} is left. We paid everyone!` : `Yes! About ${rs(ans)} is left. One more stall lights up!` },
+      oops:  D.oops,
+      hint:  { who: 'pari', vo: `L3_q${n}_hint`,  text: `Hint: ${rs(b.price)} is about ${fmt(r)}. Now take ${fmt(r)} away from ${fmt(have)}.` },
+      nudge: { who: 'pari', vo: `L3_q${n}_nudge`, text: `${fmt(have)} minus ${fmt(r)} is ${fmt(ans)}. Tap About ${rs(ans)}.` },
+      idle:  D.idle
+    };
+  };
+  /* Every voiced line in the level, in play order */
+  D.allLines = () => {
+    const T = D.teach, out = [...D.howto, ...T.lines, T.ok, T.baba, T.oops, T.hint, T.nudge, T.idle, D.oops, D.idle];
+    D.bills.forEach((b, i) => { const L = D.qLines(b, i + 1); out.push(L.ask, L.ok, L.hint, L.nudge); });
+    return out.map(l => ({ id: l.vo, who: l.who, text: l.text }));
+  };
+})(window.LEVEL3);

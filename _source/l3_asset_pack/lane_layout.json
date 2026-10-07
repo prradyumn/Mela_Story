@@ -1,0 +1,46 @@
+{
+  "stallOrder": [
+    "flowers",
+    "sweets",
+    "tent_house",
+    "lights",
+    "sound",
+    "snacks",
+    "food"
+  ],
+  "billHookPositions": [
+    [
+      350,
+      508
+    ],
+    [
+      1040,
+      507
+    ],
+    [
+      1730,
+      436
+    ],
+    [
+      2420,
+      436
+    ],
+    [
+      3110,
+      436
+    ],
+    [
+      3800,
+      522
+    ],
+    [
+      4490,
+      522
+    ]
+  ],
+  "wheelPivot": [
+    5335,
+    424
+  ],
+  "pathTop": 780
+}

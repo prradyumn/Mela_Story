@@ -15,7 +15,8 @@
   const rs = n => '₹' + fmt(n);
 
   // Number line (same numbers as the Figma "L1 · Clean build" frames)
-  const NL = { x0: 327, x1: 1593, top: 765.5, bot: 819.5, mid: 960 };
+  const NL = { x0: 470, x1: 1450,   // narrowed (was 327–1593) so Pari / Gudiya fit at the edges
+                top: 765.5, bot: 819.5, mid: 960 };
   const vx = (lo, hi, v) => NL.x0 + (v - lo) / (hi - lo) * (NL.x1 - NL.x0);
 
   const wait = s => new Promise(r => gsap.delayedCall(s, r));

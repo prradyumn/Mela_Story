@@ -1,0 +1,122 @@
+{
+  "assets": [
+    {
+      "file": "bill_hang.webp",
+      "width": 600,
+      "height": 460,
+      "bytes": 32226,
+      "hasTransparency": true
+    },
+    {
+      "file": "cart_wheel.webp",
+      "width": 280,
+      "height": 280,
+      "bytes": 34068,
+      "hasTransparency": true
+    },
+    {
+      "file": "coin.webp",
+      "width": 200,
+      "height": 200,
+      "bytes": 14394,
+      "hasTransparency": true
+    },
+    {
+      "file": "duster.webp",
+      "width": 360,
+      "height": 220,
+      "bytes": 16278,
+      "hasTransparency": true
+    },
+    {
+      "file": "firework_sheet.webp",
+      "width": 1536,
+      "height": 1536,
+      "bytes": 621626,
+      "hasTransparency": true
+    },
+    {
+      "file": "light_burst.webp",
+      "width": 600,
+      "height": 600,
+      "bytes": 64346,
+      "hasTransparency": true
+    },
+    {
+      "file": "mela_lane_dark.webp",
+      "width": 5760,
+      "height": 1080,
+      "bytes": 585484,
+      "hasTransparency": true
+    },
+    {
+      "file": "mela_lane_lit.webp",
+      "width": 5760,
+      "height": 1080,
+      "bytes": 647610,
+      "hasTransparency": true
+    },
+    {
+      "file": "money_cart.webp",
+      "width": 900,
+      "height": 620,
+      "bytes": 50506,
+      "hasTransparency": true
+    },
+    {
+      "file": "pari_push_sheet.webp",
+      "width": 2112,
+      "height": 1824,
+      "bytes": 587238,
+      "hasTransparency": true
+    },
+    {
+      "file": "potli.webp",
+      "width": 220,
+      "height": 240,
+      "bytes": 15632,
+      "hasTransparency": true
+    },
+    {
+      "file": "sky_dusk.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 38424,
+      "hasTransparency": false
+    },
+    {
+      "file": "sun_disc.webp",
+      "width": 320,
+      "height": 320,
+      "bytes": 26954,
+      "hasTransparency": true
+    },
+    {
+      "file": "takhti.webp",
+      "width": 480,
+      "height": 660,
+      "bytes": 30690,
+      "hasTransparency": true
+    },
+    {
+      "file": "wheel_rotor.webp",
+      "width": 1000,
+      "height": 1000,
+      "bytes": 261318,
+      "hasTransparency": true
+    },
+    {
+      "file": "wheel_stand.webp",
+      "width": 1000,
+      "height": 1000,
+      "bytes": 55962,
+      "hasTransparency": true
+    }
+  ],
+  "wheelPivot": [
+    500,
+    500
+  ],
+  "quality": 90,
+  "spriteOrder": "row-major"
+}

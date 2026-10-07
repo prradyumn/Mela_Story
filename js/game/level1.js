@@ -71,13 +71,13 @@
           const from = Tag.iconCentre();
           await Promise.all([Btns.hide(), Marker.hideAll(), Line.hide(), Rule.hide()]);
           await Cart.moment(GA(`ic_${q.icon}.webp`), from);
-          const side = GUDIYA.state.x < Cart.CEN.x ? -1 : 1;
+          const side = -1;                                         // Gudiya on the cart's left: it leaves to the right
           await GUDIYA.leapTo(Cart.CEN.x + side * 350, 792, 190);
           GUDIYA.face(side < 0);                                   // looking at the cart
           ST.sparks(Cart.CEN.x + side * 350, 640, 14, 90); await GUDIYA.joy();
           // the cart goes back to its corner while a marigold lights up and the sun takes one step
-          Cart.home();
-          const k = HUD.lit; await HUD.lightNext(1486 + 260, 162 + 90);
+          Cart.leave();                                            // the cart rolls on out to the right with the item
+          const k = HUD.lit; await HUD.lightNext(Cart.CEN.x, Cart.CEN.y - 120);
           HUD.sun(D.sun[0] + (D.sun[1] - D.sun[0]) * (k + 1) / 7);
           result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
         }
@@ -144,6 +144,7 @@
     for (const line of T.lines) {
       if (skipping) return;
       if (line.show === 'buttons') {
+        COACH.dismiss('manju');                   // Manju is done teaching: the right edge is Gudiya's
         skipBtn(false);
         COACH.say(line);
         Rule.hide(); await Btns.show(T.lo, T.hi);

@@ -1,0 +1,27 @@
+{
+  "image": "pari_push_sheet.webp",
+  "imageWidth": 2112,
+  "imageHeight": 1824,
+  "frameWidth": 352,
+  "frameHeight": 304,
+  "columns": 6,
+  "rows": 6,
+  "frameCount": 36,
+  "firstFrame": 0,
+  "lastFrame": 35,
+  "spacing": 0,
+  "margin": 0,
+  "order": "row-major",
+  "anchor": "bottom-center",
+  "artStyle": "smooth",
+  "frameRate": 24,
+  "loop": true,
+  "phaser": {
+    "frameWidth": 352,
+    "frameHeight": 304,
+    "startFrame": 0,
+    "endFrame": 35,
+    "margin": 0,
+    "spacing": 0
+  }
+}
