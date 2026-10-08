@@ -227,3 +227,27 @@ def build_talk2():
         out[key] = dict(n=len(fr), canvas=fr[0].size, figure=round(fig, 1), bottom_gap=fr[0].height - max(x[3] for x in b))
     print(json.dumps(out))
 if __name__ == '__main__' and sys.argv[1] == 'talk2': build_talk2()
+
+# ---------------------------------------------------------------- Baba talking (ludo.ai 6x6 sheet in _source/baba_sprites/talk/)
+# Front-facing, feet fixed, frame 0 ≈ baba_idle. Doesn't loop 35 → 0 → played forward and back ('pp'). Frames are
+# resized to 780 px tall (~1.25× the largest on-screen size, same rule as the Oct 2026 size pass), webp q78.
+def build_baba():
+    base = os.path.join(ROOT, '_source', 'baba_sprites', 'talk', 'sprite-max-px-frames-36-rows-6-cols-6')
+    d = json.load(open(base + '.json')); im = Image.open(base + '.png').convert('RGBA')
+    fr = [im.crop((f['x'], f['y'], f['x'] + f['w'], f['y'] + f['h'])) for f in (d['frames'][k]['frame'] for k in sorted(d['frames']))]
+    for i, c in enumerate(fr):
+        c = c.resize((round(c.width * 780 / c.height), 780), Image.LANCZOS)
+        c.save(os.path.join(A, f'baba_talk_{i}.webp'), 'WEBP', quality=78, alpha_quality=90, method=6)
+    b = [bbox(c) for c in fr]; print(json.dumps(dict(n=len(fr), canvas=fr[0].size, figure=round(float(np.mean([x[3] - x[1] for x in b])), 1), gap=fr[0].height - max(x[3] for x in b))))
+if __name__ == '__main__' and sys.argv[1] == 'baba': build_baba()
+
+# ---------------------------------------------------------------- Pari cheer (ludo.ai 6x6, _source/pari_sprites/cheer/)
+# One-shot: 0–21 she claps, 22–35 a big fist-pump. Feet fixed, same figure size as her explain frames. 680 px tall, q78.
+def build_cheer():
+    base = os.path.join(ROOT, '_source', 'pari_sprites', 'cheer', 'sprite-max-px-frames-36-rows-6-cols-6')
+    d = json.load(open(base + '.json')); im = Image.open(base + '.png').convert('RGBA')
+    fr = [im.crop((f['x'], f['y'], f['x'] + f['w'], f['y'] + f['h'])) for f in (d['frames'][k]['frame'] for k in sorted(d['frames']))]
+    for i, c in enumerate(fr):
+        c.resize((round(c.width * 680 / c.height), 680), Image.LANCZOS).save(os.path.join(A, f'pari_cheer_{i}.webp'), 'WEBP', quality=78, alpha_quality=90, method=6)
+    print('pari_cheer', len(fr), fr[0].size)
+if __name__ == '__main__' and sys.argv[1] == 'cheer': build_cheer()

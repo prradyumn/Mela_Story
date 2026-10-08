@@ -239,7 +239,9 @@
     SND.preload(D.allLines().map(l => l.id));
     HUD.setLit(startAt); HUD.lit = startAt;
     if (startAt > 0) { Stall.set(startAt); Sun.set(startAt); Panel.set(D.moneyBefore(startAt), true); Cam.set(CAM(startAt - 1)); }
-    await banner();
+    // decode the big pictures while the banner shows (the lit lane is 5760 px: decoding it on the first payment froze ~0.8 s)
+    const warmed = new Promise(r => gsap.delayedCall(.7, () => warm(['l3/mela_lane_dark.webp', 'l3/mela_lane_lit.webp', 'l3/wheel_rotor.webp', 'l3/wheel_stand.webp', 'l3/firework_sheet.webp', 'l3/pari_push_sheet.webp', 'l3/light_burst.webp', 'l3/coin.webp', 'l3/potli.webp'].map(GA)).then(r)));   // after the banner has popped in
+    await banner(); await warmed;
     HUD.show();
     gsap.set(['#gChip', '#sunPanel', '#glowSun'], { autoAlpha: 0 }); gsap.set('#mariPlate', { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 34 });   // L3 HUD: 🔊 + marigolds only
     if (!skipIntro) {
@@ -257,7 +259,7 @@
     await finale();
     const res = await complete();
     window.L3_ACTIVE = false; COACH.voiceOnly = false; COACH.onTalk = null; Waves.off();
-    gsap.set(['#gChip', '#sunPanel', '#glowSun', '#gHud'], { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 112 });
+    gsap.set(['#gChip', '#sunPanel', '#glowSun', '#gHud'], { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 34 });
     return res;
   }
   window.LEVEL3_RUN = run;

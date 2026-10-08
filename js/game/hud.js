@@ -82,11 +82,15 @@
              desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
   };
   const spotOf = key => SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
-  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false }) {
+  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null }) {
     const box = $('#' + key + 'Coach'), clock = () => gsap.globalTimeline.time();
     const imgs = [...Array(n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = h + 'px'; im.style.bottom = lift + 'px';
       if (flip) im.style.transform = 'translateX(-50%) scaleX(-1)'; box.appendChild(im); return im; });
     let loaded = false, talking = false, t0 = 0, stopAt = null, from = 0, shown = -1, quietCall = null;
+    // optional one-shot cheer frames (Pari: claps, then a fist-pump) layered in the same box; while it plays the talk loop is hidden
+    const cImgs = cheer ? [...Array(cheer.n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = cheer.h + 'px'; im.style.bottom = lift + 'px'; box.appendChild(im); return im; }) : [];
+    let cheerT0 = null, cShown = -1, cheerDone = null;
+    const cFrame = k => { if (k === cShown) return; cImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); cShown = k; };
     const frame = k => { if (k === shown) return; imgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); shown = k; };
     const A = {
       on: false, spot: SPOTS[key].front, h, key,
@@ -99,7 +103,7 @@
         (animate ? gsap.to : gsap.set)(box, { left: sp.x, top: sp.y, scale: sp.s, ...(animate ? { duration: .6, ease: 'power2.inOut' } : {}) });
       },
       show() {
-        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); loaded = true; }
+        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); cImgs.forEach((im, i) => im.src = SA(`${cheer.file}_${i}`)); loaded = true; }
         A.place(false);
         if (shown < 0) frame(0);
         if (!A.on) { A.on = true; gsap.to(box, { opacity: 1, duration: .25 }); }
@@ -114,8 +118,20 @@
         const stop = () => { quietCall = null; if (talking) { talking = false; stopAt = clock(); from = Math.max(0, shown); } };
         if (now) stop(); else quietCall = gsap.delayedCall(.45, stop);
       },
-      reset() { talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
+      reset() { cheerT0 = null; cFrame(-1); if (cheerDone) { cheerDone(); cheerDone = null; } talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
+      /* one-shot cheer; resolves when it has played (then the talk loop / rest frame shows again) */
+      cheer() {
+        if (!cheer || !A.on) return Promise.resolve();
+        cheerT0 = clock(); imgs.forEach(im => im.style.opacity = 0); shown = -1;
+        return new Promise(r => { cheerDone = r; });
+      },
       tick() {
+        if (cheerT0 != null) {
+          const k = Math.floor((clock() - cheerT0) * cheer.fps);
+          if (k < cheer.n) { cFrame(k); return; }
+          cheerT0 = null; cFrame(-1); if (!talking && stopAt == null) frame(mode === 'pp' ? 0 : n - 1);   // back to rest (hands together)
+          if (cheerDone) { cheerDone(); cheerDone = null; }
+        }
         if (talking) {
           const f = Math.floor((clock() - t0) * fps);
           if (mode === 'pp') { const P = 2 * (n - 1), m = f % P; frame(m < n ? m : P - m); }
@@ -130,7 +146,7 @@
     return A;
   }
   const CAST = {
-    pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486 }),
+    pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 } }),
     manju: Actor('manju', { file: 'manju_talk', n: 36, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),
     guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 10.5, mode: 'pp', h: 584, lift: -8 })
   };
@@ -167,6 +183,8 @@
     },
     /* Put a coach on stage before they speak (e.g. Guddu at his desk for all of L2) / take one off (Manju after the teach) */
     present(key) { Coach.show(); if (CAST[key]) CAST[key].show(); },
+    /* Pari claps + fist-pumps (correct answers); no-op when she isn't the full-body coach on stage */
+    cheer() { return CAST.pari.cheer(); },
     dismiss(key) { if (CAST[key]) CAST[key].hide(); if (who && who.startsWith(key + '@')) who = null; },
     hideBubble() { gsap.to('#bubble', { scale: 0, opacity: 0, duration: .2 }); },
     /* Swap the bubble text for a longer version of the same line (no new VO) */

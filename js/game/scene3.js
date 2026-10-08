@@ -34,7 +34,7 @@
     roll(dist) { wheelAng = wheelBase + dist / 80 * 180 / Math.PI; gsap.set(wheels, { rotation: wheelAng }); },
     rollStart() { wheelBase = wheelAng; },
     speed(on) { gsap.to(C.querySelectorAll('.speed'), { opacity: on ? 1 : 0, x: on ? -14 : 0, duration: .25, stagger: .05 }); },
-    glow() { return glowOn(C, '255,214,90', 26, 3); },
+    glow() { return gsap.fromTo(C.querySelector('.cglow'), { opacity: 0 }, { opacity: 1, duration: .35, yoyo: true, repeat: 3, ease: 'sine.inOut' }); },   // cheap: opacity only
     show(on, dur = .4) { return gsap.to(C, { autoAlpha: on ? 1 : 0, duration: dur }); }   // Pari stays (Figma 04)
   };
   const Panel = {
@@ -276,15 +276,29 @@
     }
   };
 
-  /* ---------- Baba (story sprite): walks in from the right, pats the cart, walks out ---------- */
-  const BB = $('#baba3');
+  /* ---------- Baba (story talking frames baba_talk_0–35, same as the story's CH.baba.acts.talk): walks in from the right,
+     talks while his VO plays (forward and back), glides back to frame 0 (≈ baba_idle) when he stops, walks out ---------- */
+  const BB = $('#baba3'), BN = 36, BFPS = 10.5;
+  const bImgs = [...Array(BN)].map(() => { const im = document.createElement('img'); im.alt = ''; BB.appendChild(im); return im; });
+  let bLoaded = false, bTalk = false, bT0 = 0, bStop = null, bFrom = 0, bShown = -1;
+  const bFrame = k => { if (k === bShown) return; bImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); bShown = k; };
+  gsap.ticker.add(() => {
+    if (bTalk) { const f = Math.floor((clock() - bT0) * BFPS), P2 = 2 * (BN - 1), m = f % P2; bFrame(m < BN ? m : P2 - m); }
+    else if (bStop != null) { const k = bFrom - Math.floor((clock() - bStop) * BFPS * 3); if (k <= 0) { bStop = null; bFrame(0); } else bFrame(k); }
+  });
   const Baba = {
-    async enter() { BB.src = SIMG('baba_ask'); gsap.set(BB, { x: 520, opacity: 0 });
+    async enter() {
+      if (!bLoaded) { bImgs.forEach((im, i) => im.src = SIMG('baba_talk_' + i)); bLoaded = true; }
+      bFrame(0); gsap.set(BB, { x: 520, opacity: 0 });
       gsap.to(BB, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' });
-      await gsap.to(BB, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' }); BB.src = SIMG('baba_idle'); },
-    async exit() { BB.src = SIMG('baba_idle'); gsap.to(BB, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(BB, { x: 520, opacity: 0, duration: .8, ease: 'power2.in' }); },
-    talk(on) { BB.src = SIMG(on ? 'baba_ask' : 'baba_idle'); },
-    hide() { gsap.set(BB, { opacity: 0, x: 520 }); }
+      await gsap.to(BB, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' });
+    },
+    async exit() { Baba.talk(false); gsap.to(BB, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(BB, { x: 520, opacity: 0, duration: .8, ease: 'power2.in' }); },
+    talk(on) {
+      if (on) { if (!bTalk) { bT0 = clock() - Math.max(0, bShown) / BFPS; bTalk = true; bStop = null; } }
+      else if (bTalk) { bTalk = false; bStop = clock(); bFrom = Math.max(0, bShown); }
+    },
+    hide() { bTalk = false; bStop = null; gsap.set(BB, { opacity: 0, x: 520 }); if (bLoaded) bFrame(0); }
   };
 
   /* ---------- Guddu Bhaiya (story sprites): walks in from the right with his notebook for the teach round ---------- */

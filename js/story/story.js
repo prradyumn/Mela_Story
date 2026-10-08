@@ -126,6 +126,7 @@ async function hookA() {
   const baba = char(s, 'baba', 420, 'idle', { ground: 1040 });
   const guddu = char(s, 'guddu', 1480, 'write', { ground: 1040, flip: true });
   const grade = warmTint(s, 0);
+  await warm(['bg_01_gate', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'bg_02_chaupal']);   // no decode hitch at the cuts
   playMusic('m_village_long', { gain: .85, fade: 1.5 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 80), null, 0);
@@ -179,7 +180,7 @@ async function hookA() {
   let t = voiceOver(tl, V - .1, 'n1');   // voice only: the pictures carry the story, no narration text
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);
-  t = say(tl, s, t + .3, 'b1', baba, T('b1'), { p: 'ask' });
+  t = say(tl, s, t + .3, 'b1', baba, T('b1'), { act: 'talk', end: 'idle' });
   tl.to(world, { x: -110, scale: 1.13, duration: 2.5, ease: 'sine.inOut' }, t - .4);
   // Guddu is muddled: scratching his head while each number pops out of it as he says it (g1 word times from Whisper;
   // the voice starts .05s after the bubble). On "Let me write it all down!" they drop into his notebook and he writes.
@@ -376,6 +377,7 @@ async function bridge1() {
   jump(tl, .5, aaru, 75, 2);
   tl.call(() => sfx('boing', .8), null, .5);
   let t = say(tl, s, 2.1, 'r2', aaru, T('r2'));
+  cheer(tl, 2.4, pari, 'happy');                                   // Pari claps and fist-pumps while Aaru cheers
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
   const go = sign(s, 'Go to the office ➜', 960, 420, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2;
   move(tl, t - .3, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
@@ -420,6 +422,7 @@ async function endA() {
   const dusk = bgImg(s, 'bg_05_mela_dusk', { left: '0px', opacity: 0 });
   el('div', '', s, `<svg width="1920" height="200" viewBox="0 0 1920 200"><path d="M40 40 Q960 190 1880 40" stroke="#3a220f" stroke-width="4" fill="none"/></svg>`, { position: 'absolute', left: 0, top: 0 });
   const bulbs = [...Array(7)].map((_, i) => { const tt = (i + 1) / 8, x = (1 - tt) * (1 - tt) * 40 + 2 * (1 - tt) * tt * 960 + tt * tt * 1880, y = (1 - tt) * (1 - tt) * 40 + 2 * (1 - tt) * tt * 190 + tt * tt * 40; return el('div', '', s, '', { position: 'absolute', left: x - 18 + 'px', top: y + 'px', width: '36px', height: '46px', borderRadius: '50% 50% 45% 45%', background: '#8a7a60', border: '4px solid #3a220f' }); });
+  await warm(['bg_05_mela', 'bg_05_mela_dusk']);
   playMusic('m_festive', { gain: .8, fade: 2 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
@@ -454,7 +457,7 @@ async function endB() {
   t = say(tl, s, t, 'p6', pari, T('p6'), { act: 'explain', end: 'happy' });
   tl.to(eq, { scale: 1.12, duration: .3, yoyo: true, repeat: 1 }, t - 1);
   tl.call(() => sfx('sparkle', .8), null, t - 1);
-  tl.set({}, {}, t + .5);
+  const tc = cheer(tl, t - .1, pari, 'happy'); tl.set({}, {}, Math.max(t + .5, tc + .2));   // "nearly the same!" → Pari cheers
   await playTL(tl);
   await cutTo();
 }

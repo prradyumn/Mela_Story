@@ -1,6 +1,6 @@
 // tools/gen_story_vo.mjs: re-voices story lines (TXT in js/story/story.js) with Gemini TTS, in the story voices
 // (narrator Sulafat, Baba Algenib, Guddu Fenrir, Pari Leda, Aaru Puck). Writes _source/story_vo_masters/<id>.wav,
-// strips the TTS end burst, then makes assets/audio/<id>.mp3 (56k mono) + .ogg (Opus 48k) at -16 LUFS.
+// strips the TTS end burst, then makes assets/audio/<id>.mp3 (48k mono) + .ogg (Opus 32k) at -16 LUFS.
 //   GEMINI_API_KEY=... node tools/gen_story_vo.mjs n1 n2 …      (key from the environment only)
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), KEY = process.env.GEMINI_API_KEY;
@@ -35,8 +35,8 @@ for (const id of process.argv.slice(2)) {
     const f = path.join(OUTW, id + '.wav'); fs.writeFileSync(f, wav(strip(Buffer.from(part.inlineData.data, 'base64'), rate), rate));
     const tmp = path.join(OUTW, '_n.wav');
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', f, '-af', 'silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11', '-ar', '44100', '-ac', '1', tmp]);
-    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', tmp, '-c:a', 'libmp3lame', '-b:a', '56k', path.join(ROOT, 'assets/audio', id + '.mp3')]);
-    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', tmp, '-c:a', 'libopus', '-b:a', '48k', '-vbr', 'on', path.join(ROOT, 'assets/audio', id + '.ogg')]);
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', tmp, '-c:a', 'libmp3lame', '-b:a', '48k', path.join(ROOT, 'assets/audio', id + '.mp3')]);
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', tmp, '-c:a', 'libopus', '-b:a', '32k', '-vbr', 'on', '-application', 'voip', path.join(ROOT, 'assets/audio', id + '.ogg')]);
     fs.unlinkSync(tmp); console.log('ok', id, '—', text.slice(0, 70)); break;
   }
 }

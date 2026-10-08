@@ -33,7 +33,7 @@
     <div id="waves3"><i></i><i></i><i></i></div>
     <div id="cart3">
       <i class="speed"></i><i class="speed"></i><i class="speed"></i>
-      <i class="cshadow"></i>
+      <i class="cglow"></i><i class="cshadow"></i>
       <img class="wheel w1" src="${A('cart_wheel.webp')}" alt=""><img class="wheel w2" src="${A('cart_wheel.webp')}" alt="">
       <img class="art" src="${A('money_cart.webp')}" alt="">
       <div class="plabel">MELA MONEY</div><div class="pval"></div>
@@ -43,7 +43,7 @@
     <img id="guddu3" alt="">
     <div id="minus3"><span></span></div>
     ${slate(0)}${slate(1)}${slate(2)}
-    <img id="baba3" alt="">
+    <div id="baba3"></div>
     <div id="aaru3"><img alt=""></div>
     <img id="potli3" src="${A('potli.webp')}" alt="">
     <div id="fw3"></div>

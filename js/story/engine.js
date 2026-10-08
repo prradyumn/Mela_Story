@@ -55,7 +55,7 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|manju_talk|guddu_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const LATER = /^(pari_explain|pari_cheer|manju_talk|guddu_talk|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
   const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
@@ -69,6 +69,9 @@ async function loadAll(onProg) {
   await Promise.all([...pImg, ...pAu]);
   later.forEach(n => { IMG[n].src = imgURL(n); });
 }
+/* warm(): make sure these images are decoded before they first appear (IMG names or URLs). Resolves when done. */
+function warm(list) { return Promise.all(list.map(n => { const im = typeof n === 'string' ? (IMG[n] || Object.assign(new Image(), { src: n })) : n; return im && im.decode ? im.decode().catch(() => { }) : null; })); }
+window.warm = warm;
 // ---------- audio unlock (Safari / iPad / embedded previews need this inside a real tap) ----------
 let AUDIO_UNLOCKED = false; window.EDIT_PAUSED = false;
 function unlockAudio() {
@@ -157,10 +160,12 @@ async function fadeIn(d = .4) { await gsap.to(fade, { opacity: 0, duration: d, e
 const CH = {
   pari: { name: 'Pari', h: 540, color: '#2f63c9', poses: ['idle', 'point', 'happy'], talk: { point: 'closed', happy: 'open' },
     cycles: { walk: { file: 'pari_walk', n: 20, h: 534.9, speed: 220, fps: 12, lift: 2 } },
-    acts: { explain: { file: 'pari_explain', n: 36, h: 541.2, fps: 12, intro: 5, outro: 31 } } },
+    acts: { explain: { file: 'pari_explain', n: 36, h: 541.2, fps: 12, intro: 5, outro: 31 },
+            cheer: { file: 'pari_cheer', n: 36, h: 539.5, fps: 15, mode: 'once' } } },   // claps (0–21), fist-pump (22–35)
   aaru: { name: 'Aaru', h: 480, color: '#e8701a', poses: ['run', 'shout', 'jump'], talk: { shout: 'closed', jump: 'closed' },
     cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } } },
-  baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' } },
+  baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
+    acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 10.5, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
     acts: { talk: { file: 'guddu_talk', n: 36, h: 650.2, fps: 10.5, mode: 'pp', lift: -6 } } },
   manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 36, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },
@@ -233,12 +238,12 @@ function move(tl, t, o, cyc, from, to, dur = null, { ease = 'power1.inOut', end 
 // Clocked on the global GSAP timeline, so ?speed= and the editor's pause apply. Skip jumps straight to `end`.
 const ACTORS = new Set();
 const actClock = () => gsap.globalTimeline.time();
-function actOn(o, name) {
+function actOn(o, name, end = null) {
   const a = o.c.acts && o.c.acts[name]; if (!a || o.moving) return;
   if (o.act && o.act.name === name && o.act.stopAt == null) return;      // already explaining: keep going
   if (o.act) o.frames[o.act.name].forEach(i => i.style.opacity = 0);
   Object.values(o.imgs).forEach(i => { gsap.killTweensOf(i); i.style.opacity = 0; });
-  o.act = { name, a, t0: actClock(), stopAt: null, end: null, shown: -1 }; ACTORS.add(o);
+  o.act = { name, a, t0: actClock(), stopAt: null, end, shown: -1 }; ACTORS.add(o);
 }
 function actDone(o) {
   if (!o.act) return; const { name, end } = o.act;
@@ -249,7 +254,8 @@ gsap.ticker.add(() => {
   ACTORS.forEach(o => {
     if (!o.wrap.isConnected) { ACTORS.delete(o); return; }
     const A = o.act, a = A.a; let k;
-    if (a.mode === 'pp') {
+    if (a.mode === 'once') { k = Math.floor((actClock() - A.t0) * a.fps); if (k >= a.n) { actDone(o); return; } }   // plays through once, then the end pose
+    else if (a.mode === 'pp') {
       if (A.stopAt != null) { if (A.from == null) A.from = Math.max(0, A.shown); k = A.from - Math.floor((actClock() - A.stopAt) * a.fps * 3); if (k <= 0) { actDone(o); return; } }  // glide back to frame 0
       else { const f = Math.floor((actClock() - A.t0) * a.fps), P = 2 * (a.n - 1), m = f % P; k = m < a.n ? m : P - m; }
     } else {
@@ -260,6 +266,9 @@ gsap.ticker.add(() => {
     if (k !== A.shown) { o.frames[A.name].forEach((i, j) => i.style.opacity = j === k ? 1 : 0); A.shown = k; }
   });
 });
+
+/* cheer(): play a one-shot act (e.g. Pari's clap + fist-pump) at time t on a timeline, then settle into `end` */
+function cheer(tl, t, o, end = null, name = 'cheer') { tl.call(() => { talkOff(o); actOn(o, name, end); }, null, t); const a = o.c.acts && o.c.acts[name]; return t + (a ? a.n / a.fps : 0); }
 
 // ---------- talking mouths ----------
 // While a line plays, the speaker switches between the pose's own mouth and its overlay in step with the loudness of

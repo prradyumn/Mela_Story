@@ -16,7 +16,9 @@
 #game .round-btn{width:96px;height:96px;border-radius:50%;background:var(--cream);border:4px solid var(--wood);box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer}
 #game .round-btn svg{width:52px;height:52px}
 #game .round-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(58,34,15,.25)}
-#game #btnSpeaker{left:40px;top:112px}
+#game #btnSpeaker{left:40px;top:34px}
+/* no level-name chip and no sunset tracker in the games (user, Oct 2026): only 🔊 + the marigolds stay */
+#game #gChip,#game #sunPanel,#game #glowSun{display:none!important}
 #game #btnMusic{left:52px;top:222px;width:72px;height:72px}
 #game #btnMusic svg{width:36px;height:36px}
 #game #btnMusic.off{opacity:.5}
@@ -264,6 +266,9 @@
 /* wheels sit behind the cart body, hubs on its bottom rail (axle), and roll on the ground (y 433 in the cart) */
 #game #cart3 .wheel{position:absolute;top:243px;width:190px;height:190px}
 #game #cart3 .w1{left:170px}#game #cart3 .w2{left:430px}
+#game #cart3 .cglow{position:absolute;left:-40px;top:-30px;width:710px;height:500px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.55),rgba(255,214,90,0));opacity:0;pointer-events:none}
+/* compositor hints: these move every frame */
+#game #pari3,#game #cart3,#game #cart3 .wheel,#game #aaru3 img,#game #potli3,#game #bill3,#game .slate3,#game #baba3,#game #guddu3,#game #wheel3 .rotor,#game #bill2,#game .stamp2,#game #l2,#game .coachFig{will-change:transform}
 #game #cart3 .cshadow{position:absolute;left:110px;top:410px;width:560px;height:40px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0))}
 #game #cart3 .plabel{position:absolute;left:203px;top:219px;width:385px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#f3d27a}
 #game #cart3 .pval{position:absolute;left:203px;top:239px;width:385px;height:70px;text-align:center;font:700 58px/70px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
@@ -291,7 +296,8 @@
 @keyframes slatePulse{50%{filter:drop-shadow(0 0 20px rgba(255,205,70,1));transform:scale(1.04)}}
 /* Guddu Bhaiya (L3 teach): stands at the right, behind the slates, with his notebook */
 #game #guddu3{position:absolute;left:1585px;top:470px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
-#game #baba3{position:absolute;left:1410px;top:440px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #baba3{position:absolute;left:1410px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #baba3 img{position:absolute;left:0;bottom:0;height:604px;opacity:0}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}
 #game #l3 .ashadow{position:absolute;width:180px;height:32px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0));opacity:0;pointer-events:none}
 #game #aaru3 img{position:absolute;bottom:0;left:0;transform:translateX(-50%)}

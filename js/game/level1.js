@@ -54,7 +54,7 @@
         SND.stopVo(); Hand.hide();
         Btns.state(correctSide, 'correct'); Btns.state(wrongSide, 'faded'); Btns.tick(correctSide);
         SND.sfx('bell'); SND.sfx('ding');
-        const okLine = COACH.say(L.ok);
+        const okLine = COACH.say(L.ok); COACH.cheer();          // Pari cheers through her "Yes!"
         Rule.hide();
         // Gudiya leaps onto the line where the price is, then hops to the round number
         const px = vx(q.lo, q.hi, q.price), ax = correctSide === 'L' ? NL.x0 : NL.x1;
@@ -242,7 +242,8 @@
     gsap.set('#gBg', { x: 0 });
     HUD.setLit(startAt); HUD.lit = startAt; HUD.setSun(D.sun[0] + (D.sun[1] - D.sun[0]) * startAt / 7);
     Cart.setItems(D.questions.slice(0, startAt).map(q => GA(`ic_${q.icon}.webp`)));
-    await banner();
+    const warmed = warm(['bg_bazaar.webp', 'ui_price_tag.webp', 'cart_empty.webp', 'nl_bar.webp', 'nl_marker.webp', 'nl_marker_green.webp', ...D.questions.map(q => `ic_${q.icon}.webp`)].map(GA));
+    await banner(); await warmed;
     HUD.show();
     if (!skipIntro) {
       skipBtn(true);

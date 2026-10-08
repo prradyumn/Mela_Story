@@ -66,7 +66,7 @@
   /* builds the fold pieces at the bill's place and returns a paused timeline: progress 0 = flat bill, 1 = tied packet */
   function foldTL(tex) {
     PK.innerHTML = ''; gsap.set(PK, { opacity: 1, x: 0, y: 0, scale: 1, rotation: 0 });
-    const root = div({ left: BILL.x + 'px', top: BILL.y + 'px', width: PW + 'px', height: PH + 'px', transformStyle: 'preserve-3d', filter: 'drop-shadow(0 10px 8px rgba(58,34,15,.28))' });
+    const root = div({ left: BILL.x + 'px', top: BILL.y + 'px', width: PW + 'px', height: PH + 'px', transformStyle: 'preserve-3d', willChange: 'transform' });   // no filter here: a filter over 3D pieces re-rasterises every frame
     // fold 1: top half stays, bottom half turns up over it (shows the paper's back)
     const top = piece(tex, 0, 0, PW, QH); root.appendChild(top);
     const f1 = div({ left: 0, top: QH + 'px', width: PW + 'px', height: QH + 'px', transformStyle: 'preserve-3d', transformOrigin: '50% 0' }, root);
@@ -180,7 +180,7 @@
       s.classList.add('pressed'); art.src = GA('stamp_tool_pressed.webp');                      // THUMP
       SND.sfx('stamp', .8);
       gsap.fromTo('#bill2', { scaleY: .95 }, { scaleY: 1, duration: .35, ease: 'elastic.out(1,.4)' });
-      gsap.fromTo('#game', { x: 0 }, { x: 4, duration: .05, yoyo: true, repeat: 3, onComplete: () => gsap.set('#game', { x: 0 }) });
+      gsap.fromTo('#l2', { x: 0 }, { x: 4, duration: .05, yoyo: true, repeat: 3, onComplete: () => gsap.set('#l2', { x: 0 }) });   // shake just the desk layer
       sparks(1250, 830, 12, 90, ['#c0392b', '#e14b3b', '#9d2a1e']);
       await wait(.12);
       Bill.showMark(value);

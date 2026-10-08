@@ -56,7 +56,7 @@
         SND.stopVo(); Hand.hide();
         b.choices.forEach((v, k) => Stamps.state(k, k === right ? 'correct' : 'faded'));
         SND.sfx('bell'); SND.sfx('ding');
-        const okLine = COACH.say(L.ok);
+        const okLine = COACH.say(L.ok); COACH.cheer();          // Pari cheers through her "Yes!"
         await Bill.chips('blue');
         await Stamps.press(right, L.ans);
         if (!teach) {
@@ -185,7 +185,8 @@
     SND.preload(D.allLines().map(l => l.id));
     HUD.setLit(startAt); HUD.lit = startAt; HUD.setSun(D.sun[0] + (D.sun[1] - D.sun[0]) * startAt / 7);
     Basket.set(startAt);
-    await banner();
+    const warmed = warm(['office_desk_l2.webp', 'bill_paper.webp', 'stamp_tool.webp', 'stamp_tool_pressed.webp', 'stamp_mark.webp', 'ink_pad.webp', 'bill_pile.webp', 'checked_basket.webp'].map(GA));
+    await banner(); await warmed;
     HUD.show();
     COACH.present('guddu');                      // Guddu Bhaiya is at his desk for the whole level
     gsap.set(['#sunPanel', '#gChip', '#mariPlate', '#glowMari'], { autoAlpha: 0 });   // L2: no sun, chip or marigolds — characters + bill get the room
