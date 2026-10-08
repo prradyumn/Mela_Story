@@ -314,6 +314,15 @@ iris-wipes to the next bridge. Game scripts load after story.js (see index.html)
 - Connected staging (Oct 2026 fix, user: "Aaru looks odd, the board and the tyres look copy-pasted"): the cart wheels sit **behind** the body with their hubs on its bottom rail and roll on the ground (y 433 in the cart) with a contact shadow; the bill hangs **on** a drawn iron hook (`#hook3`, over the rope loop, at the stall hook point), pivots on its loop, casts a shadow and sways gently; **Aaru runs on the same ground line as Pari and the cart** (feet y 990, 360 px tall, ground shadow), the slates sink before he comes, he hops by the cart with the potli held up in his raised fist (coins arc into it), runs to the stall, the potli flies onto the bill → PAID, then he runs off right.
 - Agreed with the user (Oct 2026): how-to says "lights up one stall of the Mela!"; the exact money left is ₹83,165 (story ending changed to match).
 
+### 8.7 Storyboard revision (Oct 2026) — dialogue source of truth
+- The sheets in `_source/notes/` are the Oct 2026 revision (Game.csv, Story.csv, Assets.csv; the previous ones are in `_source/notes/_v1/`). **Every voiced line follows them word for word**, with two agreed exceptions:
+  1. **Money stays mathematically correct**: the sheet's Q7 "1,39,000 minus 55,000 is 83,000" / ending "about ₹83,000" / exact "₹83,380" are kept as **≈ ₹84,000** and exact **₹83,165** (TXT.g3, p6, endB banner, L3_q7_*).
+  2. **Bridges use the Game.csv wording** (newer than Story.csv): r2 "…Yayy!", g2 "All seven bills done?…", p5 "Bhaiya… You find out the exact amount…".
+- New lines: L3 teach Guddu `L3_teach_guddu` ("Let me try… borrow one… um…", before Pari's teach_3) and `L3_teach_exact` ("Umm… it's 1,61,240 to be exact…", after Pari's OK, before Baba). Guddu walks in on the right for them (`L3SC.Guddu`, `#guddu3`).
+- n1 changed → the hookA montage cuts were re-timed to its faster-whisper word times (comment in hookA).
+- Re-voiced Oct 2026: story n1 n2 n3 r2 r3 g2 p5 (`tools/gen_story_vo.mjs`, masters in `_source/story_vo_masters/`) and game L1_howto_1/2, L1_done_1, L2_howto_2/3, L2_teach_4, L2_q1–7, L3_howto_3, L3_teach_1/2/3 + the 2 new lines. All checked by transcription.
+- To diff our lines against the sheets: list every `TXT` line + `LEVELn.allLines()` and compare with the sheet cells (see the session notes; a mismatch means re-voice).
+
 ## 9. Regenerating assets
 
 - **Story voices:** Gemini TTS `gemini-3.8-flash-tts`, prompt format:
@@ -333,6 +342,7 @@ iris-wipes to the next bridge. Game scripts load after story.js (see index.html)
 - **Asset masters (Oct 2026 size pass):** the originals of every image/audio file are in `_source/asset_masters/` before re-encoding (frames ~1.25× their largest on-screen size, webp q78; poses + mouths 1080 tall q85, same factor so they stay aligned; backgrounds same size q80; voice MP3s 56k mono; music and Ogg untouched). Re-encode from there if quality ever needs to go back up. Story images 17.2 → 12.6 MB, voice MP3s 4.9 → 3.5 MB, single file 36 → 28 MB.
 - **Game VO end click (fixed Oct 2026):** Gemini TTS ends every clip with a ~120–190 ms loud, DC-offset burst after the speech (heard as a "cable dropping" thud when a line ends). All 92 masters were trimmed (raw copies in `_source/game_vo_masters/_raw_with_end_click/`) and `gen_vo.mjs` strips it automatically (`stripEndBurst`). The engine also fades a voice out over 30 ms when it is cut (`fadeStop`) and ramps the music back up instead of jumping.
 - **Loading:** engine `loadAll` waits only for what the opening needs; the talking/explaining frames (`pari_explain`, `manju_talk`, `guddu_talk`) load in the background after it (`LATER`).
+- **Story voices (terminal):** `GEMINI_API_KEY=… node tools/gen_story_vo.mjs n1 p5 …` re-voices story lines from `TXT` (narrator Sulafat, Baba Algenib, Guddu Fenrir, Pari Leda, Aaru Puck), strips the TTS end burst, writes `assets/audio/<id>.mp3/.ogg`. Timed scenes (hookA montage) must be re-timed after n1 changes.
 - **Sprites/mouths:** `python3 _source/art_package/tools/import_sheets.py talk|cycles|pari2` → writes into `assets/story/`. Manju Mausi's sprites are coming next: give her an `acts.explain` the same way and a full-body coach like Pari's.
 - **Music:** Lyria (`lyria-3-clip-preview` ≈30 s; `lyria-3.5` long).
 - **API keys: never write a key into any file in this folder** (no .env either). Ask the user to paste it into the Voice Studio, or use an env var for a one-off script outside the repo.

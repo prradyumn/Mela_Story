@@ -20,7 +20,7 @@
 
   /* ---------- talk waves (L3 has no bubbles: the speaker's head gets three soft arcs while the VO plays) ---------- */
   const WV = $('#waves3'); let wavesTl = null;
-  const HEADS = { pari: { x: 150, y: 600, left: false }, baba: { x: 1500, y: 560, left: true } };
+  const HEADS = { pari: { x: 150, y: 600, left: false }, baba: { x: 1500, y: 560, left: true }, guddu: { x: 1620, y: 560, left: true } };
   const Waves = {
     on(who) { const h = HEADS[who]; if (!h) return Waves.off(); gsap.set(WV, { left: h.x, top: h.y, opacity: 1 }); WV.classList.toggle('left', h.left);
       if (wavesTl) wavesTl.kill(); wavesTl = gsap.timeline({ repeat: -1 }).fromTo(WV.children, { opacity: 0, scale: .85 }, { opacity: 1, scale: 1, duration: .32, stagger: .14, ease: 'sine.out' }).to(WV.children, { opacity: .25, duration: .3, stagger: .1 }); },
@@ -287,5 +287,16 @@
     hide() { gsap.set(BB, { opacity: 0, x: 520 }); }
   };
 
-  window.L3SC = { Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba, glowOn };
+  /* ---------- Guddu Bhaiya (story sprites): walks in from the right with his notebook for the teach round ---------- */
+  const GD = $('#guddu3');
+  const Guddu = {
+    async enter() { GD.src = SIMG('guddu_write'); gsap.set(GD, { x: 480, opacity: 0 });
+      gsap.to(GD, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' });
+      await gsap.to(GD, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' }); },
+    pose(p) { GD.src = SIMG('guddu_' + p); },
+    async exit() { gsap.to(GD, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(GD, { x: 480, opacity: 0, duration: .8, ease: 'power2.in' }); },
+    hide() { gsap.set(GD, { opacity: 0, x: 480 }); }
+  };
+
+  window.L3SC = { Guddu, Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba, glowOn };
 })();

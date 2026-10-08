@@ -1,4 +1,4 @@
-S.No,Scene Description (Location and Angles),Visual Assests,Dialogues,On screen text (OST)
+﻿S.No,Scene Description (Location and Angles),Visual Assests,Dialogues,On screen text (OST)
 1,"TITLE SCREEN
 Location: Apnapur village entry gate.
 Angle: Wide front view of the gate ""Welcome to Apnapur"". Gudiya the goat stands near the gate and looks at the camera.","BG: Village Entry Gate (English)
@@ -16,7 +16,7 @@ Action: The narrator box shows first. Then Baba asks his question. Guddu Bhaiya 
 Characters: Baba, Guddu Bhaiya
 Props: fat notebook, pen, Mela bunting on the tree
 Anim: the character who speaks bounces gently
-BGM: BGM Village 1","NARRATOR: Today is Mela day in Apnapur! Tonight there will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for the Mela. But the shops close when the sun goes down.
+BGM: BGM Village 1","NARRATOR: It's Mela day in Apnapur! It starts in the evening. There will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for setting up shops in the Mela. All items need to be bought before the sun goes down.
 
 BABA: Guddu, is our money enough?
 
@@ -29,7 +29,7 @@ Angle: Wide shot. Aaru runs in from the left with Gudiya. Guddu Bhaiya is in the
 Action: Aaru shouts a wild number. Pari shakes her head, smiles, and points toward the bazaar.","BG: Panchayat Bhawan (chaupal) + warm tint
 Characters: Aaru, Guddu Bhaiya, Pari, Gudiya
 Anim: small sun icon appears top-right (Sunset tracker starts)
-BGM: BGM Village 1","NARRATOR: Guddu Bhaiya adds every number fully. It takes a long time. The sun is going down.
+BGM: BGM Village 1","NARRATOR: Guddu Bhaiya will take forever if he keeps adding like this. The sun will set soon.
 
 AARU: Easy! The total is ten crore!
 
@@ -97,13 +97,13 @@ Action: Guddu Bhaiya holds up his notebook. Pari smiles. Aaru jumps. Gudiya hops
 Characters: Aaru, Pari, Gudiya, Baba, Guddu Bhaiya
 Props: string of 7 lit bulbs, Guddu's notebook
 SFX: festive crowd, bell
-BGM: BGM Village 1 (louder, festive)","NARRATOR: The sun goes down. The Mela lights come on! The giant wheel starts to turn. We bought everything, and there is still money left.
+BGM: BGM Village 1 (louder, festive)","NARRATOR: The sun goes down. The Mela lights are finally on! The giant wheel starts to turn. We bought everything, and there is still money left.
 
 GUDDU BHAIYA: I finished! Exactly ₹83,380 is left.
 
-PARI: We said about ₹84,000. That is nearly the same!
+PARI: We said about ₹83,000. That is nearly the same!
 
-AARU: Correct-correct! Now jalebi for everyone!
+AARU: Yayy! Now jalebees for everyone!
 
 NARRATOR: The Sarpanch gives you a gold badge.","₹83,380 ≈ ₹84,000
 [Get my badge]"

@@ -1,21 +1,21 @@
 // ================= STORY: The Mela Before Sunset =================
 const TXT = {
-  n1: 'Today is Mela day in Apnapur! Tonight there will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for the Mela. But the shops close when the sun goes down.',
+  n1: 'It’s Mela day in Apnapur! It starts in the evening. There will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for setting up shops in the Mela. All items need to be bought before the sun goes down.',
   b1: 'Guddu, is our money enough?',
   g1: 'Wait… 42,538 plus 23,184… carry one… Let me write it all down!',
-  n2: 'Guddu Bhaiya adds every number fully. It takes a long time. The sun is going down.',
+  n2: 'Guddu Bhaiya will take forever if he keeps adding like this. The sun will set soon.',
   r1: 'Easy! The total is ten crore!',
   p1: 'Aaru, that is a wild guess. Let’s make a smart guess.',
   p2: 'First, we change each price to a round number. Round numbers are easy to add. A smart guess like this is called an estimate.',
   p3: 'Come! Let’s go to the bazaar.',
-  r2: 'All the prices are round numbers now! Correct-correct!',
+  r2: 'All the prices are round numbers now! Yayy!',
   p4: 'Well done! The shopkeepers sent their bills to the Panchayat office. Let’s check them.',
-  g2: 'All seven bills? So fast? I am still on page two!',
-  p5: 'The shopkeepers are waiting at the Mela Ground. Baba has the money. Let’s go and pay them.',
-  n3: 'The sun goes down. The Mela lights come on! The giant wheel starts to turn. We bought everything, and there is still money left.',
+  g2: 'All seven bills done? So fast? I am still on page two!',
+  p5: 'Bhaiya… You find out the exact amount. By that time, we will get the items for the mela shops. The shopkeepers are waiting at the Mela Ground. Let’s go and pay them.',
+  n3: 'The sun goes down. The Mela lights are finally on! The giant wheel starts to turn. We bought everything, and there is still money left.',
   g3: 'I finished! Exactly ₹83,165 is left.',   // Oct 2026: matches the L3 bills (₹6,00,000 − ₹5,16,835); g3 voice must say this too
   p6: 'We said about ₹84,000. That is nearly the same!',
-  r3: 'Correct-correct! Now jalebi for everyone!',
+  r3: 'Yayy! Now jalebees for everyone!',
   n4: 'The Sarpanch gives you a gold badge.',
 };
 const inr = v => '₹' + Math.round(v).toString().replace(/(\d)(?=(\d\d)+\d$)/g, '$1,');
@@ -130,11 +130,13 @@ async function hookA() {
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 80), null, 0);
   // ---- opening montage: one slow camera move per shot, each cut on the word (n1 voice starts at V) ----
-  const V = .9, cut = [V + 2.85, V + 4.6, V + 5.45, V + 7.45];   // "Tonight…" | "sweets" | "a big giant wheel" | "The Panchayat…"
+  // n1 word times (faster-whisper, Oct 2026 voice): "It starts in the evening" 3.38 · "sweets" 6.30 · "a big giant wheel" 7.02 ·
+  // "The Panchayat" 9.26 · "six lakh rupees" 10.28–11.60 · "All items…" 14.62 · "sun" 17.42. Cuts land ~.2 s before the word.
+  const V = .9, cut = [V + 3.2, V + 6.08, V + 6.85, V + 9.07];   // "It starts in the evening…" (dusk lights) | "sweets" | "a big giant wheel" | "The Panchayat…"
   let prev = null;   // crossfade in on the cut, then hide the shot underneath so it can't show through later
   const xf = (sh, at) => { gsap.set(sh.wrap, { opacity: 0 }); tl.to(sh.wrap, { opacity: 1, duration: .35, ease: 'sine.inOut' }, at - .2);
     if (prev) tl.set(prev.wrap, { opacity: 0 }, at + .2); prev = sh; };
-  // 1 "Today is Mela day in Apnapur." push through the gate from the title screen
+  // 1 "It’s Mela day in Apnapur!" push through the gate from the title screen
   const g = shot(s, 'bg_01_gate'); prev = g;
   const wl = LAYOUT.items['title.welcome'] || {};
   el('div', '', g.cam, 'Welcome to Apnapur', { position: 'absolute', left: (1072 + (wl.dx || 0)) + 'px', top: (212 + (wl.dy || 0)) + 'px', transform: 'translate(-50%,-50%)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '66px', color: '#5a2d0c', opacity: .92, textShadow: '0 2px 0 rgba(255,220,160,.6), 0 -1px 0 rgba(0,0,0,.35)', whiteSpace: 'nowrap' });
@@ -143,7 +145,7 @@ async function hookA() {
   for (let i = 0; i < 14; i++) { const pe = el('div', '', g.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: '-30px', width: '14px', height: '9px', borderRadius: '50%', background: ['#f7b733', '#e8870e', '#ff9f1c'][i % 3] });
     tl.fromTo(pe, { y: Math.random() * 300 }, { y: 700 + Math.random() * 400, x: 60 + Math.random() * 120, rotate: 540, duration: 3.6, ease: 'none' }, 0); }
   camMove(tl, g, 0, cut[0] + .3, { x: 960, y: 540, s: 1 }, { x: 1000, y: 600, s: 1.3 }, 'power1.inOut');
-  // 2 "Tonight there will be lights," a dreamy glimpse of the Mela at dusk, panning along the bulb strings
+  // 2 "It starts in the evening. There will be lights," a dreamy glimpse of the Mela at dusk, panning along the bulb strings
   const d = shot(s, 'bg_05_mela_dusk'); xf(d, cut[0]);
   for (let i = 0; i < 16; i++) { const k = el('div', '', d.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: (80 + Math.random() * 520) + 'px', width: (18 + Math.random() * 30) + 'px', height: '0', paddingBottom: '0', borderRadius: '50%' });
     k.style.height = k.style.width; k.style.background = 'radial-gradient(circle, rgba(255,214,120,.85), rgba(255,170,60,0) 70%)'; k.style.filter = 'blur(2px)';
@@ -161,19 +163,19 @@ async function hookA() {
   tl.to(m.wrap, { opacity: 0, duration: .5, ease: 'sine.inOut' }, cut[3] - .2);
   tl.fromTo(world, { scale: 1.08 }, { scale: 1, duration: 6, ease: 'sine.out', immediateRender: false }, cut[3] - .2);
   // MELA MONEY board: the same green/gold board the child pays from in level 3. It drops in as the chaupal appears and counts
-  // up in round ₹50,000 steps, landing on ₹6,00,000 as n1 says "six lakh rupees" (voice 9.06–9.52s)
+  // up in round ₹50,000 steps, landing on ₹6,00,000 as n1 says "six lakh rupees" (voice 10.28–11.60 s)
   const ost = sign(s, `<div style="font-size:34px;letter-spacing:.12em;color:#f3d27a">MELA MONEY</div><div class="amt" style="font-size:112px;line-height:1.05;display:inline-block;min-width:520px">₹0</div>`, 960, 330, 56, 'melamoney');
   Object.assign(ost.querySelector('.board').style, { background: 'linear-gradient(#237a43,#1a5c33)', border: '8px solid #d9a93a', borderRadius: '22px', color: '#fff3c4', textShadow: '0 5px 0 rgba(10,40,20,.45)', boxShadow: '0 16px 0 rgba(58,34,15,.25), inset 0 0 0 4px rgba(255,225,140,.35)' });
   const amt = ost.querySelector('.amt');
   dropSign(tl, cut[3] - .05, ost);
-  const c0 = cut[3] + .55, c1 = V + 9.3, steps = 12;
+  const c0 = cut[3] + .55, c1 = V + 11.35, steps = 12;
   for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
   tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
   tl.fromTo(amt, { scale: 1 }, { scale: 1.16, duration: .18, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
-  // 6 "But the shops close when the sun goes down." the light warms and the sunset tracker appears on "sun"
-  tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 11.3);
-  tl.to(sunEl, { opacity: 1, duration: .6 }, V + 12.84); tl.call(() => sfx('rise', .6), null, V + 12.84);
-  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false }, V + 12.84);
+  // 6 "All items need to be bought before the sun goes down." the light warms and the sunset tracker appears on "sun"
+  tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 14.6);
+  tl.to(sunEl, { opacity: 1, duration: .6 }, V + 17.42); tl.call(() => sfx('rise', .6), null, V + 17.42);
+  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false }, V + 17.42);
   let t = voiceOver(tl, V - .1, 'n1');   // voice only: the pictures carry the story, no narration text
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);

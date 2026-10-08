@@ -86,7 +86,7 @@ const PROFILE = {
   baba:  { name: 'Baba', persona: 'A kind, wise village elder of Apnapur who looks after the Mela money for the Panchayat.',
            style: 'Warm, slow and grandfatherly, deep and steady, Indian English accent. Proud and encouraging, a gentle smile in the voice.' },
   aaru:  { name: 'Aaru', persona: 'An excitable 8-year-old boy, Pari’s little brother, who loves the Mela.',
-           style: 'Bouncy, gleeful and fast, Indian English accent. "Correct-correct!" is his happy catchphrase — say it with a big grin.' }
+           style: 'Bouncy, gleeful and fast, Indian English accent. "Yayy!" is his happy cheer — say it with a big grin.' }
 };
 const $ = s => document.querySelector(s);
 for (const w of ['pari','manju','aaru','guddu','baba']) { const sel = $('#v_' + w); sel.innerHTML = VOICES.map(v => `<option${v === DEFAULT[w] ? ' selected' : ''}>${v}</option>`).join(''); }

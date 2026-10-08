@@ -8,8 +8,8 @@ window.LEVEL2 = {
 
   howto: [
     { who: 'pari', vo: 'L2_howto_1', text: 'Look! Seven bills on Guddu Bhaiya\'s desk. Each bill has two prices.', show: 'pile' },
-    { who: 'pari', vo: 'L2_howto_2', text: 'Do not add the big numbers. Make each price a round number in your head. Then add the round numbers.', show: 'example' },
-    { who: 'pari', vo: 'L2_howto_3', text: 'Choose the answer that is about right.', show: 'stamps' }
+    { who: 'pari', vo: 'L2_howto_2', text: 'Do not need to add the numbers as they are. Make each price a round number in your head. Then add the round numbers.', show: 'example' },
+    { who: 'pari', vo: 'L2_howto_3', text: 'Choose the answer that is the closest thousand.', show: 'stamps' }
   ],
   example: { title: 'EXAMPLE', items: [['Rice', 31472], ['Oil', 18915]], choices: [40000, 50000, 60000] },
 
@@ -19,7 +19,7 @@ window.LEVEL2 = {
       { who: 'guddu', vo: 'L2_teach_1', text: '21,648 plus 43,315… I need my big notebook…', show: 'bill' },
       { who: 'pari',  vo: 'L2_teach_2', text: 'No need! 21,648 is about 22,000.', show: 'chip1' },
       { who: 'pari',  vo: 'L2_teach_3', text: '43,315 is about 43,000.', show: 'chip2' },
-      { who: 'pari',  vo: 'L2_teach_4', text: 'Now add the round numbers. 22,000 plus 43,000 is 65,000. So the bill is about ₹65,000. Tap About ₹65,000.', show: 'stamps' }
+      { who: 'pari',  vo: 'L2_teach_4', text: 'Now add the round numbers. 22,000 plus 43,000 is 65,000. So the bill is about ₹65,000. Tap ₹65,000.', show: 'stamps' }
     ],
     ok:    { who: 'pari', vo: 'L2_teach_ok',    text: 'Yes! The bill is about ₹65,000. Easy! Now you try.' },
     oops:  { who: 'pari', vo: 'L2_teach_oops',  text: 'Oops! Try again. 22,000 plus 43,000. Count the thousands: 22 and 43.' },
@@ -54,7 +54,7 @@ window.LEVEL2 = {
     if (!b.choices.includes(ans)) console.warn('L2 bill', n, 'answer not in choices', ans);
     return {
       ans,
-      ask:   { who: 'pari', vo: `L2_q${n}`,       text: `Here is bill ${n}. ${a[0]} ${rs(a[1])} and ${c[0].toLowerCase()} ${rs(c[1])}. About how much is this bill?` },
+      ask:   { who: 'pari', vo: `L2_q${n}`,       text: `Here is bill ${n}. ${a[0]} ${rs(a[1])} and ${c[0].toLowerCase()} ${rs(c[1])}. What will be the total? Choose the closest number.` },
       ok:    { who: 'pari', vo: `L2_q${n}_ok`,    text: `Yes! ${fmt(ra)} plus ${fmt(rc)} is ${fmt(ans)}. The bill is about ${rs(ans)}.${b.extra || ''}` },
       oops:  D.oops,
       hint:  { who: 'pari', vo: `L2_q${n}_hint`,  text: `Hint: ${rs(a[1])} is about ${fmt(ra)}. ${rs(c[1])} is about ${fmt(rc)}. Now add them.` },

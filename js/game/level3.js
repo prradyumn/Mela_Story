@@ -6,7 +6,7 @@
    No speech bubbles in L3: COACH.voiceOnly, the speaker gets talk waves. Running total uses the ROUNDED value. */
 (function () {
   const { $, wait, confetti } = ST;
-  const { Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba } = L3SC;
+  const { Guddu, Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba } = L3SC;
   const D = window.LEVEL3, Hand = SC.Hand;
   const fmt = n => LEVEL1.fmt(n), rs = n => '₹' + fmt(n);
   const result = { stars: [] };
@@ -150,6 +150,9 @@
         const right = T.choices.indexOf(T.answer); Slates.state(right, 'glow');
         const h = Slates.handAt(right); Hand.show(h.x, h.y);
         await play(T, L, { teach: true });
+        // Guddu: "Umm... it's 1,61,240 to be exact. But your number is so close. Good job!"
+        Guddu.pose('surprised'); await COACH.say(T.exact); Guddu.pose('proud'); await wait(.3);
+        Guddu.exit();
         // Baba: "Very good. Now the real money: ₹6,00,000. Let's pay!" — the panel refills on "₹6,00,000"
         Baba.enter().then(() => Baba.talk(true));
         const said = COACH.say(T.baba);
@@ -165,6 +168,7 @@
           Bill.show(0, T.bill, { teach: true }); await Bill.drop();
         }
         if (line.show === 'chip') await Bill.chip('blue', D.round(T.bill));
+        if (line.show === 'guddu') { await Guddu.enter(); Guddu.pose('scratch'); }   // Guddu tries it the long way…
       });
     }
   }
@@ -223,7 +227,7 @@
     // the L3 layer, clean
     $('#l3').classList.remove('hidden'); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
     gsap.set('#done3Card', { clearProps: 'transform,opacity' }); gsap.set('#gHud', { autoAlpha: 1 });
-    Wheel.reset(); Fw.clear(); Stall.set(0); Sun.set(0); Pari.reset(); Waves.off(); Baba.hide(); Aaru.hide();
+    Wheel.reset(); Fw.clear(); Stall.set(0); Sun.set(0); Pari.reset(); Waves.off(); Baba.hide(); Guddu.hide(); Aaru.hide();
     $('#bill3').classList.add('hidden'); Slates.S.forEach(s => s.className = 'slate3 hidden'); gsap.set('#minus3', { scale: 0 });
     gsap.set(['#duster3', '#potli3'], { opacity: 0 }); gsap.set('#cart3', { autoAlpha: 1 }); gsap.set('#ground3', { opacity: 0 }); $('#map3').innerHTML = '';
     Panel.set(D.start, false); Cam.set(CAM(0));
@@ -243,7 +247,7 @@
       await howto(); await teach();
       skipBtn(false); Hand.hide(); Slates.disable();
       if (skipping) {   // Skip: tidy the intro away and start at payment 1
-        Map.off(true); Baba.hide(); Waves.off(); Slates.hide(); Minus.hide(); $('#bill3').classList.add('hidden');
+        Map.off(true); Baba.hide(); Guddu.hide(); Waves.off(); Slates.hide(); Minus.hide(); $('#bill3').classList.add('hidden');
         Panel.set(D.start, false); gsap.set('#cart3', { autoAlpha: 1 });
       }
     }

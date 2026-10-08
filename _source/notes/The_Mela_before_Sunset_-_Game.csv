@@ -1,24 +1,25 @@
-Screen,Screen / Levels,Game Instruction/VO,Learner Interaction,Correct Feedback,Incorrect Feedback 1,Incorrect Animation 1,Incorrect Feeback 2,Incorrect Animation 2,Incorrect Feedback 3,Incorrect Animation 3,Inactivity VO/Instruction,Inactivity Animation
-Default (all question screens),3-strike rule,Every question screen plays its VO when it opens. Tap the speaker icon to hear it again.,Tap an answer button.,"Bell + green button + short praise, then the next screen after 2 seconds.",Oops! Try Again.,Red glow and wiggle,Hint,Red glow and wiggle + Hint screen,As per requirement (Optional),Hand nudge showing answer and user being prompted to the correct answer,"After 10 seconds with no tap, the inactivity line plays once.",Soft glow pulse on the answer buttons
+﻿Screen,Screen / Levels,Game Instruction/VO,Learner Interaction,Correct Feedback,Incorrect Feedback 1,Incorrect Animation 1,Incorrect Feeback 2,Incorrect Animation 2,Incorrect Feedback 3,Incorrect Animation 3,Inactivity VO/Instruction,Inactivity Animation
 Screen 1,Title screen,"No voice. Soft village music starts after Start is tapped.
 
 ON SCREEN: The Mela Before Sunset · [Start]",Tap Start.,Cycle bell rings; the story begins.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Start to begin.,Start button pulses softly
-Screen 2,Story – Hook screen 1,"NARRATOR: Today is Mela day in Apnapur! Tonight there will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for the Mela. But the shops close when the sun goes down.
+Screen 2,Story – Hook screen 1,"NARRATOR: It's Mela day in Apnapur! It starts in the evening. There will be lights, sweets and a big giant wheel. The Panchayat has ₹6,00,000 to buy things for setting up shops in the Mela. All items need to be bought before the sun goes down.
+
 BABA: Guddu, is our money enough?
-GUDDU BHAIYA: Wait… 42,538 plus 23,184… carry one… Let me write it all down!
 
-ON SCREEN: Mela Day in Apnapur! · Money: ₹6,00,000 · [Next]",Tap Next after each line.,Next line plays.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Next.,Next button pulses softly
-Screen 3,Story – Hook screen 2,"NARRATOR: Guddu Bhaiya adds every number fully. It takes a long time. The sun is going down.
+GUDDU BHAIYA: Wait… 42,538 plus 23,184… carry one… Let me write it all down!",Tap Next after each line.,Next line plays.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Next.,Next button pulses softly
+Screen 3,Story – Hook screen 2,"NARRATOR: Guddu Bhaiya will take forever if he keeps adding like this. The sun will set soon.
+
 AARU: Easy! The total is ten crore!
-PARI: Aaru, that is a wild guess. Let's make a smart guess.
-PARI: First, we change each price to a round number. Round numbers are easy to add. A smart guess like this is called an estimate.
-PARI: Come! Let's go to the bazaar.
 
-ON SCREEN: Smart guess = Estimate · [Go to the bazaar]",Tap Next after each line. Last tap: Go to the bazaar.,Cycle bell; the scene moves to Aakoli Bazaar.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap the button to go to the bazaar.,Button pulses softly
+PARI: Aaru, that is a wild guess. Let's make a smart guess.
+
+PARI: First, we change each price to a round number. Round numbers are easy to add. A smart guess like this is called an estimate.
+
+PARI: Come! Let's go to the bazaar.",Tap Next after each line. Last tap: Go to the bazaar.,Cycle bell; the scene moves to Aakoli Bazaar.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap the button to go to the bazaar.,Button pulses softly
 Screen 4,"Level 1 – Aakoli Bazaar
 Round the price tags
-(How to play)","PARI: Welcome to the bazaar! Every shop has a price tag. The prices are big and messy.
-PARI: Under each tag there is a number line. Tap the round number that the price is closest to.
+(How to play)","PARI: Welcome to the bazaar! Every item category has a price tag. The prices are big and messy.
+PARI: Tap the number that the price is closest to.
 PARI: Every right answer lights up a marigold. Look at the sun too. Let's finish before sunset!
 
 ON SCREEN: HUD (top of screen): level name chip on the left · 7 marigold flowers in the middle (one lights up for each correct answer) · Sunset tracker on the right (the sun moves a little after every correct answer).",Tap Next after each line.,Next line plays; the marigolds and the sun glow once as Pari names them.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Next.,Next button pulses softly
@@ -75,15 +76,15 @@ ON SCREEN: Shop 7 of 7 · price tag ""Giant wheel – ₹2,38,864"" · number li
 Anim: bell, button turns green, tag flips to a red stamp ""₹2,39,000"", one marigold lights up, the sun moves a little. After 2 seconds the next shop slides in.",Oops! Try again. Look where the red arrow is on the line.,Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: Look at the hundreds digit. It is 8. 8 is 5 or more, so we go up.",Red glow and wiggle + the hundreds digit on the tag glows yellow + rule strip appears,"₹2,38,864 is closer to 2,39,000. Tap 2,39,000.","Hand nudge on 2,39,000; the other button fades. The child taps it.","Look at the red arrow. Is it nearer 2,38,000 or 2,39,000?",Both answer buttons pulse softly; the red arrow bounces
 Screen 13,"Level 1 – Aakoli Bazaar
 Round the price tags
-(Level complete – bridge)","AARU: All the prices are round numbers now! Correct-correct!
+(Level complete – bridge)","AARU: All the prices are round numbers now! Yayy!
 PARI: Well done! The shopkeepers sent their bills to the Panchayat office. Let's check them.
 
 ON SCREEN: 7 of 7 done! · [Go to the office]","Tap Next, then Go to the office.",All 7 marigolds glow; cheer; the scene moves to the Panchayat office.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap the button to go to the office.,Button pulses softly
 Screen 14,"Level 2 – Panchayat office
 Add the bills
 (How to play)","PARI: Look! Seven bills on Guddu Bhaiya's desk. Each bill has two prices.
-PARI: Do not add the big numbers. Make each price a round number in your head. Then add the round numbers.
-PARI: Choose the answer that is about right.
+PARI: Do not need to add the numbers as they are. Make each price a round number in your head. Then add the round numbers.
+PARI: Choose the answer that is the closest thousand.
 
 ON SCREEN: pile of 7 bills · HUD (top of screen): level name chip on the left · 7 marigold flowers in the middle (one lights up for each correct answer) · Sunset tracker on the right (the sun moves a little after every correct answer).",Tap Next after each line.,Next line plays; the bill pile glows once.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Next.,Next button pulses softly
 Screen 15,"Level 2 – Panchayat office
@@ -91,78 +92,77 @@ Add the bills
 (Teach: try one with Pari)","GUDDU BHAIYA: 21,648 plus 43,315… I need my big notebook…
 PARI: No need! 21,648 is about 22,000.
 PARI: 43,315 is about 43,000.
-PARI: Now add the round numbers. 22,000 plus 43,000 is 65,000. So the bill is about ₹65,000. Tap About ₹65,000.
+PARI: Now add the round numbers. 22,000 plus 43,000 is 65,000. So the bill is about ₹65,000. Tap  ₹65,000.
 
 ON SCREEN: example bill – Diyas ₹21,648 · Candles ₹43,315 · About total: ? · round numbers ≈ 22,000 and ≈ 43,000 appear in blue as Pari says them · buttons: About ₹55,000 / About ₹65,000 / About ₹75,000","Listen to Pari (tap Next). Then tap About ₹65,000.","PARI: Yes! The bill is about ₹65,000. Easy! Now you try.
 Anim: bell, button turns green, red stamp ""About ₹65,000"" on the bill.","Oops! Try again. 22,000 plus 43,000. Count the thousands: 22 and 43.",Red glow and wiggle on the tapped button + Gudiya bleats,Hint: 22 thousand plus 43 thousand is 65 thousand.,Red glow and wiggle + the two round numbers glow yellow,"Tap About ₹65,000.","Hand nudge on About ₹65,000; other buttons fade.",Add the two round numbers.,Round numbers glow one after the other; buttons pulse
 Screen 16,"Level 2 – Panchayat office
 Add the bills
-(Question 1 of 7)","PARI: Here is bill 1. Flowers ₹42,538 and garlands ₹23,184. About how much is this bill?
+(Question 1 of 7)","PARI: Here is bill 1. Flowers ₹42,538 and garlands ₹23,184. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 1 on lined paper – Flowers ₹42,538 · Garlands ₹23,184 · About total: ? · pile label ""7 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹66,000 / About ₹56,000 / About ₹76,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 43,000 plus 23,000 is 66,000. The bill is about ₹66,000. Look, Guddu Bhaiya is still on page one!
 Anim: bell, button turns green, ≈ 43,000 and ≈ 23,000 appear in blue next to the prices, red stamp ""About ₹66,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹42,538 is about 43,000. ₹23,184 is about 23,000. Now add them.","Red glow and wiggle + ≈ 43,000 and ≈ 23,000 appear in yellow next to the prices","43,000 plus 23,000 is 66,000. Tap About ₹66,000.","Hand nudge on About ₹66,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 17,"Level 2 – Panchayat office
 Add the bills
-(Question 2 of 7)","PARI: Here is bill 2. Sweets ₹36,415 and tea ₹12,863. About how much is this bill?
+(Question 2 of 7)","PARI: Here is bill 2. Sweets ₹36,415 and tea ₹12,863. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 2 on lined paper – Sweets ₹36,415 · Tea ₹12,863 · About total: ? · pile label ""6 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹39,000 / About ₹59,000 / About ₹49,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 36,000 plus 13,000 is 49,000. The bill is about ₹49,000.
 Anim: bell, button turns green, ≈ 36,000 and ≈ 13,000 appear in blue next to the prices, red stamp ""About ₹49,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹36,415 is about 36,000. ₹12,863 is about 13,000. Now add them.","Red glow and wiggle + ≈ 36,000 and ≈ 13,000 appear in yellow next to the prices","36,000 plus 13,000 is 49,000. Tap About ₹49,000.","Hand nudge on About ₹49,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 18,"Level 2 – Panchayat office
 Add the bills
-(Question 3 of 7)","PARI: Here is bill 3. Tent ₹1,24,317 and stage ₹31,642. About how much is this bill?
+(Question 3 of 7)","PARI: Here is bill 3. Tent ₹1,24,317 and stage ₹31,642. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 3 on lined paper – Tent ₹1,24,317 · Stage ₹31,642 · About total: ? · pile label ""5 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹1,66,000 / About ₹1,56,000 / About ₹1,46,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 1,24,000 plus 32,000 is 1,56,000. The bill is about ₹1,56,000.
 Anim: bell, button turns green, ≈ 1,24,000 and ≈ 32,000 appear in blue next to the prices, red stamp ""About ₹1,56,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹1,24,317 is about 1,24,000. ₹31,642 is about 32,000. Now add them.","Red glow and wiggle + ≈ 1,24,000 and ≈ 32,000 appear in yellow next to the prices","1,24,000 plus 32,000 is 1,56,000. Tap About ₹1,56,000.","Hand nudge on About ₹1,56,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 19,"Level 2 – Panchayat office
 Add the bills
-(Question 4 of 7)","PARI: Here is bill 4. Lights ₹54,276 and wires ₹18,946. About how much is this bill?
+(Question 4 of 7)","PARI: Here is bill 4. Lights ₹54,276 and wires ₹18,946. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 4 on lined paper – Lights ₹54,276 · Wires ₹18,946 · About total: ? · pile label ""4 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹73,000 / About ₹83,000 / About ₹63,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 54,000 plus 19,000 is 73,000. The bill is about ₹73,000.
 Anim: bell, button turns green, ≈ 54,000 and ≈ 19,000 appear in blue next to the prices, red stamp ""About ₹73,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹54,276 is about 54,000. ₹18,946 is about 19,000. Now add them.","Red glow and wiggle + ≈ 54,000 and ≈ 19,000 appear in yellow next to the prices","54,000 plus 19,000 is 73,000. Tap About ₹73,000.","Hand nudge on About ₹73,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 20,"Level 2 – Panchayat office
 Add the bills
-(Question 5 of 7)","PARI: Here is bill 5. Speaker ₹47,892 and mic ₹26,354. About how much is this bill?
+(Question 5 of 7)","PARI: Here is bill 5. Speaker ₹47,892 and mic ₹26,354. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 5 on lined paper – Speaker ₹47,892 · Mic ₹26,354 · About total: ? · pile label ""3 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹64,000 / About ₹74,000 / About ₹84,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 48,000 plus 26,000 is 74,000. The bill is about ₹74,000.
 Anim: bell, button turns green, ≈ 48,000 and ≈ 26,000 appear in blue next to the prices, red stamp ""About ₹74,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹47,892 is about 48,000. ₹26,354 is about 26,000. Now add them.","Red glow and wiggle + ≈ 48,000 and ≈ 26,000 appear in yellow next to the prices","48,000 plus 26,000 is 74,000. Tap About ₹74,000.","Hand nudge on About ₹74,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 21,"Level 2 – Panchayat office
 Add the bills
-(Question 6 of 7)","PARI: Here is bill 6. Snacks ₹28,163 and plates ₹15,214. About how much is this bill?
+(Question 6 of 7)","PARI: Here is bill 6. Snacks ₹28,163 and plates ₹15,214. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 6 on lined paper – Snacks ₹28,163 · Plates ₹15,214 · About total: ? · pile label ""2 bills left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹53,000 / About ₹33,000 / About ₹43,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 28,000 plus 15,000 is 43,000. The bill is about ₹43,000.
 Anim: bell, button turns green, ≈ 28,000 and ≈ 15,000 appear in blue next to the prices, red stamp ""About ₹43,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹28,163 is about 28,000. ₹15,214 is about 15,000. Now add them.","Red glow and wiggle + ≈ 28,000 and ≈ 15,000 appear in yellow next to the prices","28,000 plus 15,000 is 43,000. Tap About ₹43,000.","Hand nudge on About ₹43,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 22,"Level 2 – Panchayat office
 Add the bills
-(Question 7 of 7)","PARI: Here is bill 7. Food ₹33,745 and water ₹21,286. About how much is this bill?
+(Question 7 of 7)","PARI: Here is bill 7. Food ₹33,745 and water ₹21,286. What will be the total? Choose the closest number.
 
 ON SCREEN: Bill 7 on lined paper – Food ₹33,745 · Water ₹21,286 · About total: ? · pile label ""1 bill left"" · Guddu Bhaiya keeps writing on the right.","Tap one answer: About ₹55,000 / About ₹45,000 / About ₹65,000.
 (No tapping on the prices. The child makes the round numbers in their head.)","PARI: Yes! 34,000 plus 21,000 is 55,000. The bill is about ₹55,000.
 Anim: bell, button turns green, ≈ 34,000 and ≈ 21,000 appear in blue next to the prices, red stamp ""About ₹55,000"", the bill slides to the done pile, one marigold lights up, the sun moves a little.","Oops! Try again. First, make each price a round number in your head.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹33,745 is about 34,000. ₹21,286 is about 21,000. Now add them.","Red glow and wiggle + ≈ 34,000 and ≈ 21,000 appear in yellow next to the prices","34,000 plus 21,000 is 55,000. Tap About ₹55,000.","Hand nudge on About ₹55,000; other buttons fade. The child taps it.",Think of the round numbers. Then add them.,The two prices glow softly one after the other; answer buttons pulse
 Screen 23,"Level 2 – Panchayat office
 Add the bills
-(Level complete – bridge)","GUDDU BHAIYA: All seven bills? So fast? I am still on page two!
-PARI: The shopkeepers are waiting at the Mela Ground. Baba has the money. Let's go and pay them.
+(Level complete – bridge)","GUDDU BHAIYA: All seven bills done? So fast? I am still on page two!
+PARI: Bhaiya… You find out the exact amount. By that time, we will get the items for the mela shops. The shopkeepers are waiting at the Mela Ground. Let's go and pay them.
 
 ON SCREEN: 7 of 7 done! · [Go to the Mela Ground]","Tap Next, then Go to the Mela Ground.",All 7 marigolds glow; cheer; the scene moves to the Mela Ground.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap the button to go to the Mela Ground.,Button pulses softly
 Screen 24,"Level 3 – Mela Ground
 Pay and find the money left
 (How to play)","BABA: Here is the Mela money: ₹6,00,000. Seven shopkeepers will come for their money.
 PARI: Each time we pay, the money gets less. Make the bill a round number in your head. Then take it away.
-PARI: Choose about how much money is left. Every payment lights one bulb of the Mela!
-
+PARI: Choose about how much money is left.
 ON SCREEN: Mela Money board ₹6,00,000 · string of 7 bulbs (all off) · HUD (top of screen): level name chip on the left · 7 marigold flowers in the middle (one lights up for each correct answer) · Sunset tracker on the right (the sun moves a little after every correct answer).",Tap Next after each line.,Next line plays; the money board and the bulbs glow once.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Next.,Next button pulses softly
 Screen 25,"Level 3 – Mela Ground
 Pay and find the money left
-(Teach: try one with Pari)","PARI: Let's try one. We have ₹2,00,000. The bill is ₹38,760.
-PARI: First, round the bill. ₹38,760 is about 39,000.
-PARI: Now take it away. 2,00,000 minus 39,000 is 1,61,000. Tap About ₹1,61,000.
-
+(Teach: try one with Pari)","PARI: Let's try one. For example, we have ₹2,00,000. The bill is ₹38,760.
+PARI: First, round off the bill. ₹38,760 is about 39,000.
+Guddu Bhaiya: Let me try... It's 2,00,000 minus 38,760... borrow one...um... PARI: Now take it away. 2,00,000 minus 39,000 is 1,61,000. Tap ₹1,61,000.
+ Guddu bhaiya: umm... it's 1,61,240 to be exact. But your number is so close. Good job!
 ON SCREEN: Mela Money board ₹2,00,000 · example bill ₹38,760 → ≈ 39,000 appears in blue · buttons: About ₹1,61,000 / About ₹2,39,000 / About ₹1,51,000","Listen to Pari (tap Next). Then tap About ₹1,61,000.","PARI: Yes! About ₹1,61,000 is left.
 BABA: Very good. Now the real money: ₹6,00,000. Let's pay!
 Anim: bell, button turns green, board changes to ""About ₹1,61,000"", money bar gets shorter.","Oops! Try again. We are paying, so the money gets less.",Red glow and wiggle on the tapped button + Gudiya bleats,Hint: 200 thousand take away 39 thousand is 161 thousand.,"Red glow and wiggle + ≈ 39,000 glows yellow","Tap About ₹1,61,000.","Hand nudge on About ₹1,61,000; other buttons fade.",Take the round number away from the money.,Bill and board glow softly; buttons pulse
@@ -212,16 +212,18 @@ Screen 32,"Level 3 – Mela Ground
 Pay and find the money left
 (Question 7 of 7)","PARI: The food stall wants ₹55,031. We have about ₹1,39,000. About how much money is left?
 
-ON SCREEN: Payment 7 of 7 · MELA MONEY: About ₹1,39,000 · bill card ""Food stall – ₹55,031"" · minus sign between them · 6 of 7 bulbs lit.","Tap one answer: About ₹84,000 / About ₹1,94,000 / About ₹74,000.
-(No tapping on the bill. The child makes the round number in their head.)","PARI: Yes! About ₹84,000 is left. We paid everyone!
-Anim: coin sound + bell, button turns green, ≈ 55,000 appears next to the bill, board changes to ""About ₹84,000"", money bar gets shorter, one more bulb lights up, the bill card slides away, one marigold lights up.","Oops! Try again. We are paying money, so the money gets less.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹55,031 is about 55,000. Now take 55,000 away from 1,39,000.","Red glow and wiggle + ""≈ 55,000"" appears in yellow next to the bill","1,39,000 minus 55,000 is 84,000. Tap About ₹84,000.","Hand nudge on About ₹84,000; other buttons fade. The child taps it.",Round the bill first. Then take it away from the money.,Bill card and Mela Money board glow softly; answer buttons pulse
-Screen 33,Ending – Sunset at the Mela,"NARRATOR: The sun goes down. The Mela lights come on! The giant wheel starts to turn. We bought everything, and there is still money left.
+ON SCREEN: Payment 7 of 7 · MELA MONEY: About ₹1,39,000 · bill card ""Food stall – ₹55,031"" · minus sign between them · 6 of 7 bulbs lit.","Tap one answer: About ₹83,000 / About ₹1,94,000 / About ₹74,000.
+(No tapping on the bill. The child makes the round number in their head.)","PARI: Yes! About ₹83,000 is left. We paid everyone!
+Anim: coin sound + bell, button turns green, ≈ 55,000 appears next to the bill, board changes to ""About ₹83,000"", money bar gets shorter, one more bulb lights up, the bill card slides away, one marigold lights up.","Oops! Try again. We are paying money, so the money gets less.",Red glow and wiggle on the tapped button + Gudiya bleats,"Hint: ₹55,031 is about 55,000. Now take 55,000 away from 1,39,000.","Red glow and wiggle + ""≈ 55,000"" appears in yellow next to the bill","1,39,000 minus 55,000 is 83,000. Tap ₹83,000.","Hand nudge on About ₹83,000; other buttons fade. The child taps it.",Round the bill first. Then take it away from the money.,Bill card and Mela Money board glow softly; answer buttons pulse
+Screen 33,Ending – Sunset at the Mela,"NARRATOR: The sun goes down. The Mela lights are finally on! The giant wheel starts to turn. We bought everything, and there is still money left.
+
 GUDDU BHAIYA: I finished! Exactly ₹83,380 is left.
-PARI: We said about ₹84,000. That is nearly the same!
-AARU: Correct-correct! Now jalebi for everyone!
-NARRATOR: The Sarpanch gives you a gold badge.
 
-ON SCREEN: ₹83,380 ≈ ₹84,000 · [Get my badge]",Tap Next after each line. Last tap: Get my badge.,All 7 bulbs glow; festive music; the badge screen opens.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Get my badge.,Button pulses softly
-Screen 34,Ending – Badge,"VOICE: You are Apnapur's Smart Guess Star!
+PARI: We said about ₹83,000. That is nearly the same!
 
-ON SCREEN: You saved the Mela! · Smart Guess Star! · You rounded 7 prices, added 7 bills and paid 7 shopkeepers. · [Play again]",Tap Play again (optional).,"Badge spins in, confetti, bell. Play again restarts from Hook screen 1.",Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,"Well done, Smart Guess Star!",Badge shines softly
+AARU: Yayy! Now jalebees for everyone!
+
+NARRATOR: The Sarpanch gives you a gold badge.",Tap Next after each line. Last tap: Get my badge.,All 7 bulbs glow; festive music; the badge screen opens.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Tap Get my badge.,Button pulses softly
+Screen 34,Ending – Badge,"NARRATOR: You are Apnapur's Smart Guess Star!
+
+ON SCREEN: You saved the Mela! · Smart Guess Star! Bravo! [Play again]",Tap Play again (optional).,"Badge spins in, confetti, bell. Play again restarts from Hook screen 1.",Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,Not needed – no answer to check on this screen.,"Well done, Smart Guess Star!",Badge shines softly

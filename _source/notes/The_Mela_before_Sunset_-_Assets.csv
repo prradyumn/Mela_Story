@@ -1,0 +1,24 @@
+﻿Type,Asset,Where it is used
+Background,Village Entry Gate (English),Title screen
+Background,Panchayat Bhawan (chaupal),Hook screens 1 and 2
+Background,"Aakoli Bazaar (wide, pans)","Level 1, Bridge 1"
+Background,Govt. Office Interior 2,"Level 2, Bridge 2"
+Background,"Village Mela Ground (+ warm tint, + dusk tint)","Level 3, Ending, Badge"
+Character,Pari,Guide and feedback voice in all levels
+Character,Aaru,"Hook 2, Bridge 1, Ending"
+Character,Baba,"Hook 1, Level 3, Ending"
+Character,Guddu Bhaiya,"Hook 1–2, Level 2, Bridge 2, Ending"
+Character,Manju Mausi,Level 1 teaching screen
+Character,Gudiya (goat),"Title, Hook 2, Ending; bleats on wrong answers"
+Prop / UI,Price tag on string (cream card),Level 1
+Prop / UI,Number line with mid-point mark + red arrow,Level 1
+Prop / UI,"Bill on lined paper, bill pile, 'done' pile",Level 2
+Prop / UI,"Mela Money board with money bar, bill card, minus sign",Level 3
+Prop / UI,String of 7 bulbs (off / lit),"Level 3, Ending"
+Prop / UI,Red 'About ₹…' stamp; blue and yellow round-number labels,Levels 1–3
+Prop / UI,"Wooden answer buttons (2 in Level 1, 3 in Levels 2–3)",Levels 1–3
+HUD,"Level name chip, 7 marigold flowers, Sunset tracker",All level screens
+Prop / UI,"Gold badge ""Apnapur's Smart Guess Star"", confetti",Badge screen
+SFX,"Bell (correct), goat bleat (wrong), cycle bell (Start), coins, paper swish, cheer",As marked in the Game sheet
+BGM,BGM Village 1 (soft loop; festive at the end),Whole game
+VO,"Narrator, Pari, Aaru, Baba, Guddu Bhaiya, Manju Mausi",Every line in the Story and Game sheets

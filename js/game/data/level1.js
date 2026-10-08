@@ -10,8 +10,8 @@ window.LEVEL1 = {
   sun: [0.02, 0.32],          // sun moves from → to across the 7 questions (0 = sunrise side, 1 = sunset side)
 
   howto: [
-    { who: 'pari', vo: 'L1_howto_1', text: 'Welcome to the bazaar! Every shop has a price tag. The prices are big and messy.', show: 'tag' },
-    { who: 'pari', vo: 'L1_howto_2', text: 'Under each tag there is a number line. Tap the round number that the price is closest to.', show: 'line' },
+    { who: 'pari', vo: 'L1_howto_1', text: 'Welcome to the bazaar! Every item category has a price tag. The prices are big and messy.', show: 'tag' },
+    { who: 'pari', vo: 'L1_howto_2', text: 'Tap the number that the price is closest to.', show: 'line' },
     { who: 'pari', vo: 'L1_howto_3', text: 'Every right answer lights up a marigold. Look at the sun too. Let’s finish before sunset!', show: 'hud' }
   ],
   howtoSample: { item: 'Diyas', icon: 'diyas', price: 12346, lo: 12000, hi: 13000 },
@@ -46,7 +46,7 @@ window.LEVEL1 = {
   ],
 
   complete: [
-    { who: 'aaru', vo: 'L1_done_1', text: 'All the prices are round numbers now! Correct-correct!' },
+    { who: 'aaru', vo: 'L1_done_1', text: 'All the prices are round numbers now! Yayy!' },
     { who: 'pari', vo: 'L1_done_2', text: 'Well done! The shopkeepers sent their bills to the Panchayat office. Let’s check them.' }
   ],
   completeCta: 'Go to the office'

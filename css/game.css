@@ -60,12 +60,13 @@
 #game #tagIcon{width:120px;height:120px;object-fit:contain;flex:none}
 #game #tagText{display:flex;flex-direction:column;padding-top:4px}
 #game #tagName{font:800 34px/1 Baloo;color:var(--ink);margin-bottom:-2px}
-#game #tagPrice{font:700 60px/1.15 Fredoka;color:var(--ink);white-space:nowrap}
+#game #tagPrice{font:700 60px/1.15 Fredoka;color:#2a1405;white-space:nowrap;text-shadow:0 1px 0 rgba(255,240,205,.55)}
+#game #tagName{color:#2a1405!important}
 #game #tagPrice .d{display:inline-block;position:relative}
-#game #tagPrice .d.glow{color:var(--saffron)}
-#game #tagPrice .d.glow::after{content:'';position:absolute;left:-10px;right:-10px;top:4px;bottom:0;border-radius:50%;background:radial-gradient(rgba(247,183,51,.75),rgba(247,183,51,0) 70%);z-index:-1;animation:digitPulse 1s ease-in-out infinite}
-#game #tagPrice .d.glow{text-decoration:underline;text-decoration-thickness:5px;text-underline-offset:6px}
-@keyframes digitPulse{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.25);opacity:1}}
+/* the hundreds digit: white on a solid red pill with a cream ring, so it stands out on the kraft tag (was orange on brown) */
+#game #tagPrice .d.glow{color:#fff;background:#c0392b;border-radius:14px;padding:0 7px;margin:0 2px;text-shadow:none;box-shadow:0 0 0 4px #fff3c4,0 5px 0 4px rgba(58,34,15,.35)}
+#game #tagPrice .d.glow::after{content:'';position:absolute;left:-16px;right:-16px;top:-10px;bottom:-10px;border-radius:20px;border:4px solid rgba(255,214,90,.95);z-index:-1;animation:digitPulse 1.1s ease-in-out infinite}
+@keyframes digitPulse{0%,100%{transform:scale(.92);opacity:.35}50%{transform:scale(1.1);opacity:1}}
 #game #tagStamp{position:absolute;left:150px;top:150px;padding:2px 18px 0;border:6px solid var(--stamp);border-radius:14px;color:var(--stamp);font:700 54px/1.1 Fredoka;background:rgba(255,250,240,.55);transform:rotate(-6deg);opacity:0;white-space:nowrap;mix-blend-mode:multiply}
 /* ---------- number line ---------- */
 #game #numline{position:absolute;inset:0;z-index:14;pointer-events:none}
@@ -288,6 +289,8 @@
 #game .slate3.faded{opacity:.35!important}   /* beats the inline opacity left by the rise tween */
 #game .slate3.pulse{animation:slatePulse 1.1s ease-in-out 3}
 @keyframes slatePulse{50%{filter:drop-shadow(0 0 20px rgba(255,205,70,1));transform:scale(1.04)}}
+/* Guddu Bhaiya (L3 teach): stands at the right, behind the slates, with his notebook */
+#game #guddu3{position:absolute;left:1585px;top:470px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #baba3{position:absolute;left:1410px;top:440px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}
 #game #l3 .ashadow{position:absolute;width:180px;height:32px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0));opacity:0;pointer-events:none}

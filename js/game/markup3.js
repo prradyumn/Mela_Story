@@ -40,6 +40,7 @@
       <div class="smears"><i></i><i></i><i></i></div>
     </div>
     <img id="duster3" src="${A('duster.webp')}" alt="">
+    <img id="guddu3" alt="">
     <div id="minus3"><span></span></div>
     ${slate(0)}${slate(1)}${slate(2)}
     <img id="baba3" alt="">

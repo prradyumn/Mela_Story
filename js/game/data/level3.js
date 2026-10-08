@@ -1,6 +1,6 @@
 /* Level 3 · Mela Ground · Pay and find the money left ("Pari's money cart")
-   Lines are word-for-word from the storyboard ("The Mela before Sunset – Game", screens 24–32), with two agreed changes:
-   the how-to says "lights up one stall" (the design lights a stall, not a bulb), and the ending's exact money is ₹83,165.
+   Lines are word-for-word from the storyboard ("The Mela before Sunset – Game", screens 24–32, Oct 2026 revision), except the
+   money: the sheet's "₹83,000" is kept mathematically correct (1,39,000 − 55,000 = 84,000; exact left ₹83,165) — agreed with the user.
    Geometry is from mela_game_assets_webp/lane_layout.json + the Figma DEV SPEC (frame 137:343).
    VO ids: L3_* in assets/game/vo/. Missing files → the line plays for a reading time (no bubbles in L3). */
 window.LEVEL3 = {
@@ -20,17 +20,19 @@ window.LEVEL3 = {
   howto: [
     { who: 'baba', vo: 'L3_howto_1', text: 'Here is the Mela money: ₹6,00,000. Seven shopkeepers will come for their money.', show: 'baba' },
     { who: 'pari', vo: 'L3_howto_2', text: 'Each time we pay, the money gets less. Make the bill a round number in your head. Then take it away.', show: 'less' },
-    { who: 'pari', vo: 'L3_howto_3', text: 'Choose about how much money is left. Every payment lights up one stall of the Mela!', show: 'map' }
+    { who: 'pari', vo: 'L3_howto_3', text: 'Choose about how much money is left.', show: 'map' }
   ],
 
   teach: {
     money: 200000, bill: 38760, choices: [161000, 239000, 151000], answer: 161000,
     lines: [
-      { who: 'pari', vo: 'L3_teach_1', text: 'Let’s try one. We have ₹2,00,000. The bill is ₹38,760.', show: 'bill' },
-      { who: 'pari', vo: 'L3_teach_2', text: 'First, round the bill. ₹38,760 is about 39,000.', show: 'chip' },
-      { who: 'pari', vo: 'L3_teach_3', text: 'Now take it away. 2,00,000 minus 39,000 is 1,61,000. Tap About ₹1,61,000.', show: 'slates' }
+      { who: 'pari', vo: 'L3_teach_1', text: 'Let’s try one. For example, we have ₹2,00,000. The bill is ₹38,760.', show: 'bill' },
+      { who: 'pari', vo: 'L3_teach_2', text: 'First, round off the bill. ₹38,760 is about 39,000.', show: 'chip' },
+      { who: 'guddu', vo: 'L3_teach_guddu', text: 'Let me try... It’s 2,00,000 minus 38,760... borrow one... um...', show: 'guddu' },
+      { who: 'pari', vo: 'L3_teach_3', text: 'Now take it away. 2,00,000 minus 39,000 is 1,61,000. Tap ₹1,61,000.', show: 'slates' }
     ],
     ok:    { who: 'pari', vo: 'L3_teach_ok',    text: 'Yes! About ₹1,61,000 is left.' },
+    exact: { who: 'guddu', vo: 'L3_teach_exact', text: 'Umm... it’s 1,61,240 to be exact. But your number is so close. Good job!' },
     baba:  { who: 'baba', vo: 'L3_teach_baba',  text: 'Very good. Now the real money: ₹6,00,000. Let’s pay!' },
     oops:  { who: 'pari', vo: 'L3_teach_oops',  text: 'Oops! Try again. We are paying, so the money gets less.' },
     hint:  { who: 'pari', vo: 'L3_teach_hint',  text: 'Hint: 200 thousand take away 39 thousand is 161 thousand.' },
@@ -77,7 +79,7 @@ window.LEVEL3 = {
   };
   /* Every voiced line in the level, in play order */
   D.allLines = () => {
-    const T = D.teach, out = [...D.howto, ...T.lines, T.ok, T.baba, T.oops, T.hint, T.nudge, T.idle, D.oops, D.idle];
+    const T = D.teach, out = [...D.howto, ...T.lines, T.ok, T.exact, T.baba, T.oops, T.hint, T.nudge, T.idle, D.oops, D.idle];
     D.bills.forEach((b, i) => { const L = D.qLines(b, i + 1); out.push(L.ask, L.ok, L.hint, L.nudge); });
     return out.map(l => ({ id: l.vo, who: l.who, text: l.text }));
   };
