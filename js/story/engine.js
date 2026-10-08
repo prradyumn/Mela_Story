@@ -165,7 +165,7 @@ const CH = {
   aaru: { name: 'Aaru', h: 480, color: '#e8701a', poses: ['run', 'shout', 'jump'], talk: { shout: 'closed', jump: 'closed' },
     cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } } },
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
-    acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 10.5, mode: 'pp', lift: -1 } } },
+    acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
     acts: { talk: { file: 'guddu_talk', n: 36, h: 650.2, fps: 10.5, mode: 'pp', lift: -6 } } },
   manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 36, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },
@@ -278,7 +278,8 @@ const TALKERS = new Set();
 function talkOn(o) { if (Object.keys(o.mouths).length) { o.mo = { open: false, since: 0 }; TALKERS.add(o); } }
 function talkOff(o) { TALKERS.delete(o); Object.values(o.mouths).forEach(i => i.style.opacity = 0); }
 function voiceLevel() {
-  if (!voiceAn || !voiceNow || !AC || AC.state !== 'running') return -1;
+  if (!voiceAn || !AC || AC.state !== 'running') return -1;   // audio locked / unavailable: flap at a speech rhythm
+  if (!voiceNow) return 0;                                    // audio on but no line playing: the mouth stays shut
   voiceAn.getFloatTimeDomainData(voiceSamples); let s = 0;
   for (let i = 0; i < voiceSamples.length; i++) s += voiceSamples[i] * voiceSamples[i];
   return Math.sqrt(s / voiceSamples.length);
@@ -350,8 +351,10 @@ function fitScale(shape, html) {
   for (let k = 1; k <= 2.6; k += .05) { t.style.width = bw * k + 'px'; t.style.height = 'auto'; if (inner.offsetHeight <= bh * k - 6) return k; }
   return 2.6;
 }
-function bubbleFor(s, o, text) {
-  const onLeft = o.x < W / 2, plain = text.replace(/<[^>]+>/g, '');
+/* side: 'L' / 'R' forces which way the bubble opens (default: away from the stage edge the speaker is near). Use 'R' for a
+   speaker left of centre whose bubble would cover someone on the right (bridge2: Pari's p5 opens to the left, Guddu stays clear). */
+function bubbleFor(s, o, text, side = null) {
+  const onLeft = side ? side === 'L' : o.x < W / 2, plain = text.replace(/<[^>]+>/g, '');
   let shape;
   if (plain.length <= 30) shape = 'db6';
   else if (onLeft) shape = (o.key === 'aaru' || o.key === 'guddu') ? 'db5' : 'db8';
@@ -379,9 +382,9 @@ function bubbleFor(s, o, text) {
 }
 // say: bubble + voice + typewriter + bounce. returns end time
 // act: play that talking animation (CH[key].acts) for the line instead of the pose + mouth; end = pose to settle into.
-function say(tl, s, t, id, o, text, { gap = .35, hold = .15, p = null, act = null, end = null } = {}) {
+function say(tl, s, t, id, o, text, { gap = .35, hold = .15, p = null, act = null, end = null, side = null } = {}) {
   text = LAYOUT.text[id] || text;
-  const d = DUR[id] || 2.5, b = reg(bubbleFor(s, o, text), 'bubble_' + id), ws = b.querySelectorAll('.w');
+  const d = DUR[id] || 2.5, b = reg(bubbleFor(s, o, text, side), 'bubble_' + id), ws = b.querySelectorAll('.w');
   if (p) pose(tl, t - .05, o, p);
   tl.to(b, { opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.4)' }, t);
   tl.call(() => { voice(id); sfx('bubble', .5); talkOn(o); }, null, t + .05);

@@ -85,18 +85,13 @@ async function title() {
   move(tl, .6, aaru, 'run', -760, 0, null, { ease: 'sine.out', end: 'shout', enter: true });
   tl.call(() => voice('t0'), null, 1.3);
   jump(tl, 2.9, aaru, 45, 1);   // once he has run in
-  const start = reg(goButton(ui, 'Play', 960, 820), 'start');
-  tl.to(start, { scale: 1, duration: .6, ease: 'back.out(2.5)' }, 2.6);
-  tl.to(start, { scale: 1.06, duration: .7, yoyo: true, repeat: -1, ease: 'sine.inOut' }, 3.3);
+  // no second Play button: the cover's Start began the game. The welcome plays (t0), then the story moves on by itself.
   birds(s, 5, 90);
   petals(50);
   const iv = setInterval(() => petals(6), 1500);
   playMusic('m_title', { gain: .9 });
-  await waitClick(start);
+  await wait(Math.max(5, 1.3 + (DUR.t0 || 3) + 1.6));
   clearInterval(iv); tl.kill();
-  play('sfx_cycle_bell', { gain: 1 });
-  gsap.to(start, { scale: .9, duration: .1, yoyo: true, repeat: 1 });
-  await wait(.7);
   await irisOut(50, 80);
   NEXT_IN = 'iris';
 }
@@ -391,12 +386,12 @@ async function bridge2() {
   SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '7 of 7 done!', flowers: 7 });
   const s = newScene();
   bgImg(s, 'bg_04_office', { left: '0px' });
-  const guddu = officeGuddu(s, 'surprised');
+  const guddu = officeGuddu(s, 'write');   // 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
   officeFG(s);
   const pari = char(s, 'pari', 720, 'idle', { ground: 1074, scale: .92, z: 8 });
   warmTint(s, .45).style.zIndex = 9;
   playMusic('m_village_long', { gain: .85, offset: 80 });
-  const pile = reg(el('div', '', s, '', { position: 'absolute', left: '300px', top: '520px', width: '220px', height: '160px', zIndex: 8 }), 'donepile');
+  const pile = reg(el('div', '', s, '', { position: 'absolute', left: '800px', top: '520px', width: '220px', height: '160px', zIndex: 8 }), 'donepile');   // on the counter between Pari and Guddu (Pari's p5 bubble opens over the left side)
   for (let i = 0; i < 7; i++) el('div', '', pile, '', { position: 'absolute', left: (i % 2) * 6 + 'px', bottom: i * 10 + 'px', width: '200px', height: '120px', background: '#fffdf4', border: '3px solid #8a6a4a', borderRadius: '6px', transform: `rotate(${(i % 3 - 1) * 3}deg)`, backgroundImage: 'repeating-linear-gradient(#fffdf4 0 14px,#c9d6ee 14px 16px)' });
   el('div', '', pile, 'DONE ✓', { position: 'absolute', left: '40px', top: '-30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '34px', color: '#fff', background: '#3b8a46', padding: '2px 16px', borderRadius: '12px', border: '4px solid #1f4d27' });
   const tl = gsap.timeline({ paused: true });
@@ -404,10 +399,10 @@ async function bridge2() {
   tl.from(pile.children, { y: -400, opacity: 0, duration: .45, stagger: .12, ease: 'bounce.out' }, .3);
   tl.call(() => sfx('paper', .7), null, .3);
   tl.to(world, { scale: 1.08, x: -80, duration: 1.2, ease: 'power2.inOut' }, 1.4);
-  let t = say(tl, s, 1.8, 'g2', guddu, T('g2'), { act: 'talk', end: 'surprised' });
+  let t = say(tl, s, 1.8, 'g2', guddu, T('g2'), { act: 'talk', end: 'write' });
   tl.call(() => sfx('sparkle', .5), null, 1.9);
   tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
-  t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy' });
+  t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
   const go = sign(s, 'Go to the Mela Ground ➜', 960, 400, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2;
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
@@ -532,8 +527,12 @@ async function main() {
   const lp = $('#lp'), bar = $('#loader .bar i');
   await loadAll(p => bar.style.width = (p * 100).toFixed(0) + '%');
   await document.fonts.load('600 32px Poppins'); await document.fonts.ready;
-  lp.textContent = 'Tap to begin'; gsap.to(lp, { scale: 1.08, duration: .6, yoyo: true, repeat: -1 });
+  // the cover's Start button (the tap unlocks audio); the whole cover is tappable too
+  gsap.to('#loader .bar', { opacity: 0, duration: .3 });
+  lp.textContent = 'Start ▶'; lp.classList.add('ready'); $('#loader').classList.add('ready');
+  gsap.fromTo(lp, { scale: 0 }, { scale: 1, duration: .6, ease: 'back.out(2.4)', onComplete: () => gsap.to(lp, { scale: 1.06, duration: .75, yoyo: true, repeat: -1, ease: 'sine.inOut' }) });
   await new Promise(r => $('#loader').addEventListener('click', () => { unlockAudio(); r(); }, { once: true }));
+  try { play('sfx_cycle_bell', { gain: 1 }); } catch (e) { }   // storyboard: cycle bell on Start
   try { await AC.resume(); } catch (e) { }
   gsap.to('#loader', { opacity: 0, duration: .5, onComplete: () => $('#loader').remove() });
   const q = new URLSearchParams(location.search);

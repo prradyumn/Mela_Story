@@ -40,7 +40,7 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
     <div id="bleat" class="abs">Meh-eh!</div>
 
     <!-- cart (appears only when an item is collected) -->
-    <div id="cart" class="abs"><div id="cartItems"></div><img class="cart-img" src="${GA('cart_empty.webp')}" alt=""><div id="cartCount">0 / 7</div></div>
+    <div id="cart" class="abs"><i class="cshadow"></i><div id="cartItems"></div><img class="cart-img" src="${GA('cart_empty.webp')}" alt=""><div id="cartCount">0 / 7</div></div>
 
     <!-- hint strip + hand -->
     <div id="rule" class="abs"><span class="bulb"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="#f7b733" stroke="#8a5a10" stroke-width="1.6" stroke-linejoin="round"/></svg></span><span id="ruleText"></span></div>
@@ -68,7 +68,7 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
     <!-- title -->
     <div class="overlay" id="titleOv">
       <div class="dim"></div>
-      <div class="gcard" id="titleCard">
+      <div class="gcard sunset" id="titleCard">
         <div class="lvl">Level 1</div>
         <h1>Aakoli Bazaar</h1>
         <p>Round the price tags before sunset</p>
@@ -78,7 +78,8 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
 
     <!-- level complete -->
     <div class="overlay hidden" id="doneOv">
-      <div class="gcard" id="doneCard">
+      <div class="gcard sunset" id="doneCard">
+        <div class="gkick">Level 1 · Done</div>
         <h2>7 of 7 done!</h2>
         <div class="sub">Every price is a round number now.</div>
         <div id="doneStars"><img alt=""><img alt=""><img alt=""></div>

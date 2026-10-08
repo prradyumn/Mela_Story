@@ -44,7 +44,7 @@
         else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule); await fb(L.hint); }
         else {
           Btns.state(wrongSide, 'faded'); Btns.state(correctSide, 'glow');
-          const c = Btns.centre(correctSide); Hand.show(c.x, c.y);
+          const h = Btns.handAt(correctSide); Hand.show(h.x, h.y);
           await fb(L.nudge);
         }
         if (!done) { Btns.enable(onPick); if (strikes < 3) Btns.state(side, ''); armIdle(); }
@@ -53,6 +53,7 @@
       async function correct() {
         SND.stopVo(); Hand.hide();
         Btns.state(correctSide, 'correct'); Btns.state(wrongSide, 'faded'); Btns.tick(correctSide);
+        GFX.ring(Btns.B[correctSide]); GFX.focus(false); GFX.flash(960, 560);
         SND.sfx('bell'); SND.sfx('ding');
         const okLine = COACH.say(L.ok); COACH.cheer();          // Pari cheers through her "Yes!"
         Rule.hide();
@@ -85,13 +86,14 @@
         await wait(teach ? 1.2 : 2);   // storyboard: "After 2 seconds the next shop slides in"
       }
 
+      GFX.focus(true);
       Btns.enable(onPick); armIdle();
     });
   }
 
   /* ---------- clear the stage between shops ---------- */
   async function clearShop() {
-    COACH.hideBubble();
+    COACH.hideBubble(); GFX.focus(false);
     const back = GUDIYA.state.x !== CORNER.x ? GUDIYA.trotTo(CORNER.x, CORNER.y, CORNER.h) : null;
     await Promise.all([Btns.hide(), Marker.hideAll(), Cart.hide(), Rule.hide(), Line.hide()]);
     await Promise.all([Tag.swingOut(), bgShift(), back]);
@@ -150,7 +152,7 @@
         Rule.hide(); await Btns.show(T.lo, T.hi);
         if ($('#gudiya').classList.contains('hidden')) GUDIYA.enter(CORNER.x, CORNER.y, CORNER.h);
         Btns.state('R', 'glow');
-        const c = Btns.centre('R'); Hand.show(c.x, c.y);       // show, don't tell: the hand demonstrates the tap
+        const h = Btns.handAt('R'); Hand.show(h.x, h.y);       // show, don't tell: the hand demonstrates the tap
         await play({ ...T, word: 'sweets', n: 0 }, L, { teach: true });
         return;
       }
@@ -169,6 +171,7 @@
     HUD.chip(`${D.chip} · Shop ${i + 1} of 7`);
     // beat 1: only the tag (bubble shows the first sentence; the VO file is the whole question)
     const ask = COACH.say({ ...L.ask, text: L.ask1 });
+    GFX.focus(true);
     await Tag.show(q.item, q.icon, q.price);
     await wait(.7);
     // beat 2: the number line + red arrow
@@ -196,11 +199,7 @@
     $('#doneScore').textContent = `${gold} of 7 on the first try`;
     SND.sfx('confetti'); confetti(90);
     await gsap.fromTo('#doneCard', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
-    for (let i = 0; i < 3; i++) {
-      gsap.fromTo(imgs[i], { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.5)' });
-      if (i < nStars) { SND.sfx('sparkle'); const r = imgs[i]; sparks(730 + r.offsetLeft + r.offsetWidth / 2, 180 + 24 + 150 + r.offsetTop, 14, 90); }
-      await wait(.3);
-    }
+    await GFX.stars(imgs, nStars);
     SND.sfx('whoosh');
     await gsap.fromTo('#doneCart', { x: -900, rotation: -4 }, { x: 0, rotation: 0, duration: .9, ease: 'power3.out' });
     gsap.fromTo('#doneCart', { y: 0 }, { y: -10, duration: .15, yoyo: true, repeat: 1 });
@@ -219,7 +218,7 @@
     gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); gsap.set('#cart', { x: 0 });
     gsap.set(['#doneCard', '#doneCart', '#gHud', '#avatar', '#bubble'], { clearProps: 'transform,opacity' });
     $('#doneCta').classList.remove('pulse'); Cart.shown = false; Rule.on = false; Hand.hide();
-    $('#gFx').innerHTML = '';
+    $('#gFx').innerHTML = ''; GFX.reset();
   }
 
   /* ---------- level title (no button: the story already had the tap that unlocks audio) ---------- */
@@ -239,12 +238,12 @@
   async function run({ startAt = 0, skipIntro = false, embedded = true } = {}) {
     reset();
     SND.preload(D.allLines().map(l => l.id));          // VO loads in the background, in play order
-    gsap.set('#gBg', { x: 0 });
+    SC.bgSet(skipIntro ? startAt + 1 : 0);
     HUD.setLit(startAt); HUD.lit = startAt; HUD.setSun(D.sun[0] + (D.sun[1] - D.sun[0]) * startAt / 7);
     Cart.setItems(D.questions.slice(0, startAt).map(q => GA(`ic_${q.icon}.webp`)));
     const warmed = warm(['bg_bazaar.webp', 'ui_price_tag.webp', 'cart_empty.webp', 'nl_bar.webp', 'nl_marker.webp', 'nl_marker_green.webp', ...D.questions.map(q => `ic_${q.icon}.webp`)].map(GA));
     await banner(); await warmed;
-    HUD.show();
+    HUD.show(); GFX.ambient(1);              // bunting + the odd flock of birds
     if (!skipIntro) {
       skipBtn(true);
       await howto();

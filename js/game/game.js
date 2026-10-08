@@ -20,7 +20,7 @@ window.GAME_LEVELS[1] = async (api) => {
   window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level1: res });
 
   // hand back: story HUD shows 7 marigolds and the sun where the level ended
-  api.setFlowers(7); api.setSun(api.level.sun[1]);
+  GFX.reset(); api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
   await gsap.to(root, { opacity: 0, duration: .35 });
   root.classList.add('hidden');
@@ -36,7 +36,7 @@ window.GAME_LEVELS[2] = async (api) => {
   root.classList.remove('hidden'); gsap.set(root, { opacity: 1 });
   const bill = parseInt(q.get('bill'), 10);
   const res = await LEVEL2_RUN({ startAt: bill > 0 ? Math.min(6, bill - 1) : 0, skipIntro: bill > 0 });
-  window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level2: res });
+  window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level2: res }); GFX.reset();
   api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
   await gsap.to(root, { opacity: 0, duration: .35 });
@@ -53,7 +53,7 @@ window.GAME_LEVELS[3] = async (api) => {
   root.classList.remove('hidden'); gsap.set(root, { opacity: 1 });
   const bill = parseInt(q.get('bill'), 10);
   const res = await LEVEL3_RUN({ startAt: bill > 0 ? Math.min(6, bill - 1) : 0, skipIntro: bill > 0 });
-  window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level3: res });
+  window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level3: res }); GFX.reset();
   api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
   await gsap.to(root, { opacity: 0, duration: .35 });

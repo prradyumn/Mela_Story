@@ -47,7 +47,7 @@
         else if (strikes === 2) { Bill.chips('yellow'); await fb(L.hint); }
         else {
           b.choices.forEach((v, k) => Stamps.state(k, k === right ? 'glow' : 'faded'));
-          const c = Stamps.centre(right); Hand.show(c.x - 76, c.y - 16);
+          const h = Stamps.handAt(right); Hand.show(h.x, h.y);
           await fb(L.nudge);
         }
         if (!done) { Stamps.enable(onPick); if (strikes < 3) Stamps.state(i, ''); armIdle(); }
@@ -55,17 +55,20 @@
       async function correct() {
         SND.stopVo(); Hand.hide();
         b.choices.forEach((v, k) => Stamps.state(k, k === right ? 'correct' : 'faded'));
+        GFX.ring(Stamps.S[right]); GFX.focus(false); GFX.flash(1310, 580);
         SND.sfx('bell'); SND.sfx('ding');
         const okLine = COACH.say(L.ok); COACH.cheer();          // Pari cheers through her "Yes!"
         await Bill.chips('blue');
         await Stamps.press(right, L.ans);
         if (!teach) {
           HUD.lit++; HUD.setLit(HUD.lit);                              // count kept (the story gets 7 flowers); no marigold plate in L2
+          HUD.sun(D.sun[0] + (D.sun[1] - D.sun[0]) * HUD.lit / 7, 1.4);   // no tracker: the light through the window warms instead
           result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
         }
         await okLine;
         await wait(teach ? .8 : 1.2);
       }
+      GFX.focus(true);
       Stamps.enable(onPick); armIdle();
     });
   }
@@ -116,7 +119,7 @@
         skipBtn(false); COACH.say(line);
         await Stamps.show(T.choices);
         const right = T.choices.indexOf(T.answer); Stamps.state(right, 'glow');
-        const c = Stamps.centre(right); Hand.show(c.x - 76, c.y - 16);
+        const h = Stamps.handAt(right); Hand.show(h.x, h.y);
         await play(T, L, { teach: true });
         await Promise.all([Stamps.hide(), Bill.crumpleTo(false)]);
         return;
@@ -135,6 +138,7 @@
     HUD.chip(`${D.chip} · Bill ${n} of 7`);
     Pile.set(8 - n); Pile.bump();
     const ask = COACH.say({ ...L.ask, text: `Here is bill ${n}.` });
+    GFX.focus(true);
     Bill.set('BILL ' + n, b.items);
     await Bill.enter();                                              // beat 1: the paper un-crumples (title only)
     COACH.update({ ...L.ask, text: `Here is bill ${n}. ${b.items[0][0]} ${LEVEL1.rs(b.items[0][1])}…` });
@@ -145,7 +149,7 @@
     SND.setCurrent(L.ask);
     await play(b, L);
     await ask;
-    Pile.set(7 - n);
+    Pile.set(7 - n); GFX.focus(false);
     await Promise.all([Stamps.hide(), Bill.crumpleTo(true)]);         // paper squash → CHECKED basket
   }
 
@@ -156,11 +160,11 @@
     const ov = $('#done2'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#done2Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
-    ov.querySelector('.balls').innerHTML = Array.from({ length: 7 }, (_, i) => `<div class="pkt" style="left:${30 + (i % 4) * 95 + (i > 3 ? 48 : 0)}px;top:${i > 3 ? 0 : 36}px"></div>`).join('');
+    ov.querySelector('.balls').innerHTML = Basket.html(7, 460 / 250);   // the same letters, standing in the big basket
     $('#done2Score').textContent = `${gold} of 7 on the first try`;
     SND.sfx('confetti'); confetti(90);
     await gsap.fromTo('#done2Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
-    for (let i = 0; i < 3; i++) { gsap.fromTo(imgs[i], { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.5)' }); if (i < nStars) SND.sfx('sparkle'); await wait(.3); }
+    await GFX.stars(imgs, nStars);
     gsap.from('#done2Basket .balls .pkt', { y: -120, opacity: 0, duration: .45, stagger: .08, ease: 'bounce.out' });
     const cta = $('#done2Cta'); cta.classList.add('pulse');
     // moves on by itself once the card has been seen; tapping the button just goes a little sooner (same as Level 1)
@@ -172,7 +176,11 @@
   function reset() {
     skipping = false; result.stars = [];
     $('#l2').classList.remove('hidden'); $('#done2').classList.add('hidden'); $('#done2Cta').classList.remove('pulse');
-    Bill.hide(); $('#pack2').innerHTML = ''; Stamps.S.forEach(s => s.className = 'stamp2 hidden'); Basket.set(0); Pile.set(7);
+    GFX.reset(); Bill.hide(); $('#pack2').innerHTML = '';
+    /* #l2 is its own stacking context (will-change), so everything on the desk (stamps, bill, basket, the complete card) is one
+       layer: put it above the coaches (#coach z 40) — the stamps stand in front of Pari/Guddu and nobody covers the card.
+       Gudiya + her bleat go above it (she trots in by the basket). Restored when the level ends. */
+    gsap.set('#l2', { zIndex: 41 }); gsap.set('#gudiya', { zIndex: 43 }); gsap.set('#bleat', { zIndex: 44 }); Stamps.S.forEach(s => s.className = 'stamp2 hidden'); Basket.set(0); Pile.set(7);
     gsap.set(['#inkPad', '#ball2', '#crumpleCv'], { opacity: 0 }); gsap.set('#done2Card', { clearProps: 'transform,opacity' });
     // anything Level 1 left behind
     ['#coach', '#btnSkip', '#gudiya', '#doneOv', '#tagRig', '#numline', '#marker', '#markerGreen', '#titleOv'].forEach(s => $(s).classList.add('hidden'));
@@ -187,7 +195,7 @@
     Basket.set(startAt);
     const warmed = warm(['office_desk_l2.webp', 'bill_paper.webp', 'stamp_tool.webp', 'stamp_tool_pressed.webp', 'stamp_mark.webp', 'ink_pad.webp', 'bill_pile.webp', 'checked_basket.webp'].map(GA));
     await banner(); await warmed;
-    HUD.show();
+    HUD.show(); GFX.ambient(2);              // dust drifting in the window light
     COACH.present('guddu');                      // Guddu Bhaiya is at his desk for the whole level
     gsap.set(['#sunPanel', '#gChip', '#mariPlate', '#glowMari'], { autoAlpha: 0 });   // L2: no sun, chip or marigolds — characters + bill get the room
     if (!skipIntro) {
@@ -198,7 +206,7 @@
     }
     for (let i = startAt; i < 7; i++) await billRound(D.bills[i], i);
     const res = await complete();
-    window.L2_ACTIVE = false; COACH.pariSpot = 'stand'; gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });
+    window.L2_ACTIVE = false; COACH.pariSpot = 'stand'; gsap.set(['#l2', '#gudiya', '#bleat'], { clearProps: 'zIndex' }); gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });
     return res;
   }
   window.LEVEL2_RUN = run;

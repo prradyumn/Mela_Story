@@ -42,13 +42,13 @@
     async lightNext(fromX, fromY) {
       const i = HUD.lit; if (i >= 7) return; HUD.lit++;
       const c = mariCentre(i);
-      await ST.flyImg('data:image/svg+xml;utf8,' + encodeURIComponent(marigoldSVG().replace('class="m-off"', 'opacity="0"')), fromX, fromY, c.x, c.y, { size: 90, endSize: 64, lift: 160, dur: .7 });
+      await ST.flyImg('data:image/svg+xml;utf8,' + encodeURIComponent(marigoldSVG().replace('class="m-off"', 'opacity="0"')), fromX, fromY, c.x, c.y, { size: 90, endSize: 64, lift: 160, dur: .7, trail: true });
       maris[i].classList.add('lit'); SND.sfx('sparkle');
-      gsap.fromTo(maris[i], { scale: 1.6 }, { scale: 1, duration: .5, ease: 'back.out(3)' });
-      sparks(c.x, c.y, 12, 70);
+      gsap.fromTo(maris[i], { scale: .25, rotation: -150 }, { scale: 1, rotation: 0, duration: .75, ease: 'back.out(2.2)' });   // the flower pops open
+      GFX.ringAt(c.x, c.y, 80, { n: 1, grow: 1.8 }); sparks(c.x, c.y, 14, 80, ['#f08c12', '#ffbf2e', '#fff1b0']);
     },
-    sun(p, dur = 0.9) { return gsap.to(sunState, { p, duration: dur, ease: 'power2.inOut', onUpdate: placeSun }); },
-    setSun(p) { sunState.p = p; placeSun(); },
+    sun(p, dur = 0.9) { GFX.grade(p, Math.max(1.2, dur)); return gsap.to(sunState, { p, duration: dur, ease: 'power2.inOut', onUpdate: placeSun }); },   // the light warms with the sun (no tracker in the games)
+    setSun(p) { sunState.p = p; placeSun(); GFX.grade(p, 0); },
     glow(id) { const g = $(id); return gsap.timeline().to(g, { opacity: 1, duration: .25 }).to(g, { opacity: .3, duration: .3, yoyo: true, repeat: 3 }).to(g, { opacity: 0, duration: .3 }); },
     celebrate() { maris.forEach((m, i) => gsap.fromTo(m, { scale: 1 }, { scale: 1.35, duration: .22, yoyo: true, repeat: 1, delay: i * .08, ease: 'power2.out' })); }
   };

@@ -49,7 +49,8 @@
     <img id="potli3" src="${A('potli.webp')}" alt="">
     <div id="fw3"></div>
     <div class="overlay hidden" id="done3"><div class="dim"></div>
-      <div class="gcard" id="done3Card">
+      <div class="gcard sunset" id="done3Card">
+        <div class="gkick">Level 3 · Done</div>
         <h2>The Mela is lit!</h2>
         <div class="sub"></div>
         <div id="done3Stars"><img alt=""><img alt=""><img alt=""></div>

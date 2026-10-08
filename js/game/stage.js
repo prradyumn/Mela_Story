@@ -50,15 +50,16 @@
     }
   }
   // Fly a copy of an image along an arc from (x0,y0) to (x1,y1). Returns a promise.
-  function flyImg(src, x0, y0, x1, y1, { size = 110, endSize = 70, lift = 220, dur = .75 } = {}) {
+  function flyImg(src, x0, y0, x1, y1, { size = 110, endSize = 70, lift = 220, dur = .75, trail = false } = {}) {
     return new Promise(res => {
       const im = document.createElement('img'); im.src = src; im.className = 'flyer'; im.style.width = im.style.height = size + 'px'; im.style.left = '0px'; im.style.top = '0px'; im.style.transform = `translate(${x0 - size / 2}px,${y0 - size / 2}px)`; fx.appendChild(im);
-      const o = { t: 0 };
+      const o = { t: 0 }; let k = 0;
       gsap.to(o, {
         t: 1, duration: dur, ease: 'power1.inOut',
         onUpdate() {
           const t = o.t, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t - lift * Math.sin(Math.PI * t), s = size + (endSize - size) * t;
           im.style.width = im.style.height = s + 'px'; im.style.transform = `translate(${x - s / 2}px,${y - s / 2}px) rotate(${t * 20}deg)`;
+          if (trail && window.GFX && k++ % 2 === 1) GFX.petal(x, y);   // petals fall off behind a flying marigold
         },
         onComplete() { im.remove(); res(); }
       });

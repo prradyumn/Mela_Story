@@ -35,7 +35,7 @@
   }
 
   const SND = {
-    sfx(name, vol) { try { sfx(NAME[name] || name, vol ?? VOL[name] ?? .5); } catch (e) { } },
+    sfx(name, vol, rate) { try { sfx(NAME[name] || name, vol ?? VOL[name] ?? .5, rate); } catch (e) { } },
     /* Load these VO ids in the background, in order (call at level start) */
     async preload(ids) { let miss = 0, any = false; for (const id of ids) { if (await load(id)) { miss = 0; any = true; } else if (++miss >= 3) { if (!any) noVO = true; return; } } },   // no VO files yet → stop asking
     /* Play a VO id. Resolves when it ends, or after `fallbackSec` if there is no file. */

@@ -72,10 +72,10 @@
     /* the duster sweeps the panel twice, chalk smears appear, the old number fades */
     async wipe() {
       const du = $('#duster3'), sm = C.querySelectorAll('.smears i');
-      gsap.set(du, { left: 470, top: 590, opacity: 1, rotation: -6 }); SND.sfx('swish', .5);
+      gsap.set(du, { left: 430, top: 556, opacity: 1, rotation: -6 }); SND.sfx('swish', .5);   // over the number on the (bigger, centred) board
       gsap.to(sm, { opacity: 1, duration: .25, stagger: .12 });
       gsap.to(pval, { opacity: 0, duration: .7 });
-      await gsap.timeline().to(du, { left: 640, duration: .32, ease: 'sine.inOut' }).to(du, { left: 480, duration: .3, ease: 'sine.inOut' }).to(du, { left: 640, duration: .3, ease: 'sine.inOut' });
+      await gsap.timeline().to(du, { left: 650, duration: .32, ease: 'sine.inOut' }).to(du, { left: 440, duration: .3, ease: 'sine.inOut' }).to(du, { left: 650, duration: .3, ease: 'sine.inOut' });
       gsap.to(du, { opacity: 0, y: 30, duration: .25, onComplete: () => gsap.set(du, { y: 0 }) });
       gsap.to(sm, { opacity: 0, duration: .5, delay: .1 });
     },
@@ -152,7 +152,7 @@
   const S = [...document.querySelectorAll('#game .slate3')];
   let onPick = null;
   S.forEach((s, i) => { s.style.left = (930 + i * 230) + 'px';
-    s.addEventListener('pointerdown', e => { e.preventDefault(); if (!onPick || s.classList.contains('locked') || s.classList.contains('faded')) return; SND.sfx('pop', .35); onPick(i); }); });
+    s.addEventListener('pointerdown', e => { e.preventDefault(); if (!onPick || s.classList.contains('locked') || s.classList.contains('faded')) return; SND.sfx('pop', .35); GFX.press(s); onPick(i); }); });
   const Slates = {
     S,
     async show(vals) {
@@ -166,8 +166,9 @@
     wiggle(i) { return gsap.fromTo(S[i], { rotation: 0 }, { rotation: 5, duration: .06, repeat: 5, yoyo: true, ease: 'sine.inOut', onComplete: () => gsap.set(S[i], { rotation: 0 }) }); },
     pulse() { S.forEach(s => { if (!s.classList.contains('faded') && !s.classList.contains('glow')) { s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); } }); },
     tick(i) { return gsap.to(S[i].querySelector('.tick'), { scale: 1, duration: .3, ease: 'back.out(3)' }); },
-    /* centre of a slate in the coordinates SC.Hand.show expects (the hand lands at (1002 + 230i, 935), as in Figma) */
-    handAt(i) { return { x: 936 + i * 230, y: 1039 }; },
+    /* SC.Hand.show(x, y) puts the fingertip at (x + 141, y + 16): land it on the slate, just above its number (centre x, y 862)
+       — the hand comes from above, so pointing lower would cover the number (it used to tap the slate's bottom frame) */
+    handAt(i) { return { x: 1030 + i * 230 + 12 - 141, y: 862 - 16 }; },
     async hide() { await gsap.to(S, { y: 320, opacity: 0, duration: .35, stagger: .05, ease: 'power2.in' }); S.forEach(s => s.className = 'slate3 hidden'); }
   };
 
@@ -220,13 +221,46 @@
   };
 
   /* ---------- coins: arc from the cart's money bag into the potli (or off-screen in the how-to) ---------- */
-  const BAG = { x: 448, y: 706 };   // the potli on the cart rim (cart3 .bag)
+  const BAG = { x: 446, y: 682 };   // the money potli on the cart rim (cart3 .bag), in front of the board's corner
+  /* one coin: pops out of the cart's potli, flips (scaleX = cos) along a high arc with a little sparkle trail, and drops INTO
+     the mouth of Aaru's potli (shrinks + fades in the last 15 %) */
+  function coinArc(from, to, k) {
+    return new Promise(res => {
+      const c = document.createElement('img'); c.src = A('coin.webp'); c.className = 'flyer'; $('#gFx').appendChild(c);
+      const o = { t: 0 }, lift = 230 + (k % 3) * 34, dur = .62 + (k % 2) * .06, spin = 3 + (k % 3);
+      let f = 0;
+      gsap.to(o, { t: 1, duration: dur, ease: 'none', onUpdate() {
+        const t = o.t, e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;   // ease in-out along x, true arc in y
+        const x = from.x + (to.x - from.x) * e, y = from.y + (to.y - from.y) * t - lift * Math.sin(Math.PI * t);
+        const s = t < .85 ? 1 : 1 - (t - .85) / .15 * .65, sz = 50 * s;
+        c.style.width = c.style.height = sz + 'px'; c.style.opacity = t < .85 ? 1 : 1 - (t - .85) / .15;
+        c.style.transform = `translate(${x - sz / 2}px,${y - sz / 2}px) scaleX(${Math.max(.18, Math.abs(Math.cos(t * Math.PI * spin)))})`;
+        if (f++ % 4 === 0 && t < .8) sparks(x, y, 1, 16, ['#fff3b0']);
+      }, onComplete() { c.remove(); res(); } });
+    });
+  }
   const Coins = {
-    async toPotli(n = 5) {
-      SND.sfx('coins', .6);
-      const t = Aaru.potliCentre();   // into the potli in his raised hand
-      await Promise.all(Array.from({ length: n }, (_, k) => new Promise(r => gsap.delayedCall(k * .12, () => ST.flyImg(A('coin.webp'), BAG.x, BAG.y, t.x + (k - 2) * 6, t.y, { size: 54, endSize: 44, lift: 220 + k * 20, dur: .6 }).then(r)))));
-      gsap.fromTo(PT, { scale: 1.15 }, { scale: 1, duration: .3, ease: 'back.out(3)' });
+    /* the payment: Aaru holds his potli up still, the cart's potli jiggles, coins fly out one by one and land in his potli
+       (plink, rising pitch; the potli dips and bounces each time), then a sparkle */
+    async toPotli(n = 6) {
+      Aaru.bounce(false); Aaru.pose('jump');                         // hold still to catch: the target must not move
+      const bag = C.querySelector('.bag');
+      gsap.fromTo(bag, { rotation: -9 }, { rotation: 9, duration: .07, yoyo: true, repeat: 3, transformOrigin: '50% 90%', onComplete: () => gsap.set(bag, { rotation: 0 }) });
+      SND.sfx('coins', .55);
+      await wait(.22);
+      const p = Aaru.potliCentre(), to = { x: p.x, y: p.y - 26 };   // the potli's mouth
+      await Promise.all(Array.from({ length: n }, (_, k) => new Promise(r => gsap.delayedCall(k * .1, () => {
+        gsap.fromTo(bag, { scaleY: .9 }, { scaleY: 1, duration: .18, transformOrigin: '50% 100%' });
+        coinArc(BAG, to, k).then(() => {
+          SND.sfx('tick', .45, 1.2 + k * .09);
+          gsap.fromTo(PT, { scaleX: 1.12, scaleY: .88 }, { scaleX: 1, scaleY: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 80%' });
+          sparks(to.x, to.y, 4, 34, ['#ffe27a', '#fff6c8']);
+          r();
+        });
+      }))));
+      SND.sfx('sparkle', .7); sparks(p.x, p.y - 10, 16, 90, ['#ffd23f', '#fff1b0', '#f7b733']);
+      GFX.ringAt(p.x, p.y, 120, { n: 1, grow: 1.6 });
+      await Aaru.hop(46);                                              // a happy little hop with the full potli
     },
     hopOff(n = 4) {
       SND.sfx('coins', .45);
@@ -237,13 +271,14 @@
   /* ---------- stalls: dark → lit crossfade + light burst; sun ---------- */
   const LIT = [...document.querySelectorAll('#game .lit3')], BU = $('#burst3');
   const Stall = {
-    set(n) { LIT.forEach((l, i) => gsap.set(l, { opacity: i < n ? 1 : 0 })); },
+    set(n) { LIT.forEach((l, i) => gsap.set(l, { opacity: i < n ? 1 : 0 })); GFX.twinkle(n); },
     async light(i) {
       const [hx, hy] = D.hooks[i];
       gsap.set(BU, { left: hx - 360, top: hy + 10 - 360 });
       SND.sfx('rise', .5); SND.sfx('sparkle', .7);
       gsap.fromTo(BU, { scale: .4, opacity: 1 }, { scale: 1.2, opacity: 0, duration: 1.2, ease: 'power2.out' });
       await gsap.to(LIT[i], { opacity: 1, duration: .8, ease: 'sine.inOut' });
+      GFX.twinkle(i + 1);                                          // its bulbs start to twinkle
       sparks(hx - Cam.x, hy - 120, 16, 140);
     }
   };
@@ -309,8 +344,8 @@
   /* ---------- Baba + Guddu: story talking frames (baba_talk_0–35, guddu_talk_0–35, the same as the story's CH.*.acts.talk).
      They walk in from the right, talk while their VO plays (forward and back, 10.5 fps), glide back to frame 0 (their resting
      pose) when they stop, and walk out. COACH.onTalk drives talk(on) in level3.js. ---------- */
-  function Talker(el, file, dx) {
-    const N = 36, FPS = 10.5;
+  function Talker(el, file, dx, FPS = 10.5) {
+    const N = 36;
     const imgs = [...Array(N)].map(() => { const im = document.createElement('img'); im.alt = ''; el.appendChild(im); return im; });
     let loaded = false, on = false, t0 = 0, stop = null, from = 0, shown = -1;
     const frame = k => { if (k === shown) return; imgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); shown = k; };
@@ -335,7 +370,7 @@
     };
     return T;
   }
-  const Baba = Talker($('#baba3'), 'baba_talk', 520);
+  const Baba = Talker($('#baba3'), 'baba_talk', 520, 14);   // a little livelier (user, Oct 2026)
   const Guddu = Talker($('#guddu3'), 'guddu_talk', 480);
 
   window.L3SC = { Guddu, Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba, glowOn };

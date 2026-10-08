@@ -6,7 +6,7 @@
   l2.id = 'l2'; l2.className = 'hidden';
   l2.innerHTML = `
     <div id="pile2" class="abs"><img class="pile-art" src="${GA('bill_pile.webp')}" alt=""><div id="pileLeft">7 bills left</div></div>
-    <div id="basket2" class="abs"><div id="basketBalls"></div><img class="basket-art" src="${GA('checked_basket.webp')}" alt=""><div class="basket-tag">CHECKED</div></div>
+    <div id="basket2" class="abs"><img class="basket-art" src="${GA('checked_basket.webp')}" alt=""><div id="basketBalls"></div><img class="basket-art front" src="${GA('checked_basket.webp')}" alt=""><div class="basket-tag">CHECKED</div></div>
     <div id="bill2" class="abs hidden">
       <img class="paper" src="${GA('bill_paper.webp')}" alt="">
       <div class="b-title"></div><div class="b-sub">Panchayat Mela · Apnapur</div>
@@ -21,11 +21,12 @@
     <img id="ball2" class="abs" src="${GA('paper_ball_3.webp')}" alt="">
     <canvas id="crumpleCv" width="1920" height="1080"></canvas>
     <div class="overlay hidden" id="done2">
-      <div class="gcard" id="done2Card">
+      <div class="gcard sunset" id="done2Card">
+        <div class="gkick">Level 2 · Done</div>
         <h2>7 bills checked!</h2>
         <div class="sub">All about right — faster than Guddu’s notebook.</div>
         <div id="done2Stars"><img alt=""><img alt=""><img alt=""></div>
-        <div id="done2Basket"><div class="balls"></div><img class="basket-art" src="${GA('checked_basket.webp')}" alt=""><div class="basket-tag">CHECKED</div></div>
+        <div id="done2Basket"><img class="basket-art" src="${GA('checked_basket.webp')}" alt=""><div class="balls"></div><img class="basket-art front" src="${GA('checked_basket.webp')}" alt=""><div class="basket-tag">CHECKED</div></div>
         <div id="done2Score"></div>
         <div class="gbtn cta abs" id="done2Cta">Go to the Mela Ground</div>
       </div>

@@ -50,11 +50,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #fx{position:absolute;inset:0;pointer-events:none;z-index:40}
 #wipe{position:absolute;inset:0;z-index:60;pointer-events:none;background:#e8870e;clip-path:circle(0% at 50% 50%)}
 #wipe .pat{position:absolute;inset:0;background-image:radial-gradient(circle at 20px 20px,rgba(255,220,120,.55) 9px,transparent 10px);background-size:56px 56px}
-#loader{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#fff3d4,#f1c77a 70%,#d98f2f);gap:34px}
-#loader h1{font-family:Baloo;font-weight:800;font-size:92px;color:#5a2d0c;text-shadow:0 6px 0 rgba(90,45,12,.2)}
-#loader .bar{width:720px;height:34px;border:6px solid #5a2d0c;border-radius:30px;background:#fff6df;overflow:hidden}
-#loader .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,#e8870e 0 22px,#f7b733 22px 44px)}
-#loader p{font-family:Fredoka;font-weight:700;font-size:40px;color:#5a2d0c}
+/* cover page (Gemini key art in the story's style, _source/cover) = the loading screen; the Start button appears when ready */
+#loader{position:absolute;inset:0;z-index:80;overflow:hidden;background:#3b2a5c;cursor:default}
+#loader .cover{position:absolute;inset:0;background:url(../assets/story/cover.webp) center/cover no-repeat;transform:scale(1.04);animation:coverDrift 14s ease-in-out infinite alternate}
+#loader .cover::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(38,20,62,.55),rgba(38,20,62,.12) 34%,rgba(38,20,62,0) 52%,rgba(30,12,4,0) 78%,rgba(30,12,4,.28))}
+@keyframes coverDrift{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.08) translate(-10px,-6px)}}
+#loader .ctitle{position:absolute;left:0;right:0;top:60px;text-align:center}
+#loader .kicker{display:inline-block;padding:8px 26px 6px;border-radius:30px;background:rgba(255,246,223,.92);border:4px solid #5a2d0c;font:800 26px/1 Baloo;letter-spacing:.18em;text-transform:uppercase;color:#b5361d;box-shadow:0 6px 0 rgba(58,34,15,.3)}
+#loader h1{margin:14px 0 6px;font-family:Baloo;font-weight:800;font-size:132px;line-height:.92;color:#fff4d6;-webkit-text-stroke:7px #5a2d0c;paint-order:stroke fill;text-shadow:0 8px 0 #5a2d0c,0 14px 22px rgba(30,10,40,.55),0 0 40px rgba(255,190,80,.55);letter-spacing:.01em}
+#loader .sub{display:inline-block;margin-top:10px;font:600 32px/1 Poppins;color:#fff8e8;text-shadow:0 2px 0 rgba(58,34,15,.7),0 0 12px rgba(30,10,40,.6)}
+#loader .bar{position:absolute;left:660px;top:930px;width:600px;height:22px;border:5px solid #5a2d0c;border-radius:20px;background:rgba(255,246,223,.9);overflow:hidden;box-shadow:0 5px 0 rgba(58,34,15,.3)}
+#loader .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,#e8870e 0 18px,#f7b733 18px 36px);transition:width .2s}
+#loader p{position:absolute;left:0;right:0;top:880px;text-align:center;font:700 32px/1 Fredoka;color:#fff8e8;text-shadow:0 2px 0 rgba(58,34,15,.8)}
+/* ready: #lp becomes the big Start button (same wooden-saffron art as the story buttons), centred on the setting sun */
+#loader p.ready{left:50%;right:auto;top:430px;height:160px;padding:0 120px 28px;display:flex;align-items:center;transform:translateX(-50%);cursor:pointer;
+  background:url(../assets/story/btn_l.webp) left center/auto 100% no-repeat,url(../assets/story/btn_r.webp) right center/auto 100% no-repeat,url(../assets/story/btn_m.webp) center/calc(100% - 180px) 100% no-repeat;
+  font:800 66px/1 Baloo;letter-spacing:.04em;color:#fffaf0;text-shadow:0 4px 0 rgba(74,40,16,.55),0 0 10px rgba(122,58,10,.35);filter:drop-shadow(0 16px 18px rgba(30,10,30,.45)) drop-shadow(0 0 30px rgba(255,200,90,.55))}
+#loader p.ready:active{filter:brightness(.93) drop-shadow(0 6px 8px rgba(40,20,5,.35))}
+#loader.ready{cursor:pointer}
 .ost-big{font-family:Baloo;font-weight:800;color:#fff7e3;text-shadow:0 6px 0 #5a3212,0 0 30px rgba(255,190,80,.6)}
 .numfloat{position:absolute;font-family:Fredoka;font-weight:700;color:#23408f;font-size:44px;text-shadow:0 3px 0 #fffaf0,0 0 12px #fffaf0;white-space:nowrap}
 

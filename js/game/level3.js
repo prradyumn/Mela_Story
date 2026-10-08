@@ -67,6 +67,7 @@
       async function correct() {
         SND.stopVo(); Hand.hide();
         q.choices.forEach((v, j) => Slates.state(j, j === right ? 'correct' : 'faded')); Slates.tick(right);
+        GFX.ring(Slates.S[right]); GFX.focus(false); { const c = Bill.centre(); GFX.flash(c.x, c.y); }
         SND.sfx('bell'); SND.sfx('ding');
         const okLine = COACH.say(L.ok);
         await Bill.chip('blue', L.r);
@@ -79,6 +80,7 @@
         await okLine;
         await wait(.5);
       }
+      GFX.focus(true);
       Slates.enable(onPick); armIdle();
     });
   }
@@ -90,8 +92,8 @@
     Minus.hide(); await Slates.hide();
     Aaru.show(2150); Aaru.carry(false);
     await Aaru.run(950);
-    Aaru.face(-1); Aaru.carry(true); Aaru.bounce(true);
-    await Coins.toPotli(5);                                        // coins arc from the cart bag into his potli
+    Aaru.face(-1); Aaru.carry(true); Aaru.pose('jump');
+    await Coins.toPotli(6);                                        // coins arc from the cart bag into his potli
     await Panel.wipe();                                            // the duster wipes the panel…
     await Panel.write(L.ans, true);                                // …and the new ≈ value is chalked in
     // LIGHT: Aaru runs the money over to the stall and hands it in → PAID → the stall lights up
@@ -218,7 +220,7 @@
     SND.sfx('confetti'); confetti(90);
     Fw.show([[280, 220, 280], [1665, 185, 250]], 1.2, 2);
     await gsap.fromTo('#done3Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
-    for (let i = 0; i < 3; i++) { gsap.fromTo(imgs[i], { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.5)' }); if (i < nStars) SND.sfx('sparkle'); await wait(.3); }
+    await GFX.stars(imgs, nStars);
     gsap.from('#done3Badges img', { y: -60, opacity: 0, duration: .4, stagger: .08, ease: 'back.out(2)' });
     const cta = $('#done3Cta'); cta.classList.add('pulse');
     // moves on by itself once the card has been seen; tapping the button just goes a little sooner (same as L1/L2)
@@ -228,7 +230,7 @@
 
   /* ---------- reset + run ---------- */
   function reset() {
-    skipping = false; result.stars = [];
+    skipping = false; result.stars = []; GFX.reset(); GFX.ambient(3);   // L3 life = the bulbs of lit stalls twinkle (Stall → GFX.twinkle)
     // anything Level 1 / Level 2 left behind
     ['#coach', '#btnSkip', '#gudiya', '#doneOv', '#tagRig', '#numline', '#marker', '#markerGreen', '#titleOv', '#l2'].forEach(s => $(s).classList.add('hidden'));
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';

@@ -140,7 +140,7 @@
       SND.sfx('pop', .4);
       await wait(.25);
       SND.sfx('whoosh', .35);
-      if (toBasket) { await fly(PACK_C.x, PACK_C.y, BASKET_C.x, BASKET_C.y - 6, 1, PKT_S, 240, .7, 'power1.in'); Basket.add(); }
+      if (toBasket) { const t = slotStage(Basket.n); await fly(PACK_C.x, PACK_C.y, t.x, t.y - 26, 1, PKT_W * BASKET_AT.s / QW, 240, .7, 'power1.in'); Basket.add(); }   // into its own slot
       else await fly(PACK_C.x, PACK_C.y, 2200, 820, 1, .5, 180, .6, 'power1.in');
       PK.innerHTML = ''; gsap.set(PK, { x: 0, y: 0, scale: 1, rotation: 0 });
     }
@@ -149,7 +149,7 @@
   /* ---------- stamps ---------- */
   const S = [...document.querySelectorAll('#game .stamp2')];
   let onPick = null;
-  S.forEach(s => s.addEventListener('pointerdown', e => { e.preventDefault(); if (!onPick || s.classList.contains('locked') || s.classList.contains('faded')) return; SND.sfx('pop', .35); onPick(+s.dataset.i); }));
+  S.forEach(s => s.addEventListener('pointerdown', e => { e.preventDefault(); if (!onPick || s.classList.contains('locked') || s.classList.contains('faded')) return; SND.sfx('pop', .35); GFX.press(s); onPick(+s.dataset.i); }));
   const Stamps = {
     S, vals: [],
     async show(vals) {
@@ -164,6 +164,8 @@
     wiggle(i) { return gsap.fromTo(S[i], { rotation: 0 }, { rotation: 5, duration: .06, repeat: 5, yoyo: true, ease: 'sine.inOut', onComplete: () => gsap.set(S[i], { rotation: 0 }) }); },
     pulse() { S.forEach(s => { if (!s.classList.contains('faded') && !s.classList.contains('glow')) { s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); } }); },
     centre(i) { return { x: SLOT(i).left + 125, y: SLOT(i).top + 265 }; },
+    /* SC.Hand.show(x, y) puts the fingertip at (x + 141, y + 16): press the stamp by its knob (like you would), so the hand never covers the number */
+    handAt(i) { return { x: SLOT(i).left + 125 - 141, y: SLOT(i).top + 66 - 16 }; },
     async hide() { await gsap.to(S, { y: 340, opacity: 0, duration: .35, stagger: .05, ease: 'power2.in' }); S.forEach(s => s.className = 'stamp2 hidden'); },
     /* correct: lift → dip in the ink → fly to the bill → THUMP → mark → lift back to the slot */
     async press(i, value) {
@@ -196,9 +198,18 @@
     glow() { return gsap.fromTo('#pile2', { filter: 'drop-shadow(0 0 0 rgba(247,183,51,0))' }, { filter: 'drop-shadow(0 0 26px rgba(247,183,51,1))', duration: .45, yoyo: true, repeat: 3 }); },
     bump() { gsap.fromTo('#pileLeft', { scale: 1.4 }, { scale: 1, duration: .4, ease: 'back.out(3)' }); }
   };
+  /* the checked letters stand INSIDE the basket: back row of 4, front row of 3, leaning a little; their bottoms go behind the
+     front rim (a second copy of the basket art clipped to the rim + front, .basket-art.front). Slots are in basket px (250 wide);
+     k scales them for the bigger basket on the complete card. */
+  const PKT_SLOTS = [[68, 50, -8], [109, 47, -3], [150, 47, 4], [190, 50, 9], [88, 60, 6], [129, 62, -4], [170, 60, 3]];
+  const PKT_W = 46, PKT_H = 58;
+  const pktHTML = (n, k = 1) => PKT_SLOTS.slice(0, Math.min(n, 7)).map(([x, y, r]) =>
+    `<div class="pkt" style="left:${(x - PKT_W / 2) * k}px;top:${(y - PKT_H / 2) * k}px;width:${PKT_W * k}px;height:${PKT_H * k}px;transform:rotate(${r}deg)"></div>`).join('');
+  const BASKET_AT = { x: 1650, y: 930, s: .8 };   // #basket2 on stage (scale .8, origin top centre)
+  const slotStage = i => { const [x, y] = PKT_SLOTS[Math.min(i, 6)]; return { x: BASKET_AT.x + 125 + (x - 125) * BASKET_AT.s, y: BASKET_AT.y + y * BASKET_AT.s }; };
   const Basket = {
-    n: 0,
-    set(n) { Basket.n = n; $('#basketBalls').innerHTML = Array.from({ length: Math.min(n, 7) }, (_, i) => `<div class="pkt" style="left:${26 + ((i * 47) % 170)}px;top:${(i < 4 ? 4 : -18) + 10}px;transform:rotate(${(i % 3 - 1) * 9}deg)"></div>`).join(''); },
+    n: 0, html: pktHTML, slot: slotStage,
+    set(n) { Basket.n = n; $('#basketBalls').innerHTML = pktHTML(n); },
     add() { Basket.set(Basket.n + 1); SND.sfx('tick', .4); const b = $('#basketBalls').lastElementChild; gsap.fromTo(b, { y: -30 }, { y: 0, duration: .35, ease: 'bounce.out' }); gsap.fromTo('#basket2', { scaleY: 1 }, { scaleY: .92, duration: .1, yoyo: true, repeat: 1, transformOrigin: '50% 100%' }); },
     glow() { return gsap.fromTo('#basket2', { filter: 'drop-shadow(0 0 0 rgba(247,183,51,0))' }, { filter: 'drop-shadow(0 0 22px rgba(247,183,51,1))', duration: .4, yoyo: true, repeat: 1 }); }
   };

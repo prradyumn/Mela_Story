@@ -107,7 +107,7 @@
   Object.values(B).forEach(b => b.addEventListener('pointerdown', e => {
     e.preventDefault();
     if (b.classList.contains('locked') || b.classList.contains('faded') || !onPick) return;
-    SND.sfx('pop', .35); onPick(b.dataset.side);
+    SND.sfx('pop', .35); GFX.press(b); onPick(b.dataset.side);
   }));
   const Btns = {
     B,
@@ -127,6 +127,8 @@
     wiggle(side) { return gsap.fromTo(B[side], { x: 0 }, { x: 14, duration: .06, repeat: 5, yoyo: true, ease: 'sine.inOut', onComplete: () => gsap.set(B[side], { x: 0 }) }); },
     tick(side) { gsap.to(B[side].querySelector('.tick-badge'), { scale: 1, duration: .35, ease: 'back.out(3)' }); gsap.fromTo(B[side], { scale: 1.12 }, { scale: 1, duration: .4, ease: 'back.out(2)' }); },
     centre(side) { return { x: side === 'L' ? NL.x0 : NL.x1, y: BTN_TOP + 60 }; },
+    /* Hand.show(x, y) puts the fingertip at (x + 141, y + 16): land it ON the button, just right of the number (it used to touch the edge) */
+    handAt(side) { const c = Btns.centre(side); return { x: c.x + 104 - 141, y: c.y + 6 - 16 }; },
     async hide() { await gsap.to([B.L, B.R], { opacity: 0, scale: .8, duration: .25 }); B.L.className = B.R.className = 'gbtn hidden'; gsap.set([B.L, B.R], { scale: 1, opacity: 1 }); }
   };
 
@@ -207,8 +209,16 @@
     hide() { if (handTl) { handTl.kill(); handTl = null; } gsap.to('#hand', { opacity: 0, duration: .2 }); }
   };
 
+  /* walking along the bazaar: between shops the background pans one step to the left (as if we moved on down the street) with a
+     soft footstep bob; 8 steps of 35 px over the 1.15× background (±140 of its ±144 px margin) */
   let shop = 0;
-  function bgShift() { shop++; return gsap.to('#gBg', { x: shop % 2 ? -80 : 80, duration: .9, ease: 'power2.inOut' }); }
+  const BGX = k => 140 - Math.min(k, 8) * 35;
+  function bgShift() {
+    shop++;
+    return gsap.timeline().to('#gBg', { x: BGX(shop), duration: 1.1, ease: 'power2.inOut' }, 0)
+      .to('#gBg', { y: -5, duration: .17, yoyo: true, repeat: 5, ease: 'sine.inOut' }, .06);
+  }
+  function bgSet(k) { shop = k; gsap.set('#gBg', { x: BGX(k), y: 0 }); }
 
-  window.SC = { Tag, Line, Marker, Btns, Cart, Rule, Hand, bgShift, BTN_TOP };
+  window.SC = { Tag, Line, Marker, Btns, Cart, Rule, Hand, bgShift, bgSet, BTN_TOP };
 })();

@@ -86,6 +86,7 @@ window.GUDIYA_POSES = {
       idleBreath(false); const x0 = st.x; G.face(x > x0);
       for (let i = 1; i <= hops; i++) {
         setPose('hop');
+        if (window.GFX) GFX.hopTrail(st.x, x0 + (x - x0) * i / hops, y - st.h * .42, 54, .3);   // dotted arc behind her
         await arc(x0 + (x - x0) * i / hops, y, { lift: 54, dur: .3 });
         setPose('idle'); G.face(x > x0); land(st.x, st.y);
         await new Promise(r => gsap.delayedCall(.07, r));

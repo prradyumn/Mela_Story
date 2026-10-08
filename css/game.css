@@ -9,7 +9,7 @@
 #game .hidden,#game.hidden{display:none!important}
 #game img{-webkit-user-drag:none;user-select:none;pointer-events:none}
 /* ---------- background ---------- */
-#game #gBg{position:absolute;left:-96px;top:-54px;width:2112px;height:1188px;background:url(../assets/game/bg_bazaar.webp) center/cover no-repeat;will-change:transform}
+#game #gBg{position:absolute;left:-144px;top:-81px;width:2208px;height:1242px;background:url(../assets/game/bg_bazaar.webp) center/cover no-repeat;will-change:transform}
 /* ---------- HUD ---------- */
 #game #gHud{position:absolute;left:0;top:0;width:1920px;height:200px;z-index:30}
 #game .gchip{left:40px;top:34px;height:78px;padding:0 30px;display:flex;align-items:center;background:var(--cream);border:4px solid var(--wood);border-radius:40px;font:800 30px/1 Baloo;box-shadow:0 6px 0 rgba(58,34,15,.25)}
@@ -35,9 +35,10 @@
 /* Full-body coaches (positions + clipping set per level in hud.js → SPOTS): Pari left, Manju right (L1), Guddu behind
    the desk (L2). .desk = cut at the office desk's top edge so the stamps stay clear. */
 #game .coachFig{left:0;top:0;width:0;height:0;opacity:0}
-#game .coachFig img{position:absolute;bottom:0;left:0;transform:translateX(-50%);opacity:0;pointer-events:none;filter:drop-shadow(0 8px 8px rgba(60,30,5,.28))}
-#game .coachFig .pc-shadow{position:absolute;left:0;bottom:-13px;width:210px;height:30px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(60,30,5,.33),rgba(60,30,5,0) 70%)}
-#game .coachFig.desk img{filter:sepia(.08) brightness(.97)}
+#game .coachFig img{position:absolute;bottom:0;left:0;transform:translateX(-50%);opacity:0;pointer-events:none;filter:var(--cg,sepia(0)) drop-shadow(0 8px 8px rgba(60,30,5,.28))}
+#game .coachFig .pc-shadow{position:absolute;left:0;bottom:-15px;width:250px;height:36px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(60,30,5,.3),rgba(60,30,5,0) 70%)}
+#game .coachFig .pc-shadow::after{content:'';position:absolute;left:25%;right:25%;top:30%;bottom:28%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(45,20,2,.45),rgba(45,20,2,0) 72%)}
+#game .coachFig.desk img{filter:var(--cg,sepia(0)) sepia(.08) brightness(.97)}
 /* bubble beside a coach on the right (Manju) / tail pointing right (Guddu at the desk) */
 #game #bubble.posR{left:auto;right:214px;transform-origin:100% 100%}
 #game #bubble.tailR::before{left:auto;right:-36px;border-width:16px 0 16px 34px;border-color:transparent transparent transparent var(--wood)}
@@ -57,7 +58,9 @@
 #game #bubbleText b{color:var(--saffron)}
 /* ---------- price tag ---------- */
 #game #tagRig{position:absolute;left:0;top:0;width:1920px;height:520px;z-index:12;transform-origin:960px 118px;pointer-events:none}
-#game #rope{position:absolute;left:957px;top:110px;width:6px;height:124px;background:linear-gradient(90deg,#5b3517,#8a5a2b,#5b3517);border-radius:3px}
+/* hangs from the marigold bar down INTO the tag's painted knot (ui_price_tag: knot at y ~118–135 of 446, ring centre x = tag centre),
+   behind the painted loop, so it reads as tied; twisted like the painted rope */
+#game #rope{position:absolute;left:955.5px;top:110px;width:9px;height:160px;border-radius:4px;background:repeating-linear-gradient(162deg,#dcaa6a 0 5px,#a86d34 5px 8px);box-shadow:inset -2px 0 0 rgba(90,50,15,.35)}
 #game #tag{position:absolute;top:188px;height:297px;min-width:400px;padding:114px 40px 0 26px;display:flex;align-items:flex-start;gap:12px;background:url(../assets/game/ui_price_tag.webp) center/100% 100% no-repeat;filter:drop-shadow(0 10px 8px rgba(58,34,15,.25));transform-style:preserve-3d}
 #game #tagIcon{width:120px;height:120px;object-fit:contain;flex:none}
 #game #tagText{display:flex;flex-direction:column;padding-top:4px}
@@ -84,7 +87,7 @@
 #game .gbtn{position:absolute;height:120px;min-width:300px;padding:0 64px 14px;display:flex;align-items:center;justify-content:center;font:700 48px/1 Fredoka;color:var(--ink);cursor:pointer;z-index:20;
   --l:url(../assets/game/btn_c_l.webp);--m:url(../assets/game/btn_c_m.webp);--r:url(../assets/game/btn_c_r.webp);
   background:var(--l) left top/auto 100% no-repeat,var(--r) right top/auto 100% no-repeat,var(--m) center top/calc(100% - 140px) 100% no-repeat;
-  filter:drop-shadow(0 6px 4px rgba(58,34,15,.25));transition:filter .2s}
+  filter:drop-shadow(0 8px 6px rgba(58,34,15,.32));transition:filter .2s,translate .18s ease-out}
 #game .gbtn:active{transform:translateY(3px)}
 #game .gbtn.cta,#game .gbtn.glow{--l:url(../assets/game/btn_l.webp);--m:url(../assets/game/btn_m.webp);--r:url(../assets/game/btn_r.webp);color:#fff;text-shadow:0 3px 0 rgba(150,70,0,.55)}
 #game .gbtn.cta{font:800 46px/1 Baloo;padding-bottom:18px}
@@ -93,21 +96,22 @@
 #game .gbtn.faded{filter:grayscale(.7) opacity(.45);pointer-events:none}
 #game .gbtn.pulse{animation:btnPulse 1.1s ease-in-out infinite}
 #game .gbtn.glow{animation:btnGlow 1s ease-in-out infinite}
-@keyframes btnPulse{0%,100%{filter:drop-shadow(0 6px 4px rgba(58,34,15,.25))}50%{filter:drop-shadow(0 0 22px rgba(247,183,51,1)) drop-shadow(0 0 8px rgba(255,220,120,1))}}
+@keyframes btnPulse{0%,100%{filter:drop-shadow(0 8px 6px rgba(58,34,15,.32))}50%{filter:drop-shadow(0 0 22px rgba(247,183,51,1)) drop-shadow(0 0 8px rgba(255,220,120,1))}}
 @keyframes btnGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(247,183,51,.8))}50%{filter:drop-shadow(0 0 30px rgba(255,200,60,1))}}
 #game .gbtn .tick-badge{position:absolute;right:-6px;top:-10px;width:56px;height:56px;border-radius:50%;background:var(--green);border:4px solid #fff;display:flex;align-items:center;justify-content:center;transform:scale(0)}
 #game .gbtn .tick-badge svg{width:30px;height:30px}
 #game .gbtn.locked{pointer-events:none}
 /* ---------- Gudiya ---------- */
 #game #gudiya{position:absolute;left:0;top:0;z-index:18;pointer-events:none;will-change:transform}
-#game #gudiya .gbody{position:absolute;transform-origin:50% 100%}
+#game #gudiya .gbody{position:absolute;transform-origin:50% 100%;filter:var(--cg,sepia(0))}
 #game #gudiya .flip{position:absolute;left:0;top:0;width:100%;height:100%}
 #game #gudiya img,#game #gudiya .sheet{position:absolute;left:0;top:0;width:100%;height:100%}
 #game #gudiya .gshadow{position:absolute;left:-60px;top:-14px;width:120px;height:24px;border-radius:50%;background:radial-gradient(rgba(58,34,15,.35),rgba(58,34,15,0) 70%)}
 #game #bleat{left:1660px;top:640px;width:190px;height:161px;z-index:19;background:url(../assets/game/db6.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;padding:0 0 30px 12px;font:800 32px/1 Baloo;color:var(--ink);opacity:0;transform-origin:30% 100%}
 /* ---------- cart ---------- */
 #game #cart{left:1486px;top:162px;width:420px;height:250px;z-index:25;opacity:0;pointer-events:none}
-#game #cart .cart-img{position:absolute;left:0;top:0;width:420px;height:242.7px}
+#game #cart .cart-img{position:absolute;left:0;top:0;width:420px;height:242.7px;filter:var(--cg,sepia(0))}
+#game #cart .cshadow{position:absolute;left:10px;top:214px;width:400px;height:40px;border-radius:50%;background:radial-gradient(closest-side,rgba(70,35,8,.38),rgba(70,35,8,0))}
 #game #cartItems{position:absolute;inset:0}
 #game #cartItems img{position:absolute;width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(58,34,15,.3))}
 #game #cartCount{position:absolute;left:6px;top:60px;padding:6px 14px 4px;border-radius:20px;background:var(--red);border:3px solid var(--cream);color:var(--cream);font:700 26px/1 Fredoka;white-space:nowrap}
@@ -157,6 +161,8 @@
 #game #pileLeft{position:absolute;left:30px;top:0;width:190px;height:44px;border-radius:22px;background:var(--cream);border:3px solid var(--wood);font:800 24px/38px Baloo;text-align:center;white-space:nowrap}
 #game #basket2{scale:.8;transform-origin:50% 0;left:1650px;top:930px;width:250px;height:190px}
 #game #basket2 .basket-art{position:absolute;left:0;top:0;width:250px;height:178.4px}
+/* the basket's front rim + body, drawn again over the letters so they stand inside it */
+#game .basket-art.front{clip-path:polygon(0.0% 29.1%,5.0% 32.1%,10.0% 33.7%,15.0% 34.7%,20.0% 35.5%,25.0% 36.0%,30.0% 36.5%,35.0% 36.8%,40.0% 37.0%,45.0% 37.2%,50.0% 37.2%,55.0% 37.2%,60.0% 37.0%,65.0% 36.8%,70.0% 36.5%,75.0% 36.0%,80.0% 35.5%,85.0% 34.7%,90.0% 33.7%,95.0% 32.1%,100.0% 29.1%,100% 100%,0 100%)}
 #game #basketBalls{position:absolute;inset:0}
 #game #basketBalls img{position:absolute;width:62px;height:62px}
 #game .basket-tag{position:absolute;left:78px;top:90px;width:99px;text-align:center;font:800 21px/1 Baloo;letter-spacing:.06em;color:var(--ink-soft)}
@@ -185,8 +191,9 @@
 #game .stamp2{position:absolute;top:740px;width:250px;height:333px;cursor:pointer;z-index:42;transform-origin:50% 100%;filter:drop-shadow(0 8px 6px rgba(58,34,15,.3))}
 #game .stamp2 .art{position:absolute;left:0;top:0;width:250px;height:333px}
 #game .stamp2.pressed .art{height:292px;top:41px}
-#game .stamp2 .about{position:absolute;left:0;top:215px;width:250px;text-align:center;font:800 18px/1 Baloo;letter-spacing:.12em;color:#fff3d6;pointer-events:none}
-#game .stamp2 .val{position:absolute;left:17px;top:248px;width:217px;height:35px;display:flex;align-items:center;justify-content:center;font:700 32px/1 Fredoka;color:var(--ink);white-space:nowrap;pointer-events:none}
+/* ABOUT: a dark tag on the wooden base (was cream text on the brass collar — unreadable) */
+#game .stamp2 .about{position:absolute;left:50%;top:206px;transform:translateX(-50%);padding:5px 14px 3px;border-radius:12px;background:#4a2410;border:2px solid #f3d27a;font:800 17px/1 Baloo;letter-spacing:.14em;color:#ffe7a8;white-space:nowrap;pointer-events:none;box-shadow:0 2px 0 rgba(40,18,4,.35)}
+#game .stamp2 .val{position:absolute;left:17px;top:240px;width:217px;height:50px;display:flex;align-items:center;justify-content:center;font:700 34px/1 Fredoka;color:var(--ink);white-space:nowrap;pointer-events:none}
 #game .stamp2 .tick{position:absolute;left:192px;top:96px;width:56px;height:56px;border-radius:50%;background:var(--green);border:4px solid #fff;display:flex;align-items:center;justify-content:center;transform:scale(0)}
 #game .stamp2 .tick svg{width:30px;height:30px}
 #game .stamp2.glow{animation:stampGlow 1s ease-in-out infinite}
@@ -201,8 +208,10 @@
 #game #inkPad{left:812px;top:952px;width:200px;height:120px;opacity:0;z-index:41}
 /* packing fold layer (scene2.js foldTL) + the tied packets in the CHECKED basket */
 #game #pack2{position:absolute;inset:0;z-index:30;pointer-events:none;perspective:1800px;perspective-origin:1310px 583px}
-#game .pkt{position:absolute;width:62px;height:76px;border-radius:6px;background:linear-gradient(transparent 40%,#c0392b 40%,#a8321c 60%,transparent 60%),linear-gradient(135deg,#f6ecd6,#e8d6b2);box-shadow:inset 0 0 0 2px rgba(122,74,34,.4),0 3px 3px rgba(58,34,15,.3)}
-#game #done2Basket .balls .pkt{width:96px;height:118px}
+/* a checked letter: folded paper, red band + knot (size set inline: it stands in the basket) */
+#game .pkt{position:absolute;width:62px;height:76px;border-radius:5px;transform-origin:50% 100%;
+  background:radial-gradient(circle at 50% 50%,#e85a3f 0 9%,#a8321c 10% 12%,transparent 13%),linear-gradient(transparent 43%,#c0392b 43%,#a8321c 57%,transparent 57%),repeating-linear-gradient(transparent 0 15%,rgba(150,170,210,.35) 15% 17%),linear-gradient(135deg,#fbf3e0,#e8d6b2);
+  box-shadow:inset 0 0 0 2px rgba(122,74,34,.45),-2px 3px 4px rgba(58,34,15,.3)}
 #game #ball2{left:0;top:0;width:220px;height:220px;opacity:0;z-index:31;pointer-events:none}
 #game #crumpleCv{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;z-index:30;opacity:0}
 /* level complete */
@@ -214,6 +223,7 @@
 #game #done2Stars img:nth-child(1){left:200px}#game #done2Stars img:nth-child(2){left:330px;top:0;width:140px;height:140px}#game #done2Stars img:nth-child(3){left:480px}
 #game #done2Basket{position:absolute;left:170px;top:330px;width:460px;height:380px}
 #game #done2Basket .basket-art{position:absolute;left:0;top:40px;width:460px;height:328px}
+#game #done2Basket .balls{position:absolute;left:0;top:40px;width:460px;height:328px}
 #game #done2Basket .balls img{position:absolute;width:110px;height:110px}
 #game #done2Basket .basket-tag{left:143px;top:200px;width:182px;font-size:36px}
 #game #done2Score{position:absolute;left:0;right:0;top:708px;font:600 26px/1 Poppins;color:var(--ink-soft)}
@@ -273,14 +283,17 @@
 #game #cart3 .cartonly{position:absolute;left:0;top:0;width:862px;height:566px;opacity:0}
 #game #cart3 .talkp{position:absolute;left:340px;top:563px;width:0;height:0;opacity:0}
 #game #cart3 .talkp img{position:absolute;bottom:0;left:0;height:566px;transform:translateX(-50%);opacity:0;filter:drop-shadow(0 8px 8px rgba(30,12,4,.3))}
-#game #cart3 .board{position:absolute;left:506px;top:92px;width:340px;height:212px}
+/* the MELA MONEY board is the hero of L3: ×1.3, centred over the cart bed (stage x ~611), fully above the front wall, with a warm
+   halo so it reads against the dark lane (the money potli leans on its lower-left corner, below the number) */
+#game #cart3 .board{position:absolute;left:430px;top:52px;width:340px;height:212px;scale:1.3;transform-origin:0 0}
+#game #cart3 .board::before{content:'';position:absolute;left:-90px;right:-90px;top:-70px;bottom:-60px;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(255,208,110,.42),rgba(255,190,80,.14) 60%,rgba(255,190,80,0))}
 #game #cart3 .board img{position:absolute;left:0;top:0;width:340px;height:212px}
-#game #cart3 .plabel{position:absolute;left:0;top:58px;width:340px;height:24px;text-align:center;font:800 17px/24px Baloo;letter-spacing:.22em;color:#f3d27a}
+#game #cart3 .plabel{position:absolute;left:0;top:57px;width:340px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#ffd970;text-shadow:0 1px 0 rgba(0,0,0,.35)}
 #game #cart3 .pval{position:absolute;left:14px;top:78px;width:312px;height:60px;text-align:center;font:700 46px/60px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
 #game #cart3 .smears i{position:absolute;width:230px;height:30px;border-radius:15px;background:rgba(240,236,224,.38);opacity:0}
 #game #cart3 .smears i:nth-child(1){left:50px;top:80px}#game #cart3 .smears i:nth-child(2){left:58px;top:100px}#game #cart3 .smears i:nth-child(3){left:66px;top:120px}
-#game #cart3 .bag{position:absolute;left:446px;top:226px;width:84px;height:92px}
-#game #cart3 .cglow{position:absolute;left:380px;top:40px;width:520px;height:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.55),rgba(255,214,90,0));opacity:0;pointer-events:none}
+#game #cart3 .bag{position:absolute;left:440px;top:232px;width:92px;height:101px;filter:drop-shadow(3px 5px 4px rgba(30,12,4,.4))}
+#game #cart3 .cglow{position:absolute;left:380px;top:-70px;width:560px;height:440px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.55),rgba(255,214,90,0));opacity:0;pointer-events:none}
 #game #cart3 .cshadow{position:absolute;left:30px;top:540px;width:820px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0))}
 #game #cart3 .speed:nth-child(1){left:-40px;top:250px;width:130px}#game #cart3 .speed:nth-child(2){left:-14px;top:314px;width:106px}#game #cart3 .speed:nth-child(3){left:12px;top:378px;width:82px}
 #game #cart3 .speed{position:absolute;height:9px;border-radius:5px;background:rgba(255,248,230,.75);opacity:0}
@@ -325,3 +338,62 @@
 #game #done3Money .lab{position:absolute;left:0;top:80px;width:420px;font:800 20px/27px Baloo;letter-spacing:.22em;color:#f3d27a}
 #game #done3Money .v{position:absolute;left:0;top:104px;width:420px;font:700 62px/73px Fredoka;color:#fffdf5}
 #game #done3Cta{left:80px;top:748px;width:640px;font-size:42px;white-space:nowrap}
+
+/* ================= Visual polish (Oct 2026, js/game/fx.js) — visual only, the pedagogy is untouched ================= */
+/* layers right above the background: background life · sunset grade · focus dim · correct flash (all under the game pieces) */
+#game #gAmb,#game #gGrade,#game #gGrade i,#game #gFocus,#game #gFlash,#game #focus3,#game #flash3{position:absolute;inset:0;pointer-events:none}
+#game #gGrade i{opacity:0;will-change:opacity}
+#game #gGrade .gold{background:linear-gradient(rgba(255,160,70,.36),rgba(255,150,60,.34) 45%,rgba(255,132,40,.24) 62%,rgba(190,90,25,.16))}
+#game #gGrade .dusk{background:linear-gradient(rgba(150,60,120,.34),rgba(235,105,70,.26) 42%,rgba(240,120,50,.16) 60%,rgba(80,30,40,.2))}
+#game .gfocus{opacity:0;will-change:opacity;background:radial-gradient(ellipse 66% 62% at var(--fx,50%) var(--fy,55%),rgba(46,22,8,0) 52%,rgba(46,22,8,.34) 100%),rgba(46,22,8,.05)}
+#game .gflash{opacity:0;will-change:opacity;background:radial-gradient(circle at var(--x,50%) var(--y,55%),rgba(255,226,140,.6),rgba(255,190,80,.22) 26%,rgba(255,180,60,0) 52%)}
+#game #focus3,#game #flash3{z-index:1}
+#game #gAmb{overflow:hidden;will-change:opacity}
+#game #gAmb .bstr{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible}
+#game #gAmb .penn{position:absolute;width:34px;height:42px;transform-origin:50% 0;clip-path:polygon(0 0,100% 0,50% 100%);box-shadow:inset 0 5px 0 rgba(0,0,0,.12);will-change:transform}
+#game #gAmb .gbird{position:absolute;left:0;top:0;width:46px;height:20px;will-change:transform}
+#game #gAmb .gbird svg{width:100%;height:100%;transform-origin:50% 60%;overflow:visible}
+#game #gAmb .beam{position:absolute;left:-200px;top:-120px;width:1300px;height:1000px;background:linear-gradient(104deg,rgba(255,238,195,0) 30%,rgba(255,240,205,.26) 40%,rgba(255,238,195,.08) 50%,rgba(255,240,205,.2) 58%,rgba(255,238,195,0) 70%);will-change:opacity}
+#game #gAmb .mote{position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(rgba(255,253,240,1) 0 28%,rgba(255,240,200,.55) 48%,rgba(255,236,180,0) 72%);will-change:transform,opacity}
+/* L3: bulbs of a lit stall twinkle (D.bulbs, in world space above the lit lane) */
+#game #tw3{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+#game #tw3 .twg{position:absolute;left:0;top:0;opacity:0}
+#game #tw3 i{position:absolute;width:52px;height:52px;border-radius:50%;background:radial-gradient(rgba(255,252,225,.95),rgba(255,222,130,.5) 30%,rgba(255,200,90,0) 68%);opacity:.15;will-change:opacity}
+/* Gudiya's hop trail */
+#game #gTrail{position:absolute;inset:0;z-index:17;pointer-events:none}
+#game #gTrail .tdot{position:absolute;width:12px;height:12px;border-radius:50%;background:#fff6dc;border:2.5px solid #7a4a22;box-shadow:0 2px 0 rgba(58,34,15,.25)}
+/* ring of light, marigold petals */
+#game .gring{position:absolute;border-radius:50%;border:6px solid rgba(var(--c),.95);box-shadow:0 0 24px 6px rgba(var(--c),.65),inset 0 0 18px 4px rgba(255,250,220,.6);pointer-events:none;will-change:transform,opacity}
+#game .gpetal{position:absolute;left:0;top:0;width:15px;height:22px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;pointer-events:none;will-change:transform,opacity}
+/* answers feel pressable: lift on hover (mouse), squash on tap (fx.js press) */
+@media (hover:hover){
+  #game .gbtn:not(.locked):not(.faded):not(.cta):hover,#game .stamp2:not(.locked):not(.faded):hover,#game .slate3:not(.locked):not(.faded):hover{translate:0 -7px}
+  #game .gbtn:not(.locked):not(.faded):not(.cta):not(.pulse):not(.glow):hover{filter:drop-shadow(0 15px 10px rgba(58,34,15,.3))}
+}
+#game .stamp2,#game .slate3{transition:translate .18s ease-out}
+
+/* ---------- cards in the cover's style: sunset strip, cover lettering, kicker tag ---------- */
+#game .gcard.sunset{--sh:200px;background:#fffaf0}
+#game .gcard.sunset::before{content:'';position:absolute;left:0;right:0;top:0;height:var(--sh);border-radius:42px 42px 0 0;border-bottom:5px solid var(--wood);
+  background:radial-gradient(ellipse 22% 40% at 50% 104%,#fff1b0 0,#ffcf5c 38%,rgba(255,170,70,0) 100%),radial-gradient(ellipse 60% 70% at 50% 110%,rgba(255,170,60,.85),rgba(255,140,60,0) 70%),linear-gradient(#3b2a5c,#7d3a6c 40%,#d4623e 78%,#f2a03a)}
+#game .gcard.sunset::after{content:'';position:absolute;left:0;right:0;top:0;height:var(--sh);border-radius:42px 42px 0 0;pointer-events:none;
+  background:radial-gradient(circle at 14% 22%,rgba(255,255,255,.9) 0 1.5px,transparent 2.5px),radial-gradient(circle at 26% 12%,rgba(255,255,255,.7) 0 1.2px,transparent 2.2px),radial-gradient(circle at 80% 18%,rgba(255,255,255,.85) 0 1.5px,transparent 2.5px),radial-gradient(circle at 90% 34%,rgba(255,255,255,.6) 0 1.2px,transparent 2.2px),radial-gradient(circle at 68% 9%,rgba(255,255,255,.7) 0 1.2px,transparent 2.2px)}
+#game .gcard.sunset h1,#game .gcard.sunset h2{position:relative;z-index:1;color:#fff4d6;-webkit-text-stroke:6px #5a2d0c;paint-order:stroke fill;text-shadow:0 6px 0 #5a2d0c,0 12px 18px rgba(30,10,40,.5),0 0 34px rgba(255,190,80,.5);letter-spacing:.01em}
+#game #titleCard p,#game #titleIcons,#game #doneCard .sub,#game #done2Card .sub{position:relative;z-index:1}   /* above the strip (a positioned ::before) */
+#game .gkick,#game #titleCard .lvl{position:absolute;left:50%;top:-30px;transform:translateX(-50%);z-index:2;padding:9px 28px 7px;border-radius:30px;background:#fff6df;border:4px solid #5a2d0c;font:800 26px/1 Baloo;letter-spacing:.18em;text-transform:uppercase;color:#b5361d;white-space:nowrap;box-shadow:0 6px 0 rgba(58,34,15,.3)}
+#game #titleCard{--sh:196px;width:980px;padding:58px 60px 56px}
+#game #titleCard h1{margin:0 0 0;line-height:1.08}
+#game #titleCard p{margin:60px 0 38px}
+#game #doneCard{--sh:166px;padding-top:40px}
+#game #doneCard .sub{margin-top:28px}
+#game #doneCart{top:352px}
+#game #done2Card{--sh:160px;padding-top:42px}
+#game #done2Card .sub{margin-top:28px}
+#game #done3Card{--sh:166px;top:126px;height:892px}
+#game #done3Card h2{top:46px}
+#game #done3Card .sub{top:184px}
+#game #done3Stars img{top:236px}
+#game #done3Stars img:nth-child(2){top:218px}
+#game #done3Badges img{top:386px}
+#game #done3Money{top:486px}
+#game #done3Cta{top:762px}
