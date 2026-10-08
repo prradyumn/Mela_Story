@@ -228,8 +228,9 @@
 #game #world3{position:absolute;left:0;top:0;width:5760px;height:1080px;transform-origin:0 0;will-change:transform}
 #game #world3 .lane{position:absolute;left:0;top:0;width:5760px;height:1080px}
 #game #laneLit3{opacity:0}
-#game #ground3{position:absolute;left:-1500px;top:1078px;width:8800px;height:2400px;background:#74493a;opacity:0}
-#game #pad3{position:absolute;left:-1000px;top:0;width:1000px;height:1080px;overflow:hidden;clip-path:inset(756px 0 0 0)}
+#game #ground3{position:absolute;left:-1500px;top:1076px;width:8800px;height:2400px;background:url(../assets/game/l3/lane_ground.webp) 0 0/1920px 290px repeat,#74493a;opacity:0}
+#game #ground3::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(40,14,30,0),rgba(40,14,30,.35))}
+#game #pad3{position:absolute;left:-998px;top:0;width:1000px;height:1080px;overflow:hidden;clip-path:inset(756px 0 0 0)}
 #game #pad3 img{position:absolute;left:1000px;top:0;width:5760px;height:1080px;transform:scaleX(-1);transform-origin:0 0}
 #game .lit3{position:absolute;overflow:hidden;opacity:0}
 #game .lit3 img{position:absolute;width:5760px;height:1080px}
@@ -254,29 +255,36 @@
 #game #map3{position:absolute;inset:0;pointer-events:none}
 #game #map3 .num{position:absolute;width:52px;height:52px;border-radius:50%;background:#ffd23f;border:4px solid #5a2d0c;font:800 30px/46px Baloo;text-align:center;color:#3a220f;box-shadow:0 4px 0 rgba(58,34,15,.3)}
 #game #map3 .star{position:absolute;width:60px;height:60px;border-radius:50%;background:#f08c12;border:4px solid #fff3d6;font:800 34px/52px Baloo;text-align:center;color:#fff}
-#game #map3 .route{position:absolute;left:510px;top:600px;width:1280px;height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,#ffe7a3 0 24px,transparent 24px 40px)}
-#game #map3 .mini{position:absolute;left:380px;top:520px;width:120px;height:83px}
+#game #map3 .route{position:absolute;left:510px;top:700px;width:1280px;height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,#ffe7a3 0 24px,transparent 24px 40px)}
+#game #map3 .mini{position:absolute;left:330px;top:600px;width:160px;height:105px;background-size:600% 600%;background-repeat:no-repeat}
 #game #pari3{position:absolute;left:-217px;top:524px;width:563px;height:486px;background-size:600% 600%;background-repeat:no-repeat}
 #game #waves3{position:absolute;left:150px;top:600px;width:0;height:0;opacity:0;pointer-events:none}
 #game #waves3 i{position:absolute;border-radius:50%;border:5px solid transparent;border-right-color:rgba(255,248,230,.9);transform:translate(-50%,-50%)}
 #game #waves3 i:nth-child(1){width:40px;height:40px}#game #waves3 i:nth-child(2){width:70px;height:70px}#game #waves3 i:nth-child(3){width:100px;height:100px}
 #game #waves3.left i{border-right-color:transparent;border-left-color:rgba(255,248,230,.9)}
-#game #cart3{position:absolute;left:200px;top:570px;width:630px;height:434px}
-#game #cart3 .art{position:absolute;left:0;top:0;width:630px;height:434px}
-/* wheels sit behind the cart body, hubs on its bottom rail (axle), and roll on the ground (y 433 in the cart) */
-#game #cart3 .wheel{position:absolute;top:243px;width:190px;height:190px}
-#game #cart3 .w1{left:170px}#game #cart3 .w2{left:430px}
-#game #cart3 .cglow{position:absolute;left:-40px;top:-30px;width:710px;height:500px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.55),rgba(255,214,90,0));opacity:0;pointer-events:none}
 /* compositor hints: these move every frame */
-#game #pari3,#game #cart3,#game #cart3 .wheel,#game #aaru3 img,#game #potli3,#game #bill3,#game .slate3,#game #baba3,#game #guddu3,#game #wheel3 .rotor,#game #bill2,#game .stamp2,#game #l2,#game .coachFig{will-change:transform}
-#game #cart3 .cshadow{position:absolute;left:110px;top:410px;width:560px;height:40px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0))}
-#game #cart3 .plabel{position:absolute;left:203px;top:219px;width:385px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#f3d27a}
-#game #cart3 .pval{position:absolute;left:203px;top:239px;width:385px;height:70px;text-align:center;font:700 58px/70px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
+#game #cart3 .pull,#game #cart3,#game #aaru3 img,#game #potli3,#game #bill3,#game .slate3,#game #baba3,#game #guddu3,#game #wheel3 .rotor,#game #bill2,#game .stamp2,#game #l2,#game .coachFig{will-change:transform}
+/* Pari + hand-cart (pari_pull_sheet 6×6, 718×472 frames) at ×1.2. The MELA MONEY board stands in the cart behind its front
+   wall, the potli sits on the rim (coins fly from it), Pari's feet and the wheel rest on the ground line y ~1000. */
+#game #cart3{position:absolute;left:-40px;top:434px;width:862px;height:566px}
+#game #cart3 .pull{position:absolute;left:0;top:0;width:862px;height:566px;background-size:600% 600%;background-repeat:no-repeat}
+/* while Pari talks she lets go of the cart: cart-only image (same canvas as the sheet) + her explaining frames standing at the
+   handle ends (her dress covers the cut handles); swapped back to the push sprite when she moves */
+#game #cart3 .cartonly{position:absolute;left:0;top:0;width:862px;height:566px;opacity:0}
+#game #cart3 .talkp{position:absolute;left:340px;top:563px;width:0;height:0;opacity:0}
+#game #cart3 .talkp img{position:absolute;bottom:0;left:0;height:566px;transform:translateX(-50%);opacity:0;filter:drop-shadow(0 8px 8px rgba(30,12,4,.3))}
+#game #cart3 .board{position:absolute;left:506px;top:92px;width:340px;height:212px}
+#game #cart3 .board img{position:absolute;left:0;top:0;width:340px;height:212px}
+#game #cart3 .plabel{position:absolute;left:0;top:58px;width:340px;height:24px;text-align:center;font:800 17px/24px Baloo;letter-spacing:.22em;color:#f3d27a}
+#game #cart3 .pval{position:absolute;left:14px;top:78px;width:312px;height:60px;text-align:center;font:700 46px/60px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
+#game #cart3 .smears i{position:absolute;width:230px;height:30px;border-radius:15px;background:rgba(240,236,224,.38);opacity:0}
+#game #cart3 .smears i:nth-child(1){left:50px;top:80px}#game #cart3 .smears i:nth-child(2){left:58px;top:100px}#game #cart3 .smears i:nth-child(3){left:66px;top:120px}
+#game #cart3 .bag{position:absolute;left:446px;top:226px;width:84px;height:92px}
+#game #cart3 .cglow{position:absolute;left:380px;top:40px;width:520px;height:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.55),rgba(255,214,90,0));opacity:0;pointer-events:none}
+#game #cart3 .cshadow{position:absolute;left:30px;top:540px;width:820px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0))}
+#game #cart3 .speed:nth-child(1){left:-40px;top:250px;width:130px}#game #cart3 .speed:nth-child(2){left:-14px;top:314px;width:106px}#game #cart3 .speed:nth-child(3){left:12px;top:378px;width:82px}
 #game #cart3 .speed{position:absolute;height:9px;border-radius:5px;background:rgba(255,248,230,.75);opacity:0}
-#game #cart3 .speed:nth-child(1){left:-160px;top:170px;width:130px}#game #cart3 .speed:nth-child(2){left:-134px;top:234px;width:106px}#game #cart3 .speed:nth-child(3){left:-108px;top:298px;width:82px}
-#game #cart3 .smears i{position:absolute;width:300px;height:36px;border-radius:18px;background:rgba(240,236,224,.38);opacity:0}
-#game #cart3 .smears i:nth-child(1){left:233px;top:239px}#game #cart3 .smears i:nth-child(2){left:245px;top:261px}#game #cart3 .smears i:nth-child(3){left:257px;top:283px}
-#game #duster3{position:absolute;left:603px;top:793px;width:190px;height:142px;opacity:0;pointer-events:none}
+#game #duster3{position:absolute;left:603px;top:600px;width:190px;height:142px;opacity:0;pointer-events:none}
 #game #minus3{position:absolute;left:862px;top:640px;width:68px;height:68px;border-radius:50%;background:#c0392b;border:5px solid #fff3d6;box-shadow:0 5px 0 rgba(58,34,15,.3);transform:scale(0)}
 #game #minus3 span{position:absolute;left:14px;top:24px;width:30px;height:10px;border-radius:5px;background:#fff}
 #game .slate3{position:absolute;top:785px;width:200px;height:275px;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 8px 6px rgba(20,10,30,.35))}
@@ -295,7 +303,8 @@
 #game .slate3.pulse{animation:slatePulse 1.1s ease-in-out 3}
 @keyframes slatePulse{50%{filter:drop-shadow(0 0 20px rgba(255,205,70,1));transform:scale(1.04)}}
 /* Guddu Bhaiya (L3 teach): stands at the right, behind the slates, with his notebook */
-#game #guddu3{position:absolute;left:1585px;top:470px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #guddu3{position:absolute;left:1585px;top:470px;width:231px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #guddu3 img{position:absolute;left:0;bottom:-8px;height:571px;opacity:0}
 #game #baba3{position:absolute;left:1410px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #baba3 img{position:absolute;left:0;bottom:0;height:604px;opacity:0}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}

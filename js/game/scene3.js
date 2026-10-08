@@ -11,27 +11,55 @@
     { filter: `drop-shadow(0 0 ${px}px rgba(${rgba},1))`, duration: .35, yoyo: true, repeat: n, ease: 'sine.inOut', onComplete: () => gsap.set(el, { clearProps: 'filter' }) });
 
   /* ---------- Pari (pari_push sheet: 6×6, 24 fps; frame 0 when still) ---------- */
-  const P = $('#pari3'); P.style.backgroundImage = `url(${A('pari_push_sheet.webp')})`;
+  let MAPON = false;
+  /* Pari + hand-cart (pari_pull_sheet: 6×6, 24 fps). Frames 13–30 loop seamlessly while moving; frame 0 when still. */
+  const P = $('#cart3 .pull'); P.style.backgroundImage = `url(${A('pari_pull_sheet.webp')})`;
   let pariOn = false, pariT0 = 0;
   const pariFrame = k => { P.style.backgroundPosition = `${(k % 6) * 20}% ${Math.floor(k / 6) * 20}%`; };
-  gsap.ticker.add(() => { if (pariOn) pariFrame(Math.floor((clock() - pariT0) * 24) % 36); });
-  const Pari = { walk(on) { pariOn = on; pariT0 = clock(); if (!on) pariFrame(0); }, reset() { pariOn = false; pariFrame(0); } };
+  gsap.ticker.add(() => { if (pariOn) pariFrame(13 + Math.floor((clock() - pariT0) * 24) % 18); });
+  /* Pari talking (option 1, user Oct 2026): while her VO plays she lets go of the cart and explains (story frames pari_explain_0–35:
+     0–4 hands apart, 5–30 loop, 31–35 hands together), then takes the handle again (back to the push sprite). */
+  const TP = $('#cart3 .talkp'), CO = $('#cart3 .cartonly');
+  const tImgs = [...Array(36)].map(() => { const im = document.createElement('img'); im.alt = ''; TP.appendChild(im); return im; });
+  let tLoaded = false, tOn = false, tTalk = false, tT0 = 0, tStop = null, tShown = -1, tQuiet = null;
+  const tFrame = k => { if (k === tShown) return; tImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); tShown = k; };
+  const swap = talking => { tOn = talking; gsap.to(P, { opacity: talking ? 0 : 1, duration: .15 }); gsap.to([CO, TP], { opacity: talking ? 1 : 0, duration: .15 }); };
+  gsap.ticker.add(() => {
+    if (!tOn) return;
+    if (tTalk) { const f = Math.floor((clock() - tT0) * 12); tFrame(f < 5 ? f : 5 + (f - 5) % 26); }
+    else if (tStop != null) { const k = 31 + Math.floor((clock() - tStop) * 12); if (k >= 36) { tStop = null; tFrame(35); swap(false); } else tFrame(k); }   // hands together → hold the cart again
+  });
+  const Pari = {
+    walk(on) { if (on) Pari.talk(false, true); pariOn = on; pariT0 = clock(); if (!on) pariFrame(0); },
+    reset() { pariOn = false; pariFrame(0); Pari.talk(false, true); },
+    /* on: let go + explain · off: hands together, then back on the handle (now = instantly, e.g. before a push) */
+    talk(on, now = false) {
+      if (tQuiet) { tQuiet.kill(); tQuiet = null; }
+      if (on) {
+        if (MAPON) return;
+        if (!tLoaded) { tImgs.forEach((im, i) => im.src = SIMG('pari_explain_' + i)); tLoaded = true; }
+        if (!tOn) { tFrame(0); swap(true); }
+        if (!tTalk) { tTalk = true; tStop = null; tT0 = clock(); }
+      } else if (now) { tTalk = false; tStop = null; if (tOn) { gsap.killTweensOf([P, CO, TP]); gsap.set(P, { opacity: 1 }); gsap.set([CO, TP], { opacity: 0 }); tOn = false; } }
+      else if (tTalk) tQuiet = gsap.delayedCall(.45, () => { tQuiet = null; tTalk = false; tStop = clock(); });   // short gaps between lines keep her talking
+    }
+  };
   pariFrame(0);
 
   /* ---------- talk waves (L3 has no bubbles: the speaker's head gets three soft arcs while the VO plays) ---------- */
   const WV = $('#waves3'); let wavesTl = null;
-  const HEADS = { pari: { x: 150, y: 600, left: false }, baba: { x: 1500, y: 560, left: true }, guddu: { x: 1620, y: 560, left: true } };
+  const HEADS = { pari: { x: 330, y: 500, left: false }, baba: { x: 1500, y: 560, left: true }, guddu: { x: 1620, y: 560, left: true } };
   const Waves = {
-    on(who) { const h = HEADS[who]; if (!h) return Waves.off(); gsap.set(WV, { left: h.x, top: h.y, opacity: 1 }); WV.classList.toggle('left', h.left);
+    on(who) { const h = HEADS[who]; if (!h || who === 'pari') return Waves.off();   // Pari talks with her own explaining sprite now   // no big Pari on the zoomed-out map gsap.set(WV, { left: h.x, top: h.y, opacity: 1 }); WV.classList.toggle('left', h.left);
       if (wavesTl) wavesTl.kill(); wavesTl = gsap.timeline({ repeat: -1 }).fromTo(WV.children, { opacity: 0, scale: .85 }, { opacity: 1, scale: 1, duration: .32, stagger: .14, ease: 'sine.out' }).to(WV.children, { opacity: .25, duration: .3, stagger: .1 }); },
     off() { if (wavesTl) { wavesTl.kill(); wavesTl = null; } gsap.to(WV, { opacity: 0, duration: .2 }); }
   };
 
   /* ---------- the money cart: wheels roll with the distance, the chalk panel shows the live money ---------- */
-  const C = $('#cart3'), wheels = C.querySelectorAll('.wheel'), pval = C.querySelector('.pval');
+  const C = $('#cart3'), pval = C.querySelector('.pval');
   let wheelBase = 0, wheelAng = 0;
   const Cart = {
-    roll(dist) { wheelAng = wheelBase + dist / 80 * 180 / Math.PI; gsap.set(wheels, { rotation: wheelAng }); },
+    roll() { },   // the wheel turns inside the pull frames
     rollStart() { wheelBase = wheelAng; },
     speed(on) { gsap.to(C.querySelectorAll('.speed'), { opacity: on ? 1 : 0, x: on ? -14 : 0, duration: .25, stagger: .05 }); },
     glow() { return gsap.fromTo(C.querySelector('.cglow'), { opacity: 0 }, { opacity: 1, duration: .35, yoyo: true, repeat: 3, ease: 'sine.inOut' }); },   // cheap: opacity only
@@ -44,10 +72,10 @@
     /* the duster sweeps the panel twice, chalk smears appear, the old number fades */
     async wipe() {
       const du = $('#duster3'), sm = C.querySelectorAll('.smears i');
-      gsap.set(du, { left: 430, top: 793, opacity: 1, rotation: -6 }); SND.sfx('swish', .5);
+      gsap.set(du, { left: 470, top: 590, opacity: 1, rotation: -6 }); SND.sfx('swish', .5);
       gsap.to(sm, { opacity: 1, duration: .25, stagger: .12 });
       gsap.to(pval, { opacity: 0, duration: .7 });
-      await gsap.timeline().to(du, { left: 640, duration: .32, ease: 'sine.inOut' }).to(du, { left: 450, duration: .3, ease: 'sine.inOut' }).to(du, { left: 640, duration: .3, ease: 'sine.inOut' });
+      await gsap.timeline().to(du, { left: 640, duration: .32, ease: 'sine.inOut' }).to(du, { left: 480, duration: .3, ease: 'sine.inOut' }).to(du, { left: 640, duration: .3, ease: 'sine.inOut' });
       gsap.to(du, { opacity: 0, y: 30, duration: .25, onComplete: () => gsap.set(du, { y: 0 }) });
       gsap.to(sm, { opacity: 0, duration: .5, delay: .1 });
     },
@@ -192,7 +220,7 @@
   };
 
   /* ---------- coins: arc from the cart's money bag into the potli (or off-screen in the how-to) ---------- */
-  const BAG = { x: 451, y: 721 };
+  const BAG = { x: 448, y: 706 };   // the potli on the cart rim (cart3 .bag)
   const Coins = {
     async toPotli(n = 5) {
       SND.sfx('coins', .6);
@@ -258,59 +286,57 @@
   const NUMS = [[90.7, 351.3], [320.7, 351.7], [550.7, 311.3], [780.7, 311.3], [1010.7, 311.7], [1240.7, 359], [1470.7, 362.7]];
   const Map = {
     async on() {
-      Cart.show(false); Minus.hide();
+      Pari.talk(false, true); MAPON = true; Waves.off(); Cart.show(false); Minus.hide();
       gsap.to('#ground3', { opacity: 1, duration: .6 });
-      await gsap.to(W, { x: 0, y: 300, scale: 1 / 3, duration: 1.2, ease: 'power2.inOut' });
-      MAP.innerHTML = `<div class="route"></div><img class="mini" src="${A('money_cart.webp')}" alt="">` + NUMS.map(([x, y], i) => `<div class="num" style="left:${x}px;top:${y}px">${i + 1}</div>`).join('') + `<div class="star" style="left:1748px;top:330px">★</div>`;
+      await gsap.to(W, { x: 0, y: 400, scale: 1 / 3, duration: 1.2, ease: 'power2.inOut' });
+      MAP.innerHTML = `<div class="route"></div><div class="mini" style="background-image:url(${A('pari_pull_sheet.webp')});background-position:0 0"></div>` + NUMS.map(([x, y], i) => `<div class="num" style="left:${x}px;top:${y + 100}px">${i + 1}</div>`).join('') + `<div class="star" style="left:1748px;top:430px">★</div>`;
       const nums = MAP.querySelectorAll('.num'), star = MAP.querySelector('.star');
       gsap.set([...nums, star], { scale: 0 }); gsap.from(MAP.querySelector('.route'), { scaleX: 0, transformOrigin: '0 50%', duration: .8 });
       nums.forEach((n, i) => gsap.to(n, { scale: 1, duration: .3, ease: 'back.out(3)', delay: .2 + i * .3, onStart: () => SND.sfx('pop', .35, 1 + i * .06) }));
       gsap.to(star, { scale: 1, duration: .4, ease: 'back.out(3)', delay: .2 + 7 * .3, onStart: () => SND.sfx('sparkle', .5) });
-      gsap.to(MAP.querySelector('.mini'), { left: 1660, duration: 3.2, ease: 'sine.inOut', delay: .4 });
+      const mini = MAP.querySelector('.mini'), mo = { f: 0 };   // the little Pari-cart walks the route
+      gsap.to(mini, { left: 1620, duration: 3.2, ease: 'sine.inOut', delay: .4 });
+      gsap.to(mo, { f: 18 * 4, duration: 3.2, delay: .4, ease: 'none', onUpdate() { const k = 13 + Math.floor(mo.f) % 18; mini.style.backgroundPosition = `${(k % 6) * 20}% ${Math.floor(k / 6) * 20}%`; } });
     },
     async off(instant = false) {
       gsap.to(MAP, { opacity: 0, duration: instant ? 0 : .3, onComplete: () => { MAP.innerHTML = ''; gsap.set(MAP, { opacity: 1 }); } });
       gsap.to('#ground3', { opacity: 0, duration: instant ? 0 : .6 });
       await gsap.to(W, { x: -Cam.x, y: 0, scale: 1, duration: instant ? 0 : 1.1, ease: 'power2.inOut' });
-      Cart.show(true, instant ? 0 : .4);
+      Cart.show(true, instant ? 0 : .4); MAPON = false;
     }
   };
 
-  /* ---------- Baba (story talking frames baba_talk_0–35, same as the story's CH.baba.acts.talk): walks in from the right,
-     talks while his VO plays (forward and back), glides back to frame 0 (≈ baba_idle) when he stops, walks out ---------- */
-  const BB = $('#baba3'), BN = 36, BFPS = 10.5;
-  const bImgs = [...Array(BN)].map(() => { const im = document.createElement('img'); im.alt = ''; BB.appendChild(im); return im; });
-  let bLoaded = false, bTalk = false, bT0 = 0, bStop = null, bFrom = 0, bShown = -1;
-  const bFrame = k => { if (k === bShown) return; bImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); bShown = k; };
-  gsap.ticker.add(() => {
-    if (bTalk) { const f = Math.floor((clock() - bT0) * BFPS), P2 = 2 * (BN - 1), m = f % P2; bFrame(m < BN ? m : P2 - m); }
-    else if (bStop != null) { const k = bFrom - Math.floor((clock() - bStop) * BFPS * 3); if (k <= 0) { bStop = null; bFrame(0); } else bFrame(k); }
-  });
-  const Baba = {
-    async enter() {
-      if (!bLoaded) { bImgs.forEach((im, i) => im.src = SIMG('baba_talk_' + i)); bLoaded = true; }
-      bFrame(0); gsap.set(BB, { x: 520, opacity: 0 });
-      gsap.to(BB, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' });
-      await gsap.to(BB, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' });
-    },
-    async exit() { Baba.talk(false); gsap.to(BB, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(BB, { x: 520, opacity: 0, duration: .8, ease: 'power2.in' }); },
-    talk(on) {
-      if (on) { if (!bTalk) { bT0 = clock() - Math.max(0, bShown) / BFPS; bTalk = true; bStop = null; } }
-      else if (bTalk) { bTalk = false; bStop = clock(); bFrom = Math.max(0, bShown); }
-    },
-    hide() { bTalk = false; bStop = null; gsap.set(BB, { opacity: 0, x: 520 }); if (bLoaded) bFrame(0); }
-  };
-
-  /* ---------- Guddu Bhaiya (story sprites): walks in from the right with his notebook for the teach round ---------- */
-  const GD = $('#guddu3');
-  const Guddu = {
-    async enter() { GD.src = SIMG('guddu_write'); gsap.set(GD, { x: 480, opacity: 0 });
-      gsap.to(GD, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' });
-      await gsap.to(GD, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' }); },
-    pose(p) { GD.src = SIMG('guddu_' + p); },
-    async exit() { gsap.to(GD, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(GD, { x: 480, opacity: 0, duration: .8, ease: 'power2.in' }); },
-    hide() { gsap.set(GD, { opacity: 0, x: 480 }); }
-  };
+  /* ---------- Baba + Guddu: story talking frames (baba_talk_0–35, guddu_talk_0–35, the same as the story's CH.*.acts.talk).
+     They walk in from the right, talk while their VO plays (forward and back, 10.5 fps), glide back to frame 0 (their resting
+     pose) when they stop, and walk out. COACH.onTalk drives talk(on) in level3.js. ---------- */
+  function Talker(el, file, dx) {
+    const N = 36, FPS = 10.5;
+    const imgs = [...Array(N)].map(() => { const im = document.createElement('img'); im.alt = ''; el.appendChild(im); return im; });
+    let loaded = false, on = false, t0 = 0, stop = null, from = 0, shown = -1;
+    const frame = k => { if (k === shown) return; imgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); shown = k; };
+    gsap.ticker.add(() => {
+      if (on) { const f = Math.floor((clock() - t0) * FPS), P2 = 2 * (N - 1), m = f % P2; frame(m < N ? m : P2 - m); }
+      else if (stop != null) { const k = from - Math.floor((clock() - stop) * FPS * 3); if (k <= 0) { stop = null; frame(0); } else frame(k); }
+    });
+    const T = {
+      async enter() {
+        if (!loaded) { imgs.forEach((im, i) => im.src = SIMG(file + '_' + i)); loaded = true; }
+        if (shown < 0) frame(0); gsap.set(el, { x: dx, opacity: 0 });
+        gsap.to(el, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' });
+        await gsap.to(el, { x: 0, opacity: 1, duration: .9, ease: 'power2.out' });
+      },
+      async exit() { T.talk(false); gsap.to(el, { y: -8, duration: .2, yoyo: true, repeat: 3, ease: 'sine.inOut' }); await gsap.to(el, { x: dx, opacity: 0, duration: .8, ease: 'power2.in' }); },
+      talk(v) {
+        if (v) { if (!loaded) { imgs.forEach((im, i) => im.src = SIMG(file + '_' + i)); loaded = true; } if (!on) { t0 = clock() - Math.max(0, shown) / FPS; on = true; stop = null; } }
+        else if (on) { on = false; stop = clock(); from = Math.max(0, shown); }
+      },
+      pose() { },   // kept for older calls: the talking frames replace the still poses
+      hide() { on = false; stop = null; gsap.set(el, { opacity: 0, x: dx }); if (loaded) frame(0); }
+    };
+    return T;
+  }
+  const Baba = Talker($('#baba3'), 'baba_talk', 520);
+  const Guddu = Talker($('#guddu3'), 'guddu_talk', 480);
 
   window.L3SC = { Guddu, Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba, glowOn };
 })();

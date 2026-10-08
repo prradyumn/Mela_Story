@@ -29,18 +29,19 @@
       <svg id="hook3" viewBox="-14 -40 28 52" width="28" height="52"><path d="M0 -38 L0 2 A7 7 0 1 0 7 -5 L7 -9" fill="none" stroke="#2c2a30" stroke-width="5.5" stroke-linecap="round"/><path d="M0 -38 L0 2 A7 7 0 1 0 7 -5 L7 -9" fill="none" stroke="#8d8a96" stroke-width="2.4" stroke-linecap="round"/><rect x="-6" y="-40" width="12" height="7" rx="2" fill="#5a3a1c" stroke="#2c1a0c" stroke-width="1.5"/></svg>
     </div>
     <div id="map3"></div>
-    <div id="pari3"></div>
+    <div id="pari3" style="display:none"></div>
     <div id="waves3"><i></i><i></i><i></i></div>
     <div id="cart3">
       <i class="speed"></i><i class="speed"></i><i class="speed"></i>
       <i class="cglow"></i><i class="cshadow"></i>
-      <img class="wheel w1" src="${A('cart_wheel.webp')}" alt=""><img class="wheel w2" src="${A('cart_wheel.webp')}" alt="">
-      <img class="art" src="${A('money_cart.webp')}" alt="">
-      <div class="plabel">MELA MONEY</div><div class="pval"></div>
-      <div class="smears"><i></i><i></i><i></i></div>
+      <div class="board"><img src="${A('money_board.webp')}" alt=""><div class="plabel">MELA MONEY</div><div class="pval"></div><div class="smears"><i></i><i></i><i></i></div></div>
+      <img class="bag" src="${A('potli.webp')}" alt="">
+      <img class="cartonly" src="${A('cart_only.webp')}" alt="">
+      <div class="talkp"></div>
+      <div class="pull"></div>
     </div>
     <img id="duster3" src="${A('duster.webp')}" alt="">
-    <img id="guddu3" alt="">
+    <div id="guddu3"></div>
     <div id="minus3"><span></span></div>
     ${slate(0)}${slate(1)}${slate(2)}
     <div id="baba3"></div>

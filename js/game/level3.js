@@ -108,6 +108,15 @@
     await Bill.away();
   }
 
+  /* ---------- camera on the speaker: while only Baba or Guddu speaks (both stand on the right), the scene pushes in (×1.18) and pans toward him (he stays put, the money
+     board stays in view on the left; the right edge never shows); it eases back when his line ends (user, Oct 2026) ---------- */
+  let camTw = null;
+  function speakerCam(on) {
+    if (camTw) camTw.kill();
+    camTw = gsap.to('#l3', on ? { scale: 1.18, x: -30, transformOrigin: '1700px 760px', duration: 1, ease: 'sine.inOut' }
+                              : { scale: 1, x: 0, transformOrigin: '1700px 760px', duration: .9, ease: 'sine.inOut', delay: .2 });
+  }
+
   /* ---------- banner ---------- */
   async function banner() {
     const ov = $('#titleOv'), c = $('#titleCard');
@@ -127,11 +136,11 @@
   async function howto() {
     for (const line of D.howto) {
       await beat(line, async () => {
-        if (line.show === 'baba') { glowAlong(line, [[.32, () => { Cart.glow(); Panel.glow(); }]]); await Baba.enter(); Baba.talk(true); }
+        if (line.show === 'baba') { glowAlong(line, [[.32, () => { Cart.glow(); Panel.glow(); }]]); await Baba.enter(); }
         if (line.show === 'less') { await Minus.show(); Coins.hopOff(4); }
         if (line.show === 'map') { await Map.on(); }
       });
-      if (line.show === 'baba') { Baba.talk(false); Baba.exit(); }
+      if (line.show === 'baba') Baba.exit();
       if (line.show === 'less') Minus.hide();
       if (line.show === 'map') await Map.off(skipping);
       if (skipping) return;
@@ -151,14 +160,14 @@
         const h = Slates.handAt(right); Hand.show(h.x, h.y);
         await play(T, L, { teach: true });
         // Guddu: "Umm... it's 1,61,240 to be exact. But your number is so close. Good job!"
-        Guddu.pose('surprised'); await COACH.say(T.exact); Guddu.pose('proud'); await wait(.3);
+        await COACH.say(T.exact); await wait(.3);
         Guddu.exit();
         // Baba: "Very good. Now the real money: ₹6,00,000. Let's pay!" — the panel refills on "₹6,00,000"
-        Baba.enter().then(() => Baba.talk(true));
+        Baba.enter();
         const said = COACH.say(T.baba);
         gsap.delayedCall(durOf(T.baba) * .35, async () => { await Panel.wipe(); await Panel.write(D.start, false); Cart.glow(); });
         Bill.away(); Slates.hide(); Minus.hide();
-        await said; Baba.talk(false); await wait(.4);
+        await said; await wait(.4);
         await Baba.exit();
         return;
       }
@@ -168,7 +177,7 @@
           Bill.show(0, T.bill, { teach: true }); await Bill.drop();
         }
         if (line.show === 'chip') await Bill.chip('blue', D.round(T.bill));
-        if (line.show === 'guddu') { await Guddu.enter(); Guddu.pose('scratch'); }   // Guddu tries it the long way…
+        if (line.show === 'guddu') await Guddu.enter();   // Guddu tries it the long way… (talking frames)
       });
     }
   }
@@ -225,7 +234,7 @@
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';
     gsap.set('#gBg', { autoAlpha: 0 });
     // the L3 layer, clean
-    $('#l3').classList.remove('hidden'); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
+    $('#l3').classList.remove('hidden'); gsap.set('#l3', { scale: 1, x: 0 }); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
     gsap.set('#done3Card', { clearProps: 'transform,opacity' }); gsap.set('#gHud', { autoAlpha: 1 });
     Wheel.reset(); Fw.clear(); Stall.set(0); Sun.set(0); Pari.reset(); Waves.off(); Baba.hide(); Guddu.hide(); Aaru.hide();
     $('#bill3').classList.add('hidden'); Slates.S.forEach(s => s.className = 'slate3 hidden'); gsap.set('#minus3', { scale: 0 });
@@ -234,13 +243,13 @@
   }
   async function run({ startAt = 0, skipIntro = false } = {}) {
     window.L3_ACTIVE = true;
-    COACH.voiceOnly = true; COACH.onTalk = (who, on) => on ? Waves.on(who) : Waves.off();
+    COACH.voiceOnly = true; COACH.onTalk = (who, on) => { if (who === 'pari') return Pari.talk(on); Waves.off(); if (who === 'baba') { Baba.talk(on); speakerCam(on); } if (who === 'guddu') { Guddu.talk(on); speakerCam(on); } };
     reset();
     SND.preload(D.allLines().map(l => l.id));
     HUD.setLit(startAt); HUD.lit = startAt;
     if (startAt > 0) { Stall.set(startAt); Sun.set(startAt); Panel.set(D.moneyBefore(startAt), true); Cam.set(CAM(startAt - 1)); }
     // decode the big pictures while the banner shows (the lit lane is 5760 px: decoding it on the first payment froze ~0.8 s)
-    const warmed = new Promise(r => gsap.delayedCall(.7, () => warm(['l3/mela_lane_dark.webp', 'l3/mela_lane_lit.webp', 'l3/wheel_rotor.webp', 'l3/wheel_stand.webp', 'l3/firework_sheet.webp', 'l3/pari_push_sheet.webp', 'l3/light_burst.webp', 'l3/coin.webp', 'l3/potli.webp'].map(GA)).then(r)));   // after the banner has popped in
+    const warmed = new Promise(r => gsap.delayedCall(.7, () => warm(['l3/mela_lane_dark.webp', 'l3/mela_lane_lit.webp', 'l3/wheel_rotor.webp', 'l3/wheel_stand.webp', 'l3/firework_sheet.webp', 'l3/pari_pull_sheet.webp', 'l3/money_board.webp', 'l3/lane_ground.webp', 'l3/light_burst.webp', 'l3/coin.webp', 'l3/potli.webp'].map(GA)).then(r)));   // after the banner has popped in
     await banner(); await warmed;
     HUD.show();
     gsap.set(['#gChip', '#sunPanel', '#glowSun'], { autoAlpha: 0 }); gsap.set('#mariPlate', { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 34 });   // L3 HUD: 🔊 + marigolds only
@@ -249,6 +258,7 @@
       await howto(); await teach();
       skipBtn(false); Hand.hide(); Slates.disable();
       if (skipping) {   // Skip: tidy the intro away and start at payment 1
+        speakerCam(false);
         Map.off(true); Baba.hide(); Guddu.hide(); Waves.off(); Slates.hide(); Minus.hide(); $('#bill3').classList.add('hidden');
         Panel.set(D.start, false); gsap.set('#cart3', { autoAlpha: 1 });
       }
@@ -258,7 +268,7 @@
     for (let i = startAt; i < 7; i++) await stallRound(i);
     await finale();
     const res = await complete();
-    window.L3_ACTIVE = false; COACH.voiceOnly = false; COACH.onTalk = null; Waves.off();
+    window.L3_ACTIVE = false; COACH.voiceOnly = false; COACH.onTalk = null; Waves.off(); gsap.set('#l3', { scale: 1, x: 0 });
     gsap.set(['#gChip', '#sunPanel', '#glowSun', '#gHud'], { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 34 });
     return res;
   }

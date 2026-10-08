@@ -44,7 +44,7 @@ const imgURL = n => SRC[n] || `assets/story/${n}.webp`;
 const OGG = !!document.createElement('audio').canPlayType('audio/ogg; codecs="opus"');
 const auURL = (n, ext = OGG ? 'ogg' : 'mp3') => SRC[n] || `assets/audio/${n}.${ext}`;
 let AC, master, musicBus, voiceBus, sfxBus;
-const MUSIC_LEVEL = 0.4, MUSIC_DUCK = 0.14;   // music bus: normal level, and while a voice speaks
+const MUSIC_LEVEL = 0.22, MUSIC_DUCK = 0.07;   // music bus: normal level, and while a voice speaks (Oct 2026: lowered again, −5 dB / −6 dB)
 async function loadAll(onProg) {
   AC = new (window.AudioContext || window.webkitAudioContext)();
   master = AC.createGain(); master.connect(AC.destination);
@@ -108,7 +108,7 @@ function voice(n) {
   voiceNow = play(n, { bus: voiceBus, gain: 1.15 });
   const t = AC.currentTime, d = DUR[n] || 2;
   musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t);
-  musicBus.gain.linearRampToValueAtTime(MUSIC_DUCK, t + 0.25); musicBus.gain.setValueAtTime(MUSIC_DUCK, t + d); musicBus.gain.linearRampToValueAtTime(MUSIC_LEVEL, t + d + 0.8);
+  musicBus.gain.linearRampToValueAtTime(MUSIC_DUCK, t + 0.25); musicBus.gain.setValueAtTime(MUSIC_DUCK, t + d); musicBus.gain.linearRampToValueAtTime(MUSIC_LEVEL, t + d + 1.6);   // slow swell back: no pumping between lines
 }
 // fade a voice out over a few ms before stopping it (an instant stop clicks)
 function fadeStop(h, t) { try { h.g.gain.cancelScheduledValues(t); h.g.gain.setValueAtTime(h.g.gain.value, t); h.g.gain.linearRampToValueAtTime(0, t + .03); h.s.stop(t + .04); } catch (e) { } }
