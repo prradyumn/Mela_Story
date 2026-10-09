@@ -70,6 +70,7 @@
         if (!teach) {
           // the cart moment: the line clears, the cart rolls to the centre, the item drops in, Gudiya jumps for joy
           const from = Tag.iconCentre();
+          COACH.hideBubble();                                      // the cart rolls in under where the bubble sits (Pari's line was up for 3+ s)
           await Promise.all([Btns.hide(), Marker.hideAll(), Line.hide(), Rule.hide()]);
           await Cart.moment(GA(`ic_${q.icon}.webp`), from);
           const side = -1;                                         // Gudiya on the cart's left: it leaves to the right
@@ -201,7 +202,7 @@
     await gsap.fromTo('#doneCard', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
     await GFX.stars(imgs, nStars);
     SND.sfx('whoosh');
-    await gsap.fromTo('#doneCart', { x: -900, rotation: -4 }, { x: 0, rotation: 0, duration: .9, ease: 'power3.out' });
+    await gsap.fromTo('#doneCart', { x: -150, rotation: -4, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: .7, ease: 'power3.out' });   // rolls in inside the card (it used to start over Pari)
     gsap.fromTo('#doneCart', { y: 0 }, { y: -10, duration: .15, yoyo: true, repeat: 1 });
     if (!embedded) for (const line of D.complete) await COACH.say(line);   // inside the story, bridge1 says these lines (r2, p4)
     // moves on by itself once the card has been seen; tapping the button just goes a little sooner

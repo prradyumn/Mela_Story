@@ -45,7 +45,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
    only the plain middle strip stretches to fit the label; it tucks 5px under each cap so no hairline seam shows */
 .btn{position:absolute;height:150px;padding:0 104px 26px;display:flex;align-items:center;justify-content:center;white-space:nowrap;border:0;background:url(../assets/story/btn_l.webp) left center/auto 100% no-repeat,url(../assets/story/btn_r.webp) right center/auto 100% no-repeat,url(../assets/story/btn_m.webp) center/calc(100% - 170px) 100% no-repeat;color:#fffaf0;font-family:Baloo;font-weight:800;font-size:56px;line-height:1;letter-spacing:.02em;text-shadow:0 4px 0 rgba(74,40,16,.55),0 0 10px rgba(122,58,10,.35);filter:drop-shadow(0 14px 16px rgba(40,20,5,.35));cursor:pointer;pointer-events:auto}
 .btn:active{filter:brightness(.93) drop-shadow(0 6px 8px rgba(40,20,5,.35))}
-#skip{position:absolute;right:34px;bottom:30px;padding:10px 26px 14px;border-radius:24px;border:4px solid rgba(58,34,15,.8);background:rgba(255,250,240,.85);font-family:Baloo;font-weight:800;font-size:28px;color:#3a220f;cursor:pointer;opacity:0;pointer-events:none;z-index:50}
+#skip{position:absolute;right:34px;top:206px;padding:10px 26px 14px;border-radius:24px;border:4px solid rgba(58,34,15,.8);background:rgba(255,250,240,.85);font-family:Baloo;font-weight:800;font-size:28px;color:#3a220f;cursor:pointer;opacity:0;pointer-events:none;z-index:50}
 #skip.on{opacity:.85;pointer-events:auto}
 #fx{position:absolute;inset:0;pointer-events:none;z-index:40}
 #wipe{position:absolute;inset:0;z-index:60;pointer-events:none;background:#e8870e;clip-path:circle(0% at 50% 50%)}
@@ -69,6 +69,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #loader p.ready:active{filter:brightness(.93) drop-shadow(0 6px 8px rgba(40,20,5,.35))}
 #loader.ready{cursor:pointer}
 .ost-big{font-family:Baloo;font-weight:800;color:#fff7e3;text-shadow:0 6px 0 #5a3212,0 0 30px rgba(255,190,80,.6)}
+/* a key takeaway on a cream pill (readable on any background) */
+.ost-pill{font-family:Baloo;font-weight:800;line-height:1.1;color:#3a220f;background:#fffaf0;border:6px solid #5a3212;border-radius:60px;padding:10px 40px 14px;box-shadow:0 8px 0 rgba(58,34,15,.35),0 14px 30px rgba(30,10,0,.35)}
 .numfloat{position:absolute;font-family:Fredoka;font-weight:700;color:#23408f;font-size:44px;text-shadow:0 3px 0 #fffaf0,0 0 12px #fffaf0;white-space:nowrap}
 
 .bird{position:absolute;width:46px;height:20px;pointer-events:none}

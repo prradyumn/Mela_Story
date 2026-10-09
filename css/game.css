@@ -129,7 +129,7 @@
 #game #titleCard h1{font:800 104px/1.05 Baloo;margin:14px 0 6px}
 #game #titleCard p{font:600 34px/1.3 Poppins;color:var(--ink-soft);margin-bottom:46px}
 #game #titleCard .gbtn{position:relative;margin:0 auto;width:360px}
-#game #titleIcons{display:flex;justify-content:center;gap:16px;margin:0 0 34px}
+#game #titleIcons{display:flex;justify-content:center;gap:16px;margin:0 0 14px}
 #game #titleIcons img{width:96px;height:96px;object-fit:contain}
 #game #doneCard{width:800px;height:880px;position:absolute;left:730px;top:180px;padding-top:24px}
 #game #doneCard h2{font:800 96px/1.1 Baloo}
@@ -140,7 +140,7 @@
 #game #doneStars img:nth-child(2){left:330px;top:0;width:140px;height:140px}
 #game #doneStars img:nth-child(3){left:490px}
 #game #doneCart{position:absolute;left:150px;top:330px;width:500px}
-#game #doneCta{left:170px;top:732px;width:460px;font-size:40px;white-space:nowrap}
+#game #doneCta{left:170px;top:744px;width:460px;font-size:40px;white-space:nowrap}
 #game #doneScore{position:absolute;left:0;right:0;top:690px;font:600 26px/1 Poppins;color:var(--ink-soft)}
 /* ---------- particles ---------- */
 #game #gFx{position:absolute;inset:0;z-index:55;pointer-events:none}
@@ -150,7 +150,8 @@
 #game .flyer{position:absolute;z-index:56;pointer-events:none}
 /* toast (dev / level hand-off) */
 #game #gToast{left:960px;top:40px;transform:translateX(-50%);z-index:70;padding:14px 28px;border-radius:30px;background:var(--ink);color:var(--cream);font:600 26px/1 Poppins;opacity:0}
-#game #btnSkip{left:1702px;top:968px;z-index:45;display:flex;align-items:center;gap:8px;padding:14px 26px 12px;border-radius:40px;background:rgba(255,250,240,.92);border:4px solid var(--wood);font:800 30px/1 Baloo;color:var(--ink);cursor:pointer;box-shadow:0 5px 0 rgba(58,34,15,.25)}
+/* top-left beside 🔊: at the bottom-right it sat on Manju's / Guddu's feet and on the CHECKED basket */
+#game #btnSkip{left:160px;top:44px;z-index:45;display:flex;align-items:center;gap:8px;padding:14px 26px 12px;border-radius:40px;background:rgba(255,250,240,.92);border:4px solid var(--wood);font:800 30px/1 Baloo;color:var(--ink);cursor:pointer;box-shadow:0 5px 0 rgba(58,34,15,.25)}
 #game #btnSkip svg{width:28px;height:28px}
 #game #btnSkip:active{transform:translateY(3px)}
 
@@ -169,8 +170,8 @@
 /* the bill */
 #game #bill2{left:1000px;top:196px;width:620px;height:775px;transform-origin:50% 100%;filter:drop-shadow(0 12px 10px rgba(58,34,15,.28))}
 #game #bill2 .paper{position:absolute;left:0;top:0;width:620px;height:775px}
-#game #bill2 .b-title{position:absolute;left:100px;top:26px;font:800 52px/1.1 Baloo;color:var(--red)}
-#game #bill2 .b-sub{position:absolute;left:104px;top:82px;font:600 20px/1 Poppins;color:var(--ink-soft)}
+#game #bill2 .b-title{position:absolute;left:100px;top:40px;font:800 52px/1.1 Baloo;color:var(--red)}
+#game #bill2 .b-sub{position:absolute;left:104px;top:96px;font:600 20px/1 Poppins;color:var(--ink-soft)}
 #game #bill2 .b-item{position:absolute;left:100px}
 #game #bi1{top:136px}#game #bi2{top:272px}
 #game #bill2 .b-name{font:600 30px/1.2 Poppins;color:var(--ink)}
@@ -192,7 +193,7 @@
 #game .stamp2 .art{position:absolute;left:0;top:0;width:250px;height:333px}
 #game .stamp2.pressed .art{height:292px;top:41px}
 /* ABOUT: a dark tag on the wooden base (was cream text on the brass collar — unreadable) */
-#game .stamp2 .about{position:absolute;left:50%;top:206px;transform:translateX(-50%);padding:5px 14px 3px;border-radius:12px;background:#4a2410;border:2px solid #f3d27a;font:800 17px/1 Baloo;letter-spacing:.14em;color:#ffe7a8;white-space:nowrap;pointer-events:none;box-shadow:0 2px 0 rgba(40,18,4,.35)}
+#game .stamp2 .about{position:absolute;left:50%;top:206px;transform:translateX(-50%);padding:6px 16px 4px;border-radius:12px;background:#4a2410;border:2px solid #f3d27a;font:800 22px/1 Baloo;letter-spacing:.12em;color:#ffe7a8;white-space:nowrap;pointer-events:none;box-shadow:0 2px 0 rgba(40,18,4,.35)}
 #game .stamp2 .val{position:absolute;left:17px;top:240px;width:217px;height:50px;display:flex;align-items:center;justify-content:center;font:700 34px/1 Fredoka;color:var(--ink);white-space:nowrap;pointer-events:none}
 #game .stamp2 .tick{position:absolute;left:192px;top:96px;width:56px;height:56px;border-radius:50%;background:var(--green);border:4px solid #fff;display:flex;align-items:center;justify-content:center;transform:scale(0)}
 #game .stamp2 .tick svg{width:30px;height:30px}
@@ -215,7 +216,7 @@
 #game #ball2{left:0;top:0;width:220px;height:220px;opacity:0;z-index:31;pointer-events:none}
 #game #crumpleCv{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;z-index:30;opacity:0}
 /* level complete */
-#game #done2Card{position:absolute;left:560px;top:190px;width:800px;height:860px;padding-top:24px}
+#game #done2Card{position:absolute;left:560px;top:150px;width:800px;height:900px;padding-top:24px}
 #game #done2Card h2{font:800 88px/1.1 Baloo}
 #game #done2Card .sub{font:600 28px/1.3 Poppins;color:var(--ink-soft)}
 #game #done2Stars{position:relative;height:150px;margin-top:6px}
@@ -226,8 +227,8 @@
 #game #done2Basket .balls{position:absolute;left:0;top:40px;width:460px;height:328px}
 #game #done2Basket .balls img{position:absolute;width:110px;height:110px}
 #game #done2Basket .basket-tag{left:143px;top:200px;width:182px;font-size:36px}
-#game #done2Score{position:absolute;left:0;right:0;top:708px;font:600 26px/1 Poppins;color:var(--ink-soft)}
-#game #done2Cta{left:80px;top:744px;width:640px;font-size:42px;white-space:nowrap}
+#game #done2Score{position:absolute;left:0;right:0;top:694px;font:600 26px/1 Poppins;color:var(--ink-soft)}
+#game #done2Cta{left:80px;top:756px;width:640px;font-size:42px;white-space:nowrap}
 
 /* ================= Level 3 · Mela Ground · Pari's money cart (Figma ★ L3 · Clean build v3, DEV SPEC 137:343) =================
    #l3 is its own stacking context (z 5): Gudiya (18), the hand (46), the HUD (30) and fx (55) stay above it. */
@@ -248,18 +249,19 @@
 #game #burst3{position:absolute;width:720px;height:720px;opacity:0;pointer-events:none;mix-blend-mode:screen}
 #game #wheel3{position:absolute;left:4960px;top:49px;width:750px;height:750px;display:none}
 #game #wheel3 img{position:absolute;left:0;top:0;width:750px;height:750px}
-#game #wheel3 .rotor{transform-origin:50% 50%}
+#game #wheel3 .rotor{transform-origin:376.5px 364.5px}   /* the hub (wheel_frame drawn on the stand's axle) */
+#game #wheel3 .cab{position:absolute;left:0;top:0;width:124px;height:168px;background:url(../assets/game/l3/wheel_cabins.webp) 0 0/992px 168px no-repeat;transform-origin:59.2px 0;will-change:transform}
 #game #bill3{position:absolute;width:300px;height:230px;transform-origin:150px 6px;filter:drop-shadow(7px 12px 7px rgba(20,8,0,.42))}   /* pivots on its rope loop */
 #game #hook3{position:absolute;display:none;pointer-events:none;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.4))}
 #game #bill3.hidden{display:none}
 #game #bill3 .art{position:absolute;left:0;top:0;width:300px;height:230px}
-#game #bill3 .try{position:absolute;left:0;top:84px;width:300px;text-align:center;font:800 22px/1 Baloo;letter-spacing:.14em;color:#b5361d;display:none}
+#game #bill3 .try{position:absolute;left:22px;top:56px;padding:3px 9px 1px;border:3px solid #b5361d;border-radius:8px;transform:rotate(-8deg);font:800 17px/1 Baloo;letter-spacing:.12em;color:#b5361d;display:none}   /* a little corner tag, clear of the rope knot */
 #game #bill3.teach .try{display:block}
 #game #bill3 .price{position:absolute;left:0;top:98px;width:300px;height:63px;text-align:center;font:700 56px/63px Fredoka;color:var(--ink);border-radius:14px}
 #game #bill3.teach .price{top:106px;font-size:52px}
 #game #bill3 .chip{position:absolute;left:80px;top:166px;width:140px;height:44px;border-radius:14px;border:3px solid #2f62c9;background:#e6efff;color:#2f62c9;font:700 26px/1 Fredoka;display:flex;align-items:center;justify-content:center;padding-top:2px;white-space:nowrap;opacity:0}
 #game #bill3 .chip.yellow{border-color:#e0a81c;background:#fff1b8;color:#8a5a10}
-#game #bill3 .paid{position:absolute;left:120px;top:118px;width:174px;height:70px;opacity:0;transform:rotate(-8deg)}
+#game #bill3 .paid{position:absolute;left:138px;top:150px;width:174px;height:70px;opacity:0;transform:rotate(-8deg);mix-blend-mode:multiply}   /* ink on paper, lower right: the amount stays readable */
 #game #bill3 .paid img{position:absolute;left:0;top:0;width:174px;height:66px}
 #game #bill3 .paid span{position:absolute;left:0;top:12px;width:174px;text-align:center;font:800 34px/1 Baloo;color:#c0392b;letter-spacing:.06em}
 #game #map3{position:absolute;inset:0;pointer-events:none}
@@ -322,7 +324,7 @@
 #game #baba3 img{position:absolute;left:0;bottom:0;height:604px;opacity:0}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}
 #game #l3 .ashadow{position:absolute;width:180px;height:32px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0));opacity:0;pointer-events:none}
-#game #aaru3 img{position:absolute;bottom:0;left:0;transform:translateX(-50%)}
+#game #aaru3 img{position:absolute;bottom:0;left:0;transform:translateX(-50%);transform-origin:50% 100%}
 #game #potli3{position:absolute;left:0;top:0;width:100px;height:109px;opacity:0;pointer-events:none}
 #game #fw3{position:absolute;inset:0;pointer-events:none;z-index:8}
 #game #fw3 .fw{position:absolute;background-repeat:no-repeat}
@@ -381,9 +383,9 @@
 #game .gcard.sunset h1,#game .gcard.sunset h2{position:relative;z-index:1;color:#fff4d6;-webkit-text-stroke:6px #5a2d0c;paint-order:stroke fill;text-shadow:0 6px 0 #5a2d0c,0 12px 18px rgba(30,10,40,.5),0 0 34px rgba(255,190,80,.5);letter-spacing:.01em}
 #game #titleCard p,#game #titleIcons,#game #doneCard .sub,#game #done2Card .sub{position:relative;z-index:1}   /* above the strip (a positioned ::before) */
 #game .gkick,#game #titleCard .lvl{position:absolute;left:50%;top:-30px;transform:translateX(-50%);z-index:2;padding:9px 28px 7px;border-radius:30px;background:#fff6df;border:4px solid #5a2d0c;font:800 26px/1 Baloo;letter-spacing:.18em;text-transform:uppercase;color:#b5361d;white-space:nowrap;box-shadow:0 6px 0 rgba(58,34,15,.3)}
-#game #titleCard{--sh:196px;width:980px;padding:58px 60px 56px}
+#game #titleCard{--sh:196px;width:980px;padding:58px 60px 34px}   /* no dead space under the icons */
 #game #titleCard h1{margin:0 0 0;line-height:1.08}
-#game #titleCard p{margin:60px 0 38px}
+#game #titleCard p{margin:60px 0 30px}
 #game #doneCard{--sh:166px;padding-top:40px}
 #game #doneCard .sub{margin-top:28px}
 #game #doneCart{top:352px}

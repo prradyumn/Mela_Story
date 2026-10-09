@@ -75,9 +75,9 @@
   const Hand = SC.Hand;
   async function gudiyaBleat() {
     const G = GUDIYA;
-    await G.enter(1810, 1072, 190);
-    await G.bleat();
-    gsap.delayedCall(1.4, async () => { await G.trotTo(2150, 1072, 190); G.hide(); });
+    await G.enter(1555, 1078, 170);                    // on the floor in front of the desk, between the bill and the basket (she stood IN the basket)
+    await G.bleat({ left: 1575, top: 590 });           // her bubble over the wall, clear of the pile's "bills left" counter
+    gsap.delayedCall(1.4, async () => { await G.trotTo(2150, 1078, 170); G.hide(); });
   }
 
   /* ---------- banner ---------- */

@@ -11,6 +11,8 @@ window.LEVEL3 = {
 
   // world (lane) geometry, 1 px = 1 stage px; the lane art is 5760×1080
   hooks: [[350, 508], [1040, 507], [1730, 436], [2420, 436], [3110, 436], [3800, 522], [4490, 522]],
+  // where each bill's rope loop hangs: the stall's OWN painted hardware (gold ring · iron hook · S-hook), measured in the lane art
+  catch: [[340, 515], [1051, 514], [1739, 428], [2422, 423], [3104, 428], [3812, 540], [4486, 540]],
   boxes: [[44, 636], [758, 1439], [1330, 2129], [2020, 2819], [2710, 3509], [3400, 4199], [4090, 4802]],   // stall x ranges (lit crossfade)
   signs: [['FLOWERS', 346], ['SWEETS', 347], ['TENT HOUSE', 226], ['LIGHTS', 226], ['SOUND', 226], ['SNACKS', 369], ['FOOD', 380]],   // text, top y (centred on the hook x)
   wheel: [5335, 424], pathTop: 780,

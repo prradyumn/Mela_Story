@@ -117,6 +117,7 @@
     if (camTw) camTw.kill();
     camTw = gsap.to('#l3', on ? { scale: 1.18, x: -30, transformOrigin: '1700px 760px', duration: 1, ease: 'sine.inOut' }
                               : { scale: 1, x: 0, transformOrigin: '1700px 760px', duration: .9, ease: 'sine.inOut', delay: .2 });
+    gsap.to('#sun3', { y: on ? 110 : 0, duration: on ? 1 : .9, delay: on ? 0 : .2, ease: 'sine.inOut', overwrite: 'auto' });   // keep the sun in frame during the push-in
   }
 
   /* ---------- banner ---------- */
@@ -203,7 +204,7 @@
     await Cam.push(D.finaleCam, { dur: 2 });
     Stall.set(7); Wheel.light(); SND.sfx('confetti', .7); SND.sfx('sparkle', .8);
     Fw.show([[390, 180, 300], [880, 130, 240], [1145, 215, 190]], 1.1, 2);
-    Aaru.show(1134); Aaru.face(1); Aaru.bounce(true);                    // Aaru jumps for joy by the wheel
+    Aaru.show(985); Aaru.face(1); Aaru.bounce(true);                     // Aaru jumps for joy in front of the food stall, clear of the wheel's cabins
     await wait(3.4);
   }
 
@@ -236,7 +237,7 @@
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';
     gsap.set('#gBg', { autoAlpha: 0 });
     // the L3 layer, clean
-    $('#l3').classList.remove('hidden'); gsap.set('#l3', { scale: 1, x: 0 }); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
+    $('#l3').classList.remove('hidden'); gsap.set('#l3', { scale: 1, x: 0 }); gsap.set('#sun3', { y: 0 }); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
     gsap.set('#done3Card', { clearProps: 'transform,opacity' }); gsap.set('#gHud', { autoAlpha: 1 });
     Wheel.reset(); Fw.clear(); Stall.set(0); Sun.set(0); Pari.reset(); Waves.off(); Baba.hide(); Guddu.hide(); Aaru.hide();
     $('#bill3').classList.add('hidden'); Slates.S.forEach(s => s.className = 'slate3 hidden'); gsap.set('#minus3', { scale: 0 });
@@ -251,7 +252,7 @@
     HUD.setLit(startAt); HUD.lit = startAt;
     if (startAt > 0) { Stall.set(startAt); Sun.set(startAt); Panel.set(D.moneyBefore(startAt), true); Cam.set(CAM(startAt - 1)); }
     // decode the big pictures while the banner shows (the lit lane is 5760 px: decoding it on the first payment froze ~0.8 s)
-    const warmed = new Promise(r => gsap.delayedCall(.7, () => warm(['l3/mela_lane_dark.webp', 'l3/mela_lane_lit.webp', 'l3/wheel_rotor.webp', 'l3/wheel_stand.webp', 'l3/firework_sheet.webp', 'l3/pari_pull_sheet.webp', 'l3/money_board.webp', 'l3/lane_ground.webp', 'l3/light_burst.webp', 'l3/coin.webp', 'l3/potli.webp'].map(GA)).then(r)));   // after the banner has popped in
+    const warmed = new Promise(r => gsap.delayedCall(.7, () => warm(['l3/mela_lane_dark.webp', 'l3/mela_lane_lit.webp', 'l3/wheel_frame.webp', 'l3/wheel_cabins.webp', 'l3/wheel_stand.webp', 'l3/firework_sheet.webp', 'l3/pari_pull_sheet.webp', 'l3/money_board.webp', 'l3/lane_ground.webp', 'l3/light_burst.webp', 'l3/coin.webp', 'l3/potli.webp'].map(GA)).then(r)));   // after the banner has popped in
     await banner(); await warmed;
     HUD.show();
     gsap.set(['#gChip', '#sunPanel', '#glowSun'], { autoAlpha: 0 }); gsap.set('#mariPlate', { autoAlpha: 1 }); gsap.set('#btnSpeaker', { top: 34 });   // L3 HUD: 🔊 + marigolds only

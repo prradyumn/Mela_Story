@@ -188,7 +188,7 @@ function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, 
   Object.entries(c.acts || {}).forEach(([n, a]) => { frames[n] = [...Array(a.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${a.file}_${j}`].src; i.style.height = a.h * scale + 'px'; i.style.bottom = (a.lift || 0) * scale + 'px'; i.style.transform = tf; return i; }); });
   imgs[pose].style.opacity = 1;
   const o = { key, c, wrap, body, imgs, mouths, frames, pose, x, ground, h: c.h * scale, scale, flip, moving: null, act: null };
-  reg(wrap, name, 'char'); wrap._o = o;
+  reg(wrap, name, 'char'); wrap._o = o; if (Object.keys(mouths).length) RESTERS.add(o);
   const br = gsap.to(body, { scaleY: 1.012, scaleX: .995, duration: 1.6 + Math.random() * .5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
   IDLE.push(br);
   gsap.set(wrap, { y: 0, x: 0 });
@@ -275,8 +275,12 @@ function cheer(tl, t, o, end = null, name = 'cheer') { tl.call(() => { talkOff(o
 // the voice (read from voiceBus). With no audio (muted / locked), the mouth flaps at a natural speech rhythm instead.
 let voiceAn = null, voiceSamples = null;
 const TALKERS = new Set();
-function talkOn(o) { if (Object.keys(o.mouths).length) { o.mo = { open: false, since: 0 }; TALKERS.add(o); } }
-function talkOff(o) { TALKERS.delete(o); Object.values(o.mouths).forEach(i => i.style.opacity = 0); }
+/* RESTERS: everyone with mouth overlays. Several poses are drawn mid-shout with an open mouth (Aaru shout/jump, Guddu
+   surprised/scratch, Baba ask, Pari point: CH.talk[pose] === 'closed' means the overlay is the CLOSED mouth). When that
+   character is not speaking, the closed-mouth overlay stays on, so nobody looks like they are talking over someone else. */
+const RESTERS = new Set();
+function talkOn(o) { if (Object.keys(o.mouths).length) { o.mo = { open: false, since: 0 }; o.rest = undefined; TALKERS.add(o); } }
+function talkOff(o) { TALKERS.delete(o); o.rest = undefined; Object.values(o.mouths).forEach(i => i.style.opacity = 0); }   // the RESTERS tick then shuts an open-mouth pose
 function voiceLevel() {
   if (!voiceAn || !AC || AC.state !== 'running') return -1;   // audio locked / unavailable: flap at a speech rhythm
   if (!voiceNow) return 0;                                    // audio on but no line playing: the mouth stays shut
@@ -285,6 +289,13 @@ function voiceLevel() {
   return Math.sqrt(s / voiceSamples.length);
 }
 gsap.ticker.add(() => {
+  RESTERS.forEach(o => {
+    if (!o.wrap.isConnected) { RESTERS.delete(o); return; }
+    if (TALKERS.has(o)) return;
+    const want = !o.moving && !o.act && o.c.talk[o.pose] === 'closed' ? o.pose : null;
+    if (want === o.rest) return; o.rest = want;
+    Object.entries(o.mouths).forEach(([p, i]) => { i.style.opacity = p === want ? 1 : 0; });
+  });
   if (!TALKERS.size || window.EDIT_PAUSED) return;
   const now = performance.now(), lv = voiceLevel(), ts = now / 1000;
   TALKERS.forEach(o => {
@@ -461,14 +472,21 @@ function petals(n = 40, { y0 = -40, spread = W, x0 = 0 } = {}) {
 function confetti(n = 160, x = W / 2, y = H * .35) {
   for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, v = 400 + Math.random() * 700; P.push({ k: 'conf', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 400, r: Math.random() * 6.28, vr: (Math.random() - .5) * 12, s: 10 + Math.random() * 10, c: ['#ffa31a', '#2f63c9', '#e33b6b', '#3bb36b', '#ffd83a', '#9b5de5'][i % 6], life: 5 }); }
 }
-function firework(x, y, c) {
-  for (let i = 0; i < 70; i++) { const a = i / 70 * 6.28, v = 220 + Math.random() * 160; P.push({ k: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: 3 + Math.random() * 2, c, life: 1.6 + Math.random() * .6 }); }
+/* a firework: a bright flash + a ring of glowing streaks (drawn additively, no shadowBlur) + a few white glitters */
+function firework(x, y, c, big = 1) {
+  P.push({ k: 'flash', x, y, vx: 0, vy: 0, s: 190 * big, c, life: .55, max: .55 });
+  const n = Math.round(90 * big);
+  for (let i = 0; i < n; i++) { const a = i / n * 6.28 + Math.random() * .05, v = (320 + Math.random() * 200) * big; P.push({ k: 'fw', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: 4.6 + Math.random() * 2, c, life: 1.6 + Math.random() * .7 }); }
+  for (let i = 0; i < 26; i++) { const a = Math.random() * 6.28, v = Math.random() * 170 * big; P.push({ k: 'fw', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: 2.2, c: '#fffbe6', life: 1 + Math.random() * .8 }); }
 }
 function jalebis(n = 26) { for (let i = 0; i < n; i++) P.push({ k: 'jal', x: 80 + Math.random() * (W - 160), y: -60 - Math.random() * 500, vx: 0, vy: 260 + Math.random() * 160, r: Math.random() * 6.28, vr: (Math.random() - .5) * 4, s: 26 + Math.random() * 16, life: 6 }); }
+/* a jalebi: a thick syrupy orange spiral with a dark crisp edge and a glossy highlight (it read as a thin scribble before) */
 function drawJalebi(s) {
-  fxc.lineWidth = s * .28; fxc.strokeStyle = '#f08a12'; fxc.lineCap = 'round'; fxc.beginPath();
-  for (let a = 0; a < 6.28 * 2.6; a += .2) { const r = s * .12 * a / 1.2; const px = Math.cos(a) * r, py = Math.sin(a) * r; a ? fxc.lineTo(px, py) : fxc.moveTo(px, py); }
-  fxc.stroke(); fxc.lineWidth = s * .1; fxc.strokeStyle = 'rgba(255,230,140,.8)'; fxc.stroke();
+  fxc.lineCap = 'round'; fxc.lineJoin = 'round'; fxc.beginPath();
+  for (let a = 0; a < 6.28 * 2.4; a += .18) { const r = s * .15 * a / 1.2; const px = Math.cos(a) * r, py = Math.sin(a) * r; a ? fxc.lineTo(px, py) : fxc.moveTo(px, py); }
+  fxc.lineWidth = s * .42; fxc.strokeStyle = '#8a3d05'; fxc.stroke();
+  fxc.lineWidth = s * .3; fxc.strokeStyle = '#f39a1e'; fxc.stroke();
+  fxc.lineWidth = s * .09; fxc.strokeStyle = 'rgba(255,238,175,.9)'; fxc.stroke();
 }
 let lastT = performance.now();
 function fxLoop(now) {
@@ -479,12 +497,23 @@ function fxLoop(now) {
     if (p.k === 'petal') { p.vx += Math.sin(now / 600 + i) * 4 * dt * 10; }
     if (p.k === 'conf') { p.vy += 900 * dt; p.vx *= .985; }
     if (p.k === 'spark') { p.vy += 120 * dt; p.vx *= .97; p.vy *= .97; }
+    if (p.k === 'fw') { p.vy += 95 * dt; p.vx *= .962; p.vy *= .962; }
     p.x += p.vx * dt; p.y += p.vy * dt; p.r = (p.r || 0) + (p.vr || 0) * dt;
     fxc.save(); fxc.translate(p.x, p.y); fxc.rotate(p.r || 0);
     if (p.k === 'petal') { fxc.fillStyle = p.c; fxc.beginPath(); fxc.ellipse(0, 0, p.s * .45, p.s, 0, 0, 6.28); fxc.fill(); }
     else if (p.k === 'conf') { fxc.fillStyle = p.c; fxc.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); }
     else if (p.k === 'spark') { fxc.globalAlpha = Math.min(1, p.life); fxc.fillStyle = p.c; fxc.shadowColor = p.c; fxc.shadowBlur = 12; fxc.beginPath(); fxc.arc(0, 0, p.s, 0, 6.28); fxc.fill(); }
     else if (p.k === 'jal') drawJalebi(p.s);
+    else if (p.k === 'fw') {   // a glowing streak along its motion
+      const al = Math.min(1, p.life * 1.4); fxc.globalCompositeOperation = 'lighter'; fxc.lineCap = 'round';
+      fxc.globalAlpha = al * .55; fxc.strokeStyle = p.c; fxc.lineWidth = p.s * 3.6; fxc.beginPath(); fxc.moveTo(0, 0); fxc.lineTo(-p.vx * .08, -p.vy * .08); fxc.stroke();
+      fxc.globalAlpha = al; fxc.lineWidth = p.s; fxc.strokeStyle = p.c; fxc.stroke();
+      fxc.globalAlpha = al * .9; fxc.fillStyle = '#fffbe6'; fxc.beginPath(); fxc.arc(0, 0, p.s * .55, 0, 6.28); fxc.fill();
+    } else if (p.k === 'flash') {
+      const k = 1 - p.life / p.max, r = p.s * (.4 + k), g = fxc.createRadialGradient(0, 0, 0, 0, 0, r);
+      g.addColorStop(0, `rgba(255,250,225,${.85 * (1 - k)})`); g.addColorStop(1, 'rgba(255,220,150,0)');
+      fxc.globalCompositeOperation = 'lighter'; fxc.fillStyle = g; fxc.beginPath(); fxc.arc(0, 0, r, 0, 6.28); fxc.fill();
+    }
     fxc.restore();
   }
   requestAnimationFrame(fxLoop);
@@ -505,7 +534,7 @@ function thoughts(s, tl, o, items, { avoid = null, until = null, sinkTo = null }
     gsap.set(n, { xPercent: -50, yPercent: -50, opacity: 0, scale: .3, x: hx - p.x, y: hy - p.y });
     tl.to(n, { opacity: 1, scale: 1, x: 0, y: 0, rotate: (i % 2 ? 1 : -1) * (5 + i * 2), duration: .55, ease: 'back.out(2)' }, at);
     tl.to(n, { y: -16, duration: 1.1, yoyo: true, repeat: 3, ease: 'sine.inOut' }, at + .55);
-    if (until != null) tl.to(n, { x: (sinkTo || { x: hx }).x - p.x, y: (sinkTo || { y: hy }).y - p.y, scale: .15, opacity: 0, rotate: 0, duration: .45, ease: 'power2.in', overwrite: 'auto' }, until + i * .07);
+    if (until != null) tl.to(n, { x: (sinkTo || { x: hx }).x - p.x, y: (sinkTo || { y: hy }).y - p.y, scale: .15, opacity: 0, rotate: 0, duration: .45, ease: 'power2.in', overwrite: 'auto' }, Math.max(until + i * .07, at + .7));   // a number lands in its slot before it is sucked away (the last one used to cross his face and vanish)
   });
 }
 function numbers(s, tl, t, list, cx, cy, dur = 4) {

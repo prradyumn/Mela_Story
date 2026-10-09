@@ -15,6 +15,7 @@
   /* Pari + hand-cart (pari_pull_sheet: 6×6, 24 fps). Frames 13–30 loop seamlessly while moving; frame 0 when still. */
   const P = $('#cart3 .pull'); P.style.backgroundImage = `url(${A('pari_pull_sheet.webp')})`;
   let pariOn = false, pariT0 = 0;
+  const REST = 23;   // standing still: feet together (frame 0 is mid-stride, looked like walking on the spot)
   const pariFrame = k => { P.style.backgroundPosition = `${(k % 6) * 20}% ${Math.floor(k / 6) * 20}%`; };
   gsap.ticker.add(() => { if (pariOn) pariFrame(13 + Math.floor((clock() - pariT0) * 24) % 18); });
   /* Pari talking (option 1, user Oct 2026): while her VO plays she lets go of the cart and explains (story frames pari_explain_0–35:
@@ -23,15 +24,16 @@
   const tImgs = [...Array(36)].map(() => { const im = document.createElement('img'); im.alt = ''; TP.appendChild(im); return im; });
   let tLoaded = false, tOn = false, tTalk = false, tT0 = 0, tStop = null, tShown = -1, tQuiet = null;
   const tFrame = k => { if (k === tShown) return; tImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); tShown = k; };
-  const swap = talking => { tOn = talking; gsap.to(P, { opacity: talking ? 0 : 1, duration: .15 }); gsap.to([CO, TP], { opacity: talking ? 1 : 0, duration: .15 }); };
+  const swap = talking => { tOn = talking; gsap.to(P, { opacity: talking ? 0 : 1, duration: .22 }); gsap.to([CO, TP], { opacity: talking ? 1 : 0, duration: .22 });
+    gsap.fromTo(TP, { x: talking ? -46 : 0 }, { x: talking ? 0 : -46, duration: .32, ease: 'power2.out' }); };   // a step off / back onto the handle, not a pop
   gsap.ticker.add(() => {
     if (!tOn) return;
     if (tTalk) { const f = Math.floor((clock() - tT0) * 12); tFrame(f < 5 ? f : 5 + (f - 5) % 26); }
     else if (tStop != null) { const k = 31 + Math.floor((clock() - tStop) * 12); if (k >= 36) { tStop = null; tFrame(35); swap(false); } else tFrame(k); }   // hands together → hold the cart again
   });
   const Pari = {
-    walk(on) { if (on) Pari.talk(false, true); pariOn = on; pariT0 = clock(); if (!on) pariFrame(0); },
-    reset() { pariOn = false; pariFrame(0); Pari.talk(false, true); },
+    walk(on) { if (on) Pari.talk(false, true); pariOn = on; pariT0 = clock(); if (!on) pariFrame(REST); },
+    reset() { pariOn = false; pariFrame(REST); Pari.talk(false, true); },
     /* on: let go + explain · off: hands together, then back on the handle (now = instantly, e.g. before a push) */
     talk(on, now = false) {
       if (tQuiet) { tQuiet.kill(); tQuiet = null; }
@@ -44,7 +46,7 @@
       else if (tTalk) tQuiet = gsap.delayedCall(.45, () => { tQuiet = null; tTalk = false; tStop = clock(); });   // short gaps between lines keep her talking
     }
   };
-  pariFrame(0);
+  pariFrame(REST);
 
   /* ---------- talk waves (L3 has no bubbles: the speaker's head gets three soft arcs while the VO plays) ---------- */
   const WV = $('#waves3'); let wavesTl = null;
@@ -112,13 +114,14 @@
   const B = $('#bill3'), HK = $('#hook3');
   let sway = null;
   /* the hook is drawn over the bill's rope loop (the bill hangs ON it), at the stall's hook point */
-  const hookAt = i => { const [hx, hy] = D.hooks[i]; HK.style.display = 'block'; gsap.set(HK, { left: hx - 14, top: hy - 42 }); };
+  const hookAt = () => { HK.style.display = 'none'; };   // the stalls have their own painted ring/hook (a drawn one doubled it)
   const Bill = {
     i: 0,
     show(i, price, { teach = false } = {}) {
       const [hx, hy] = D.hooks[i]; Bill.i = i;
       if (sway) { sway.kill(); sway = null; }
-      B.className = teach ? 'teach' : ''; gsap.set(B, { clearProps: 'transform,opacity' }); Object.assign(B.style, { left: (hx - 150) + 'px', top: (hy - 16) + 'px' });   // rope loop top 12 px above the hook's curve
+      const [cx, cy] = D.catch[i];
+      B.className = teach ? 'teach' : ''; gsap.set(B, { clearProps: 'transform,opacity' }); Object.assign(B.style, { left: (cx - 150) + 'px', top: (cy - 7) + 'px' });   // the rope loop (bill x 150, y 4) over the stall's ring/hook
       hookAt(i);
       B.querySelector('.price').textContent = rs(price);
       gsap.set(B.querySelector('.chip'), { opacity: 0, scale: 1 }); gsap.set(B.querySelector('.paid'), { opacity: 0 });
@@ -145,7 +148,7 @@
     },
     away() { if (sway) { sway.kill(); sway = null; } gsap.to(HK, { opacity: 0, duration: .3, onComplete: () => { HK.style.display = 'none'; gsap.set(HK, { opacity: 1 }); } });
       return gsap.to(B, { y: -260, rotation: 10, opacity: 0, duration: .55, ease: 'power2.in', onComplete: () => B.classList.add('hidden') }); },
-    centre() { const [hx, hy] = D.hooks[Bill.i]; return { x: hx - Cam.x, y: hy + 130 }; }
+    centre() { const [hx, hy] = D.catch[Bill.i]; return { x: hx - Cam.x, y: hy + 125 }; }
   };
 
   /* ---------- the three answer slates (takhti) ---------- */
@@ -168,7 +171,7 @@
     tick(i) { return gsap.to(S[i].querySelector('.tick'), { scale: 1, duration: .3, ease: 'back.out(3)' }); },
     /* SC.Hand.show(x, y) puts the fingertip at (x + 141, y + 16): land it on the slate, just above its number (centre x, y 862)
        — the hand comes from above, so pointing lower would cover the number (it used to tap the slate's bottom frame) */
-    handAt(i) { return { x: 1030 + i * 230 + 12 - 141, y: 862 - 16 }; },
+    handAt(i) { return { x: 1030 + i * 230 - 141, y: 800 - 16 }; },   // fingertip on the slate's top frame (it covered ABOUT)
     async hide() { await gsap.to(S, { y: 320, opacity: 0, duration: .35, stagger: .05, ease: 'power2.in' }); S.forEach(s => s.className = 'slate3 hidden'); }
   };
 
@@ -176,19 +179,20 @@
   const AR = $('#aaru3'), AI = AR.querySelector('img'), PT = $('#potli3');
   const RUN_H = 360, JUMP_H = 380, STEP = 50, SPEED = 750, GROUND = 990;   // ~85 % of Pari; feet on the same ground line as Pari and the cart
   const JW = JUMP_H * 659 / 1080;                                           // aaru_jump canvas width at JUMP_H
+  const JGAP = JUMP_H * .096;   // aaru_jump has 9.6 % empty canvas under his feet: drop the image by that, so on the ground his feet touch it (he looked like he hovered)
   const ast = { x: 2100, feet: GROUND, face: -1, pose: 'run', k: 0, potli: false };
   const SH = document.createElement('i'); SH.className = 'ashadow'; AR.parentNode.insertBefore(SH, AR);
   function aaruLayout() {
     gsap.set(AR, { left: ast.x, top: ast.feet });
     const up = Math.max(0, GROUND - ast.feet);                    // his shadow stays on the ground and shrinks as he hops
     gsap.set(SH, { left: ast.x - 90, top: GROUND - 16, scale: 1 - up / 220, opacity: AR.style.display === 'none' ? 0 : .9 - up / 160 });
-    if (ast.pose === 'jump') { AI.src = SIMG('aaru_jump'); AI.style.height = JUMP_H + 'px'; AI.style.bottom = '0px'; }
+    if (ast.pose === 'jump') { AI.src = SIMG('aaru_jump'); AI.style.height = JUMP_H + 'px'; AI.style.bottom = -JGAP + 'px'; }
     else { AI.src = SIMG('aaru_run_' + ast.k); AI.style.height = RUN_H + 'px'; AI.style.bottom = '-4px'; }
     AI.style.transform = 'translateX(-50%)' + (ast.face < 0 ? ' scaleX(-1)' : '');
     if (!ast.potli) return;
     let fx, fy;
     if (ast.pose === 'jump') {   // the raised fist on the side he faces (aaru_jump: right fist at 0.94, 0.12 of the canvas)
-      fx = ast.x - JW / 2 + (ast.face > 0 ? .94 : .06) * JW; fy = ast.feet - JUMP_H + .12 * JUMP_H;
+      fx = ast.x - JW / 2 + (ast.face > 0 ? .94 : .06) * JW; fy = ast.feet + JGAP - JUMP_H + .12 * JUMP_H;
       gsap.set(PT, { left: fx - 50, top: fy - 16, rotation: 0 });
     } else {                     // running: hugged to his chest
       fx = ast.x + ast.face * .14 * RUN_H; fy = ast.feet - .56 * RUN_H;
@@ -212,7 +216,8 @@
       if (hopTl) { hopTl.kill(); hopTl = null; ast.feet = GROUND; aaruLayout(); }
       if (!on) return;
       ast.pose = 'jump';
-      hopTl = gsap.timeline({ repeat: -1, repeatDelay: .12 }).to(ast, { feet: GROUND - 34, duration: .2, ease: 'power2.out', onUpdate: aaruLayout }).to(ast, { feet: GROUND, duration: .2, ease: 'power2.in', onUpdate: aaruLayout });
+      hopTl = gsap.timeline({ repeat: -1, repeatDelay: .1 }).to(ast, { feet: GROUND - 64, duration: .26, ease: 'power2.out', onUpdate: aaruLayout }).to(ast, { feet: GROUND, duration: .24, ease: 'power2.in', onUpdate: aaruLayout })
+        .call(() => { try { AI.animate([{ scale: '1.04 .9' }, { scale: '1 1' }], { duration: 160, easing: 'ease-out' }); } catch (e) { } });   // land: a little squash (individual 'scale': aaruLayout owns 'transform')
     },
     async hop(h = 70) { Aaru.bounce(false); ast.pose = 'jump'; await gsap.to(ast, { feet: GROUND - h, duration: .22, ease: 'power2.out', yoyo: true, repeat: 1, onUpdate: aaruLayout }); },
     potliCentre() { const r = PT.getBoundingClientRect(), st = $('#stage').getBoundingClientRect(), k = st.width / 1920; return { x: (r.left - st.left) / k + r.width / k / 2, y: (r.top - st.top) / k + r.height / k * .6 }; },
@@ -299,21 +304,33 @@
   };
 
   /* ---------- finale: whole lane lit, the baked wheel is replaced by stand + spinning rotor ---------- */
-  const WH = $('#wheel3'), ROT = WH.querySelector('.rotor');
-  const CLIP = 'polygon(0 0, 4960px 0, 4960px 756px, 5760px 756px, 5760px 1080px, 0 1080px)';   // hides the wheel baked into the lane
+  /* the rotor is a cabin-free frame (wheel_frame: rim, spokes, bulbs, the painted hub, 8 pivot knobs) turning about the hub;
+     the 8 cabins (wheel_cabins sheet) hang from the knobs and stay UPRIGHT as it turns (they used to spin with the wheel and
+     end up upside down), with a little swing. Geometry in the 750-px box: hub (376.5, 364.5), knob radius 327. */
+  const WH = $('#wheel3'), ROT = WH.querySelector('.rotor'), CABS = [...WH.querySelectorAll('.cab')];
+  const HUB = { x: 376.5, y: 364.5 }, KR = 327, CAB_PX = 59.2;   // CAB_PX = the hanger's x in a 124-px cabin cell
   let spin = null;
+  function placeCabins() {
+    const a = gsap.getProperty(ROT, 'rotation') || 0, t = gsap.globalTimeline.time();
+    CABS.forEach((c, k) => {
+      const th = (k * 45 - 90 + a) * Math.PI / 180;
+      gsap.set(c, { x: HUB.x + KR * Math.cos(th) - CAB_PX, y: HUB.y + KR * Math.sin(th), scale: .82, rotation: 3 * Math.sin(t * 1.7 + k) * (spin ? spin.timeScale() : 0) });
+    });
+  }
+  placeCabins();
+  const CLIP = 'polygon(0 0, 4960px 0, 4960px 756px, 5760px 756px, 5760px 1080px, 0 1080px)';   // hides the wheel baked into the lane
   const Wheel = {
     async light() {
       gsap.set(['#lane3', '#laneLit3'], { clipPath: CLIP });
-      WH.style.display = 'block'; gsap.set(ROT, { rotation: 0 });
+      WH.style.display = 'block'; gsap.set(ROT, { rotation: 0 }); placeCabins();
       gsap.to('#laneLit3', { opacity: 1, duration: 1.4 });
       gsap.fromTo(WH, { opacity: 0 }, { opacity: 1, duration: .6 });
       gsap.set(BU, { left: D.wheel[0] - 420, top: D.wheel[1] - 420, width: 840, height: 840 });
       gsap.fromTo(BU, { scale: .5, opacity: 1 }, { scale: 1.2, opacity: 0, duration: 1.6, ease: 'power2.out', onComplete: () => gsap.set(BU, { width: 720, height: 720 }) });
-      spin = gsap.to(ROT, { rotation: 360, duration: 8, ease: 'none', repeat: -1 }); spin.timeScale(0);
+      spin = gsap.to(ROT, { rotation: 360, duration: 8, ease: 'none', repeat: -1, onUpdate: placeCabins }); spin.timeScale(0);
       gsap.to(spin, { timeScale: 1, duration: 2.5, ease: 'power1.in' });
     },
-    reset() { if (spin) { spin.kill(); spin = null; } WH.style.display = 'none'; gsap.set(['#lane3', '#laneLit3'], { clipPath: 'none' }); gsap.set('#laneLit3', { opacity: 0 }); }
+    reset() { if (spin) { spin.kill(); spin = null; } gsap.set(ROT, { rotation: 0 }); placeCabins(); WH.style.display = 'none'; gsap.set(['#lane3', '#laneLit3'], { clipPath: 'none' }); gsap.set('#laneLit3', { opacity: 0 }); }
   };
 
   /* ---------- how-to 3: zoom out to the whole lane (1/3) — stall numbers pop, ★ on the wheel, the mini cart traces the route ---------- */

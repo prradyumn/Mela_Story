@@ -12,7 +12,7 @@
     }
     let onIn = '';
     for (let i = 0; i < 10; i++) onIn += `<ellipse cx="32" cy="21" rx="5.5" ry="9" transform="rotate(${i * 36 + 18} 32 32)" fill="#ffbf2e" stroke="#d98a0c" stroke-width="1.1"/>`;
-    return `<svg viewBox="0 0 64 64"><g class="m-off">${off}<circle cx="32" cy="32" r="9" fill="#efe2c4" stroke="#cdb994" stroke-width="1.6"/></g>
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><g class="m-off">${off}<circle cx="32" cy="32" r="9" fill="#efe2c4" stroke="#cdb994" stroke-width="1.6"/></g>
       <g class="m-on">${on}${onIn}<circle cx="32" cy="32" r="8" fill="#c8550a"/><circle cx="29.5" cy="29.5" r="2.6" fill="#ffd27a" opacity=".8"/></g></svg>`;
   }
   const plate = $('#mariPlate');

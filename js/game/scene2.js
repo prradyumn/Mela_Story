@@ -29,8 +29,8 @@
     const k = 1.5, c = document.createElement('canvas'); c.width = BILL.w * k; c.height = BILL.h * k;
     const g = c.getContext('2d'); g.scale(k, k); g.textBaseline = 'top';
     g.drawImage(paperImg, 0, 0, BILL.w, BILL.h);
-    g.fillStyle = '#b5361d'; g.font = '800 52px Baloo'; g.fillText(s.title, 100, 32);
-    g.fillStyle = '#7a4a22'; g.font = '600 20px Poppins'; g.fillText('Panchayat Mela · Apnapur', 104, 84);
+    g.fillStyle = '#b5361d'; g.font = '800 52px Baloo'; g.fillText(s.title, 100, 46);
+    g.fillStyle = '#7a4a22'; g.font = '600 20px Poppins'; g.fillText('Panchayat Mela · Apnapur', 104, 98);
     s.items.forEach((it, i) => {
       if (s.show <= i) return; const y0 = 136 + i * 136;
       g.fillStyle = '#3a220f'; g.font = '600 30px Poppins'; g.fillText(it[0], 100, y0 + 4);
@@ -85,7 +85,7 @@
     tl.to(f1, { rotationX: 180, duration: .42, ease: 'power2.inOut' })
       .set([top, f1], { visibility: 'hidden' }).set(s2, { visibility: 'visible' })
       .to(f2, { rotationY: -180, duration: .36, ease: 'power2.inOut' })
-      .set(band, { visibility: 'visible' }).fromTo(band, { scaleX: 0 }, { scaleX: 1, duration: .25, ease: 'power2.out', immediateRender: false })
+      .set(band, { visibility: 'visible' }).fromTo(band, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: .25, ease: 'power2.out', immediateRender: false })   // fades as it unties (no red stub left beside the paper)
       .set(knot, { visibility: 'visible' }).fromTo(knot, { scale: 0 }, { scale: 1, duration: .22, ease: 'back.out(3)', immediateRender: false });
     tl.root = root; return tl;
   }
@@ -177,8 +177,8 @@
       SND.sfx('tick', .4);
       await gsap.to(s, { top: 610, scaleY: 1, duration: .2, ease: 'power2.out' });
       gsap.to(pad, { opacity: 0, y: 80, duration: .3, delay: .2 });
-      await gsap.to(s, { left: 1125, top: 430, duration: .4, ease: 'power2.inOut' });          // over the "?" box
-      await gsap.to(s, { top: 504, duration: .12, ease: 'power3.in' });
+      await gsap.to(s, { left: 1125, top: 520, duration: .4, ease: 'power2.inOut' });          // over the "?" box
+      await gsap.to(s, { top: 598, duration: .12, ease: 'power3.in' });                         // the stamp face lands ON the box, where the mark appears
       s.classList.add('pressed'); art.src = GA('stamp_tool_pressed.webp');                      // THUMP
       SND.sfx('stamp', .8);
       gsap.fromTo('#bill2', { scaleY: .95 }, { scaleY: 1, duration: .35, ease: 'elastic.out(1,.4)' });
@@ -187,8 +187,9 @@
       await wait(.12);
       Bill.showMark(value);
       s.classList.remove('pressed'); art.src = GA('stamp_tool.webp');
-      await gsap.to(s, { top: 380, duration: .25, ease: 'power2.out' });
-      await gsap.to(s, { left: slot.left, top: slot.top, duration: .5, ease: 'power2.inOut' });
+      await gsap.to(s, { top: 420, duration: .25, ease: 'power2.out' });
+      await gsap.to(s, { left: slot.left, top: 470, duration: .42, ease: 'power2.inOut' });   // up and over the other stamps
+      await gsap.to(s, { top: slot.top, duration: .2, ease: 'power2.in' });
     }
   };
 
@@ -201,7 +202,7 @@
   /* the checked letters stand INSIDE the basket: back row of 4, front row of 3, leaning a little; their bottoms go behind the
      front rim (a second copy of the basket art clipped to the rim + front, .basket-art.front). Slots are in basket px (250 wide);
      k scales them for the bigger basket on the complete card. */
-  const PKT_SLOTS = [[68, 50, -8], [109, 47, -3], [150, 47, 4], [190, 50, 9], [88, 60, 6], [129, 62, -4], [170, 60, 3]];
+  const PKT_SLOTS = [[68, 60, -8], [109, 58, -3], [150, 58, 4], [190, 60, 9], [88, 70, 6], [129, 72, -4], [170, 70, 3]];   // sunk into the basket: only the tops show above the rim
   const PKT_W = 46, PKT_H = 58;
   const pktHTML = (n, k = 1) => PKT_SLOTS.slice(0, Math.min(n, 7)).map(([x, y, r]) =>
     `<div class="pkt" style="left:${(x - PKT_W / 2) * k}px;top:${(y - PKT_H / 2) * k}px;width:${PKT_W * k}px;height:${PKT_H * k}px;transform:rotate(${r}deg)"></div>`).join('');

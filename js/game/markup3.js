@@ -20,7 +20,7 @@
       <img id="laneLit3" class="lane" src="${A('mela_lane_lit.webp')}" alt="">
       ${signs}
       <img id="burst3" src="${A('light_burst.webp')}" alt="">
-      <div id="wheel3"><img class="stand" src="${A('wheel_stand.webp')}" alt=""><img class="rotor" src="${A('wheel_rotor.webp')}" alt=""></div>
+      <div id="wheel3"><img class="stand" src="${A('wheel_stand.webp')}" alt=""><img class="rotor" src="${A('wheel_frame.webp')}" alt="">${[...Array(8)].map((_, k) => `<i class="cab" style="background-position:${-k * 124}px 0"></i>`).join('')}</div>
       <div id="bill3" class="hidden">
         <img class="art" src="${A('bill_hang.webp')}" alt="">
         <div class="try">TRY ONE</div><div class="price"></div><div class="chip"></div>

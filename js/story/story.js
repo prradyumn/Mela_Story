@@ -233,14 +233,15 @@ async function hookC() {
   tl.call(() => { sfx('whoosh', .6); sfx('goat', .7); }, null, .2);
   dust(tl, s, .4, 150, 1000, 6);
   let u = 2.35;   // Aaru has arrived
-  const burst = reg(el('div', '', s, '₹10,00,00,000 ?!', { position: 'absolute', left: '960px', top: '120px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '100px', color: '#ffd83a', WebkitTextStroke: '5px #5a1d05', paintOrder: 'stroke fill', textShadow: '8px 8px 0 #5a1d05', whiteSpace: 'nowrap', zIndex: 12 }), 'burst');
+  // left of centre (clear of Pari's bubble on the right) on a dark pill, so it reads against the marigold garlands
+  const burst = reg(el('div', '', s, '₹10,00,00,000 ?!', { position: 'absolute', left: '640px', top: '128px', padding: '4px 40px 10px', borderRadius: '70px', background: 'rgba(70,22,4,.78)', border: '5px solid #ffd83a', boxShadow: '0 10px 24px rgba(40,10,0,.45)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '100px', lineHeight: 1.1, color: '#ffd83a', WebkitTextStroke: '5px #5a1d05', paintOrder: 'stroke fill', textShadow: '6px 6px 0 #5a1d05', whiteSpace: 'nowrap', zIndex: 12 }), 'burst');
   gsap.set(burst, { scale: 0, rotate: -8, xPercent: -50 });
   const rEnd = say(tl, s, u, 'r1', aaru, T('r1'), { p: 'shout' });
   tl.to(burst, { scale: 1, duration: .4, ease: 'back.out(3)' }, u + (DUR.r1 || 2) * .6);
   shake(tl, u + (DUR.r1 || 2) * .6, 10);
   tl.call(() => sfx('pop', 1), null, u + (DUR.r1 || 2) * .6);
   u = rEnd;
-  const X = reg(el('div', '', s, '✕', { position: 'absolute', left: '960px', top: '40px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '260px', color: '#e0301e', textShadow: '0 6px 0 #6a0f06', zIndex: 13 }), 'cross');
+  const X = reg(el('div', '', s, '✕', { position: 'absolute', left: '640px', top: '30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '260px', color: '#e0301e', textShadow: '0 6px 0 #6a0f06', zIndex: 13 }), 'cross');
   gsap.set(X, { scale: 3, opacity: 0, xPercent: -50 });
   const p1s = u;
   u = say(tl, s, u, 'p1', pari, T('p1'), { p: 'point' });
@@ -257,12 +258,12 @@ async function hookD() {
   const s = newScene();
   bgImg(s, 'bg_02_chaupal', { left: '0px', filter: 'blur(4px) brightness(.92)', transform: 'scale(1.3)', transformOrigin: '75% 60%' });
   warmTint(s, .5);
-  const pari = char(s, 'pari', 1470, 'happy', { ground: 1150, scale: 1.3, flip: true });
+  const pari = char(s, 'pari', 1470, 'happy', { ground: 1066, scale: 1.24, flip: true });   // close-up, but her shoes stay in frame
   const card = panel(s, `<div style="font-size:34px;color:#8a5a2b;letter-spacing:.06em">ROUND EACH PRICE</div>
    <div style="margin-top:16px;font-size:66px"><span>42,538</span> <span style="color:#e8870e">→</span> <span class="rb" style="color:#2f63c9">43,000</span></div>
    <div style="font-size:66px"><span>23,184</span> <span style="color:#e8870e">→</span> <span class="rb" style="color:#2f63c9">23,000</span></div>
    <div class="sum" style="margin-top:14px;font-size:44px;color:#3b8a46;white-space:nowrap">43,000 + 23,000 = 66,000 ✓</div>`, { left: '60px', top: '200px', width: '660px', zIndex: 10 }, 'roundcard');
-  const est = reg(el('div', 'ost-big', s, 'Smart guess = <span style="color:#ffd83a">Estimate</span>', { position: 'absolute', left: '390px', top: '690px', fontSize: '70px', whiteSpace: 'nowrap', zIndex: 10 }), 'estimate');
+  const est = reg(el('div', 'ost-pill', s, 'Smart guess = <span style="color:#e8870e">Estimate</span>', { position: 'absolute', left: '390px', top: '700px', fontSize: '60px', whiteSpace: 'nowrap', zIndex: 10 }), 'estimate');
   gsap.set(est, { xPercent: -50, scale: 0 });
   gsap.set(card, { scale: 0, opacity: 0 });
   const rb = card.querySelectorAll('.rb'), sm = card.querySelector('.sum');
@@ -388,10 +389,10 @@ async function bridge2() {
   bgImg(s, 'bg_04_office', { left: '0px' });
   const guddu = officeGuddu(s, 'write');   // 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
   officeFG(s);
-  const pari = char(s, 'pari', 720, 'idle', { ground: 1074, scale: .92, z: 8 });
+  const pari = char(s, 'pari', 720, 'idle', { ground: 1052, scale: .92, z: 8 });
   warmTint(s, .45).style.zIndex = 9;
   playMusic('m_village_long', { gain: .85, offset: 80 });
-  const pile = reg(el('div', '', s, '', { position: 'absolute', left: '800px', top: '520px', width: '220px', height: '160px', zIndex: 8 }), 'donepile');   // on the counter between Pari and Guddu (Pari's p5 bubble opens over the left side)
+  const pile = reg(el('div', '', s, '', { position: 'absolute', left: '800px', top: '520px', width: '220px', height: '160px', zIndex: 7 }), 'donepile');   // on the counter between Pari and Guddu (Pari's p5 bubble opens over the left side)
   for (let i = 0; i < 7; i++) el('div', '', pile, '', { position: 'absolute', left: (i % 2) * 6 + 'px', bottom: i * 10 + 'px', width: '200px', height: '120px', background: '#fffdf4', border: '3px solid #8a6a4a', borderRadius: '6px', transform: `rotate(${(i % 3 - 1) * 3}deg)`, backgroundImage: 'repeating-linear-gradient(#fffdf4 0 14px,#c9d6ee 14px 16px)' });
   el('div', '', pile, 'DONE ✓', { position: 'absolute', left: '40px', top: '-30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '34px', color: '#fff', background: '#3b8a46', padding: '2px 16px', borderRadius: '12px', border: '4px solid #1f4d27' });
   const tl = gsap.timeline({ paused: true });
@@ -403,7 +404,7 @@ async function bridge2() {
   tl.call(() => sfx('sparkle', .5), null, 1.9);
   tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
-  const go = sign(s, 'Go to the Mela Ground ➜', 960, 400, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2;
+  const go = sign(s, 'Go to the Mela Ground ➜', 1500, 330, 54, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2;   // over the window wall, toward the door: clear of Guddu + the DONE pile
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
   await playTL(tl);
@@ -428,7 +429,7 @@ async function endA() {
   sunTo(tl, n3s, 1, 3); tl.to(sunEl, { opacity: 0, duration: .8 }, n3s + 3);
   bulbs.forEach((b, i) => { tl.to(b, { background: '#ffe47a', boxShadow: '0 0 30px 12px rgba(255,210,90,.85)', duration: .2 }, n3s + d3 * .3 + i * .22); tl.call(() => sfx('tick', .8, 1 + i * .1), null, n3s + d3 * .3 + i * .22); });
   tl.call(() => sfx('sparkle', .9), null, n3s + d3 * .3 + 1.6);
-  for (let k = 0; k < 7; k++) tl.call(() => { firework(300 + Math.random() * 1320, 260 + Math.random() * 200, ['#ffd83a', '#ff6ea8', '#6ee7ff', '#9dff7a'][k % 4]); sfx('pop', .5, .7); }, null, n3s + d3 * .5 + k * .6);
+  for (let k = 0; k < 7; k++) tl.call(() => { firework(260 + (k % 4) * 450 + Math.random() * 200, 110 + Math.random() * 150, ['#ffd83a', '#ff6ea8', '#6ee7ff', '#9dff7a'][k % 4], 1.15); sfx('pop', .5, .7); }, null, n3s + d3 * .5 + k * .6);
   tl.set({}, {}, Math.max(t, n3s + d3 * .5 + 4.4) + .3);
   await playTL(tl);
   await cutTo();
@@ -440,12 +441,12 @@ async function endB() {
   bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
   const pari = char(s, 'pari', 400, 'happy', { ground: 1045, scale: .95 });
   const guddu = char(s, 'guddu', 1450, 'proud', { ground: 1045, scale: .95, flip: true });
-  const baba = char(s, 'baba', 1760, 'idle', { ground: 1045, scale: .9, flip: true });
-  const eq = reg(el('div', 'ost-big', s, '₹83,165 <span style="color:#ffd83a">≈</span> ₹84,000', { position: 'absolute', left: '930px', top: '640px', fontSize: '88px', whiteSpace: 'nowrap', zIndex: 12 }), 'approx');
+  const baba = char(s, 'baba', 1740, 'idle', { ground: 1045, scale: .9, flip: true });
+  const eq = reg(el('div', 'ost-pill', s, '₹83,165 <span style="color:#e8870e">≈</span> ₹84,000', { position: 'absolute', left: '900px', top: '820px', fontSize: '76px', whiteSpace: 'nowrap', zIndex: 12 }), 'approx');
   gsap.set(eq, { xPercent: -50, scale: 0 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
-  for (let k = 0; k < 3; k++) tl.call(() => firework(700 + Math.random() * 500, 160 + Math.random() * 120, ['#ffd83a', '#ff6ea8', '#6ee7ff'][k]), null, .3 + k * 1.4);
+  for (let k = 0; k < 3; k++) tl.call(() => firework(560 + k * 300 + Math.random() * 120, 110 + Math.random() * 90, ['#ffd83a', '#ff6ea8', '#6ee7ff'][k]), null, .3 + k * 1.4);
   let t = say(tl, s, .5, 'g3', guddu, T('g3'), { act: 'talk', end: 'proud' });
   tl.to(eq, { scale: 1, duration: .6, ease: 'back.out(2.4)' }, t - .6);
   tl.call(() => sfx('ding', .8), null, t - .5);
@@ -468,9 +469,10 @@ async function endC() {
   const r3s = .4;
   let t = say(tl, s, r3s, 'r3', aaru, T('r3'));
   jump(tl, r3s + (DUR.r3 || 3) + .1, aaru, 80, 2);
-  tl.call(() => { sfx('boing', .8); jalebis(18); setPose(goat, 'hop'); sfx('goat', .9); }, null, r3s + (DUR.r3 || 3) * .6);
-  jump(tl, r3s + (DUR.r3 || 3) * .6, goat, 60, 3, .3);
-  tl.call(() => setPose(goat, 'idle'), null, r3s + (DUR.r3 || 3) * .6 + 3);
+  const rain = t - .2;   // after Aaru's bubble has gone, so the jalebis never cover his words
+  tl.call(() => { sfx('boing', .8); jalebis(20); setPose(goat, 'hop'); sfx('goat', .9); }, null, rain);
+  jump(tl, rain, goat, 60, 3, .3);
+  tl.call(() => setPose(goat, 'idle'), null, rain + 3);
   tl.to(world, { scale: 1.05, duration: 6, ease: 'sine.inOut' }, r3s);
   t = voiceOver(tl, t + .8, 'n4');
   await playTL(tl);
@@ -485,7 +487,7 @@ async function badge() {
   SCN = 'badge'; hudState({ sunVis: false });
   const s = newScene();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px', filter: 'blur(10px) brightness(.7)', transform: 'scale(1.05)' });
-  const card = el('div', 'card', ui, '', { left: '960px', top: '120px', width: '980px', height: '840px' });
+  const card = el('div', 'card', ui, '', { left: '960px', top: '70px', width: '1120px', height: '950px' });
   gsap.set(card, { xPercent: -50 });
   const medal = reg(el('div', '', ui, `<svg viewBox="-160 -200 320 400" width="340" height="425">
    <path d="M-70 -200 L-20 -60 L-60 -60 Z" fill="#c93b3b"/><path d="M70 -200 L20 -60 L60 -60 Z" fill="#2f63c9"/>
@@ -493,20 +495,20 @@ async function badge() {
    <circle cx="0" cy="60" r="130" fill="#f6c343" stroke="#8a5a0a" stroke-width="10"/>
    <circle cx="0" cy="60" r="104" fill="#ffd966" stroke="#c98a1a" stroke-width="6"/>
    <polygon fill="#fff4c2" stroke="#c98a1a" stroke-width="5" points="${[...Array(10)].map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 34 : 78; return (Math.cos(a) * r).toFixed(1) + ',' + (60 + Math.sin(a) * r).toFixed(1) }).join(' ')}"/>
-   <rect class="shine" x="-40" y="-80" width="30" height="300" fill="rgba(255,255,255,.55)" transform="rotate(25)"/></svg>`, { position: 'absolute', left: '960px', top: '150px', transform: 'translateX(-50%)', perspective: '800px' }), 'medal');
-  const t1 = el('div', '', ui, 'You saved the Mela!', { position: 'absolute', left: '960px', top: '590px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '64px', color: '#b5361d', whiteSpace: 'nowrap' });
-  const t2 = el('div', '', ui, 'Smart Guess Star!', { position: 'absolute', left: '960px', top: '660px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '96px', color: '#e8870e', textShadow: '0 5px 0 #6b3d16', whiteSpace: 'nowrap' });
-  const t3 = el('div', '', ui, 'You rounded 7 prices, added 7 bills and paid 7 shopkeepers.', { position: 'absolute', left: '960px', top: '790px', fontFamily: 'Fredoka', fontWeight: 500, fontSize: '36px', color: '#3a220f', whiteSpace: 'nowrap' });
+   <rect class="shine" x="-40" y="-80" width="30" height="300" fill="rgba(255,255,255,.55)" transform="rotate(25)"/></svg>`, { position: 'absolute', left: '960px', top: '96px', transform: 'translateX(-50%)', perspective: '800px' }), 'medal');
+  const t1 = el('div', '', ui, 'You saved the Mela!', { position: 'absolute', left: '960px', top: '540px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '64px', color: '#b5361d', whiteSpace: 'nowrap' });
+  const t2 = el('div', '', ui, 'Smart Guess Star!', { position: 'absolute', left: '960px', top: '608px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '96px', color: '#e8870e', textShadow: '0 5px 0 #6b3d16', whiteSpace: 'nowrap' });
+  const t3 = el('div', '', ui, 'You rounded 7 prices, added 7 bills and paid 7 shopkeepers.', { position: 'absolute', left: '960px', top: '740px', fontFamily: 'Fredoka', fontWeight: 500, fontSize: '34px', color: '#3a220f', whiteSpace: 'nowrap' });
   [t1, t2, t3].forEach(x => gsap.set(x, { xPercent: -50, opacity: 0, y: 30 }));
-  const again = goButton(ui, 'Play again ↻', 960, 890);
+  const again = goButton(ui, 'Play again ↻', 960, 850);
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 40), null, 0);
   tl.from(card, { scale: .6, opacity: 0, duration: .5, ease: 'back.out(2)' }, .1);
-  tl.fromTo(medal, { rotateY: 900, scale: 0, y: -200 }, { rotateY: 0, scale: 1, y: 0, duration: 1.6, ease: 'power3.out' }, .4);
+  tl.fromTo(medal, { rotateY: 900, scale: 0, y: -200 }, { rotateY: 0, scale: 1, y: 0, duration: 1.3, ease: 'power3.out' }, .15);   // with the card, so it is never an empty card
   tl.call(() => { confetti(220, 960, 360); sfx('confetti', 1); sfx('sparkle', 1); }, null, 1.9);
   tl.call(() => voice('x1'), null, 2.0);
   tl.fromTo(medal.querySelector('.shine'), { x: -160 }, { x: 180, duration: 1, ease: 'power2.inOut', repeat: -1, repeatDelay: 1.6 }, 2);
-  tl.to([t1, t2, t3], { opacity: 1, y: 0, duration: .5, stagger: .25, ease: 'back.out(2)' }, 2.2);
+  tl.to([t1, t2, t3], { opacity: 1, y: 0, duration: .5, stagger: .2, ease: 'back.out(2)' }, .9);
   tl.to(again, { scale: 1, duration: .5, ease: 'back.out(2.5)' }, 3.6);
   tl.to(medal, { y: -12, duration: 1.4, yoyo: true, repeat: -1, ease: 'sine.inOut' }, 3.6);
   tl.call(() => { const iv = setInterval(() => confetti(40, 200 + Math.random() * 1520, 200), 2200); again._iv = iv; }, null, 3);

@@ -101,9 +101,9 @@ window.GUDIYA_POSES = {
       setPose('idle'); G.face(false); idleBreath(true);
     },
     /* Wrong answer: hop on the spot + "Meh-eh!" */
-    async bleat() {
+    async bleat(at) {   // at = { left, top } to place the "Meh-eh!" bubble somewhere clear (default: above her, to the left)
       idleBreath(false); setPose('hop'); SND.sfx('goat');
-      const b = $('#bleat'); b.style.left = (st.x - 170) + 'px'; b.style.top = (st.y - st.h - 150) + 'px';
+      const b = $('#bleat'); b.style.left = (at ? at.left : st.x - 170) + 'px'; b.style.top = (at ? at.top : st.y - st.h - 150) + 'px';
       gsap.fromTo(b, { scale: .3, opacity: 0 }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(2.5)' });
       gsap.to(b, { opacity: 0, scale: .8, duration: .25, delay: 1.5 });
       await arc(st.x, st.y, { lift: 70, dur: .38 });
