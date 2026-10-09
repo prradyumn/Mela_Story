@@ -172,8 +172,8 @@
       const s = S[i], art = s.querySelector('.art'), pad = $('#inkPad'), slot = SLOT(i);
       gsap.fromTo(pad, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: .35, ease: 'back.out(1.6)' });
       gsap.to(s.querySelector('.tick'), { scale: 1, duration: .3, ease: 'back.out(3)' });
-      await gsap.to(s, { left: 790, top: 640, duration: .45, ease: 'power2.inOut' });
-      await gsap.to(s, { top: 680, scaleY: .92, duration: .14, ease: 'power2.in' });          // dip
+      await gsap.to(s, { left: 828, top: 620, duration: .45, ease: 'power2.inOut' });
+      await gsap.to(s, { top: 668, scaleY: .92, duration: .14, ease: 'power2.in' });          // dip into the (bigger) pad
       SND.sfx('tick', .4);
       await gsap.to(s, { top: 610, scaleY: 1, duration: .2, ease: 'power2.out' });
       gsap.to(pad, { opacity: 0, y: 80, duration: .3, delay: .2 });

@@ -6,6 +6,7 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
   root.id = 'game'; root.className = 'hidden';
   root.innerHTML = `
     <div id="gBg"></div>
+    <img id="sun1" src="${GA('l3/sun_disc.webp')}" alt="">   <!-- L1: the sun Pari asks us to watch (sinks a step with each shop) -->
 
     <!-- price tag on its rope -->
     <div id="tagRig" class="hidden">

@@ -298,7 +298,8 @@ async function hookE() {
   jump(tl, u - .6, aaru, 70, 2);
   const go = sign(s, 'Go to the bazaar ➜', 960, 430, 58, 'gosign');
   dropSign(tl, u - .1, go);
-  const e = u + .9;   // once Aaru's two jumps have landed
+  signGate(tl, u + 1, go);   // the child taps the sign to go
+  const e = u + 1.1;   // once Aaru's two jumps have landed (and the sign was tapped)
   move(tl, e, aaru, 'run', 0, 650, null, { ease: 'sine.in' });
   move(tl, e + .1, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
   move(tl, e + .15, goat, 'trot', 0, 520, null, { ease: 'sine.in' });
@@ -375,7 +376,7 @@ async function bridge1() {
   let t = say(tl, s, 2.1, 'r2', aaru, T('r2'));
   cheer(tl, 2.4, pari, 'happy');                                   // Pari claps and fist-pumps while Aaru cheers
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
-  const go = sign(s, 'Go to the office ➜', 960, 420, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2;
+  const go = sign(s, 'Go to the office ➜', 960, 420, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);
   move(tl, t - .3, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
   move(tl, t - .2, aaru, 'run', 0, 600, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .8);
@@ -404,7 +405,7 @@ async function bridge2() {
   tl.call(() => sfx('sparkle', .5), null, 1.9);
   tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
-  const go = sign(s, 'Go to the Mela Ground ➜', 1500, 330, 54, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2;   // over the window wall, toward the door: clear of Guddu + the DONE pile
+  const go = sign(s, 'Go to the Mela Ground ➜', 1500, 330, 54, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
   await playTL(tl);
@@ -487,7 +488,7 @@ async function badge() {
   SCN = 'badge'; hudState({ sunVis: false });
   const s = newScene();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px', filter: 'blur(10px) brightness(.7)', transform: 'scale(1.05)' });
-  const card = el('div', 'card', ui, '', { left: '960px', top: '70px', width: '1120px', height: '950px' });
+  const card = el('div', 'card', ui, '', { left: '960px', top: '70px', width: '1000px', height: '900px' });
   gsap.set(card, { xPercent: -50 });
   const medal = reg(el('div', '', ui, `<svg viewBox="-160 -200 320 400" width="340" height="425">
    <path d="M-70 -200 L-20 -60 L-60 -60 Z" fill="#c93b3b"/><path d="M70 -200 L20 -60 L60 -60 Z" fill="#2f63c9"/>
@@ -499,8 +500,9 @@ async function badge() {
   const t1 = el('div', '', ui, 'You saved the Mela!', { position: 'absolute', left: '960px', top: '540px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '64px', color: '#b5361d', whiteSpace: 'nowrap' });
   const t2 = el('div', '', ui, 'Smart Guess Star!', { position: 'absolute', left: '960px', top: '608px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '96px', color: '#e8870e', textShadow: '0 5px 0 #6b3d16', whiteSpace: 'nowrap' });
   const t3 = el('div', '', ui, 'You rounded 7 prices, added 7 bills and paid 7 shopkeepers.', { position: 'absolute', left: '960px', top: '740px', fontFamily: 'Fredoka', fontWeight: 500, fontSize: '34px', color: '#3a220f', whiteSpace: 'nowrap' });
-  [t1, t2, t3].forEach(x => gsap.set(x, { xPercent: -50, opacity: 0, y: 30 }));
-  const again = goButton(ui, 'Play again ↻', 960, 850);
+  t3.remove();   // feedback: no summary line under "Smart Guess Star!"
+  [t1, t2].forEach(x => gsap.set(x, { xPercent: -50, opacity: 0, y: 30 }));
+  const again = goButton(ui, 'Play again ↻', 960, 790);
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 40), null, 0);
   tl.from(card, { scale: .6, opacity: 0, duration: .5, ease: 'back.out(2)' }, .1);
@@ -508,7 +510,7 @@ async function badge() {
   tl.call(() => { confetti(220, 960, 360); sfx('confetti', 1); sfx('sparkle', 1); }, null, 1.9);
   tl.call(() => voice('x1'), null, 2.0);
   tl.fromTo(medal.querySelector('.shine'), { x: -160 }, { x: 180, duration: 1, ease: 'power2.inOut', repeat: -1, repeatDelay: 1.6 }, 2);
-  tl.to([t1, t2, t3], { opacity: 1, y: 0, duration: .5, stagger: .2, ease: 'back.out(2)' }, .9);
+  tl.to([t1, t2], { opacity: 1, y: 0, duration: .5, stagger: .2, ease: 'back.out(2)' }, .9);
   tl.to(again, { scale: 1, duration: .5, ease: 'back.out(2.5)' }, 3.6);
   tl.to(medal, { y: -12, duration: 1.4, yoyo: true, repeat: -1, ease: 'sine.inOut' }, 3.6);
   tl.call(() => { const iv = setInterval(() => confetti(40, 200 + Math.random() * 1520, 200), 2200); again._iv = iv; }, null, 3);

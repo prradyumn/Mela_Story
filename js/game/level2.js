@@ -28,13 +28,13 @@
   $('#btnSkip').addEventListener('pointerdown', e => { if (!window.L2_ACTIVE || skipping) return; skipping = true; SND.stopVo(); skipBtn(false); skipRes && skipRes(); });
 
   /* ---------- one bill: 3-strike play ---------- */
-  function play(b, L, { teach = false } = {}) {
+  function play(b, L, { teach = false, ready = null } = {}) {   // ready = the question's VO: answers locked until it is over
     return new Promise(resolve => {
       let strikes = 0, idleCall = null, idlePlayed = false, done = false;
       const right = b.choices.indexOf(L.ans);
       const armIdle = () => {
         if (idleCall) idleCall.kill(); if (idlePlayed) return;
-        idleCall = gsap.delayedCall(10, () => { idlePlayed = true; COACH.say(L.idle); Bill.glowPrices(); Stamps.pulse(); });
+        idleCall = gsap.delayedCall(10, () => { idlePlayed = true; Stamps.disable(); COACH.say(L.idle).then(() => { if (!done) Stamps.enable(onPick); }); Bill.glowPrices(); Stamps.pulse(); });
       };
       async function onPick(i) {
         if (done) return; if (idleCall) idleCall.kill();
@@ -42,7 +42,7 @@
         strikes++; Stamps.disable();
         Stamps.state(i, 'wrong'); Stamps.wiggle(i); SND.sfx('boing');
         gsap.delayedCall(.8, () => { if (!done && strikes < 3) Stamps.state(i, ''); });
-        const fb = l => Promise.race([COACH.say(l), wait(1.3)]);
+        const fb = l => COACH.say(l);   // answer again once the feedback line is over
         if (strikes === 1) { gudiyaBleat(); await fb(L.oops); }
         else if (strikes === 2) { Bill.chips('yellow'); await fb(L.hint); }
         else {
@@ -69,7 +69,7 @@
         await wait(teach ? .8 : 1.2);
       }
       GFX.focus(true);
-      Stamps.enable(onPick); armIdle();
+      GFX.lockFor(Stamps.S, ready, () => { if (!done) { Stamps.enable(onPick); armIdle(); } });
     });
   }
   const Hand = SC.Hand;
@@ -116,11 +116,11 @@
     for (const line of T.lines) {
       if (skipping) return;
       if (line.show === 'stamps') {
-        skipBtn(false); COACH.say(line);
+        skipBtn(false); const said = COACH.say(line);
         await Stamps.show(T.choices);
         const right = T.choices.indexOf(T.answer); Stamps.state(right, 'glow');
         const h = Stamps.handAt(right); Hand.show(h.x, h.y);
-        await play(T, L, { teach: true });
+        await play(T, L, { teach: true, ready: said });
         await Promise.all([Stamps.hide(), Bill.crumpleTo(false)]);
         return;
       }
@@ -147,7 +147,7 @@
     await Bill.write(2); await Bill.showTotal();                     // beat 3: price 2 + "About total: ?"
     await Stamps.show(b.choices);                                    // beat 4: the stamps
     SND.setCurrent(L.ask);
-    await play(b, L);
+    await play(b, L, { ready: ask });
     await ask;
     Pile.set(7 - n); GFX.focus(false);
     await Promise.all([Stamps.hide(), Bill.crumpleTo(true)]);         // paper squash → CHECKED basket
@@ -167,8 +167,7 @@
     await GFX.stars(imgs, nStars);
     gsap.from('#done2Basket .balls .pkt', { y: -120, opacity: 0, duration: .45, stagger: .08, ease: 'bounce.out' });
     const cta = $('#done2Cta'); cta.classList.add('pulse');
-    // moves on by itself once the card has been seen; tapping the button just goes a little sooner (same as Level 1)
-    await Promise.race([wait(3), new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }))]);
+    await new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }));   // the child taps "Go to …" (feedback: it used to move on by itself)
     return { stars: nStars, gold, perShop: result.stars.slice() };
   }
 

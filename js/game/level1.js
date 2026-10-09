@@ -12,7 +12,8 @@
   const result = { stars: [] };   // per shop: 'gold' | 'silver' | 'none'
 
   /* ---------- one question (also used for the teach round) ---------- */
-  function play(q, L, { teach = false } = {}) {
+  /* ready = the question's VO: the answers stay locked until it has been heard (feedback Oct 2026) */
+  function play(q, L, { teach = false, ready = null } = {}) {
     return new Promise(resolve => {
       let strikes = 0, idleCall = null, idlePlayed = false, done = false;
       const correctSide = L.ans === q.lo ? 'L' : 'R', wrongSide = correctSide === 'L' ? 'R' : 'L';
@@ -22,7 +23,7 @@
         if (idlePlayed) return;
         idleCall = gsap.delayedCall(10, () => {
           idlePlayed = true;
-          COACH.say(L.idle);
+          Btns.disable(); COACH.say(L.idle).then(() => { if (!done) Btns.enable(onPick); });   // locked while the line plays
           ['L', 'R'].forEach(s => { if (!Btns.B[s].classList.contains('faded') && !Btns.B[s].classList.contains('glow')) Btns.B[s].classList.add('pulse'); });
           gsap.delayedCall(3.5, () => ['L', 'R'].forEach(s => Btns.B[s].classList.remove('pulse')));
           Marker.bounce();
@@ -39,7 +40,7 @@
         Btns.disable();
         Btns.state(side, 'wrong'); Btns.wiggle(side); SND.sfx('boing');
         gsap.delayedCall(.75, () => { if (!done && strikes < 3) Btns.state(side, ''); });
-        const fb = l => Promise.race([COACH.say(l), wait(1.3)]);   // child can answer again after ~1 s; a new tap cuts the line
+        const fb = l => COACH.say(l);   // the child can answer again once Pari's feedback line is over
         if (strikes === 1) { GUDIYA.bleat(); await fb(L.oops); }
         else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule); await fb(L.hint); }
         else {
@@ -88,7 +89,7 @@
       }
 
       GFX.focus(true);
-      Btns.enable(onPick); armIdle();
+      GFX.lockFor([Btns.B.L, Btns.B.R], ready, () => { if (!done) { Btns.enable(onPick); armIdle(); } });
     });
   }
 
@@ -132,7 +133,7 @@
         if (line.show === 'line') { await Line.show(s.lo, s.hi); await Marker.show(s.lo, s.hi, s.price); }
         if (line.show === 'hud') {
           await Promise.all([Marker.hideAll(), Line.hide()]); await Tag.swingOut(); COACH.step('front');
-          HUD.glow('#glowMari'); gsap.delayedCall(1.4, () => { HUD.glow('#glowSun'); HUD.sun(D.sun[0] + .06, .6).then(() => HUD.sun(D.sun[0], .6)); });
+          HUD.glow('#glowMari'); gsap.delayedCall(1.4, () => GFX.sunHint());   // "Look at the sun too": the sun in the sky glows
         }
       });
       if (skipping) return;
@@ -149,12 +150,12 @@
       if (line.show === 'buttons') {
         COACH.dismiss('manju');                   // Manju is done teaching: the right edge is Gudiya's
         skipBtn(false);
-        COACH.say(line);
+        const said = COACH.say(line);
         Rule.hide(); await Btns.show(T.lo, T.hi);
         if ($('#gudiya').classList.contains('hidden')) GUDIYA.enter(CORNER.x, CORNER.y, CORNER.h);
         Btns.state('R', 'glow');
         const h = Btns.handAt('R'); Hand.show(h.x, h.y);       // show, don't tell: the hand demonstrates the tap
-        await play({ ...T, word: 'sweets', n: 0 }, L, { teach: true });
+        await play({ ...T, word: 'sweets', n: 0 }, L, { teach: true, ready: said });
         return;
       }
       await beat(line, async () => {
@@ -183,7 +184,7 @@
     await Btns.show(q.lo, q.hi);
     if ($('#gudiya').classList.contains('hidden')) GUDIYA.enter(CORNER.x, CORNER.y, CORNER.h);
     SND.setCurrent(L.ask);
-    await play(q, L);
+    await play(q, L, { ready: ask });
     await ask;
   }
 
@@ -205,9 +206,8 @@
     await gsap.fromTo('#doneCart', { x: -150, rotation: -4, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: .7, ease: 'power3.out' });   // rolls in inside the card (it used to start over Pari)
     gsap.fromTo('#doneCart', { y: 0 }, { y: -10, duration: .15, yoyo: true, repeat: 1 });
     if (!embedded) for (const line of D.complete) await COACH.say(line);   // inside the story, bridge1 says these lines (r2, p4)
-    // moves on by itself once the card has been seen; tapping the button just goes a little sooner
     const cta = $('#doneCta'); cta.classList.add('pulse');
-    await Promise.race([wait(3), new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }))]);
+    await new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }));   // the child taps "Go to …" (feedback: it used to move on by itself)
     return { stars: nStars, gold, perShop: result.stars.slice() };
   }
 

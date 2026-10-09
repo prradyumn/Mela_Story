@@ -40,13 +40,13 @@
   }
 
   /* ---------- one question: 3-strike play ---------- */
-  function play(q, L, { teach = false, i = 0 } = {}) {
+  function play(q, L, { teach = false, i = 0, ready = null } = {}) {   // ready = the question's VO: answers locked until it is over
     return new Promise(resolve => {
       let strikes = 0, idleCall = null, idlePlayed = false, done = false;
       const right = q.choices.indexOf(L.ans);
       const armIdle = () => {
         if (idleCall) idleCall.kill(); if (idlePlayed) return;
-        idleCall = gsap.delayedCall(10, () => { idlePlayed = true; COACH.say(L.idle); Bill.glow(); Cart.glow(); Slates.pulse(); });
+        idleCall = gsap.delayedCall(10, () => { idlePlayed = true; Slates.disable(); COACH.say(L.idle).then(() => { if (!done) Slates.enable(onPick); }); Bill.glow(); Cart.glow(); Slates.pulse(); });
       };
       async function onPick(k) {
         if (done) return; if (idleCall) idleCall.kill();
@@ -54,7 +54,7 @@
         strikes++; Slates.disable();
         Slates.state(k, 'wrong'); Slates.wiggle(k); SND.sfx('boing');
         gsap.delayedCall(.8, () => { if (!done && strikes < 3) Slates.state(k, ''); });
-        const fb = l => Promise.race([COACH.say(l), wait(1.3)]);
+        const fb = l => COACH.say(l);   // answer again once the feedback line is over
         if (strikes === 1) { gudiyaBleat(); await fb(L.oops); }
         else if (strikes === 2) { Bill.chip('yellow', L.r); Minus.glow(); await fb(L.hint); }
         else {
@@ -81,7 +81,7 @@
         await wait(.5);
       }
       GFX.focus(true);
-      Slates.enable(onPick); armIdle();
+      GFX.lockFor(Slates.S, ready, () => { if (!done) { Slates.enable(onPick); armIdle(); } });
     });
   }
 
@@ -157,11 +157,11 @@
     for (const line of T.lines) {
       if (skipping) return;
       if (line.show === 'slates') {
-        skipBtn(false); COACH.say(line);
+        skipBtn(false); const asked = COACH.say(line);
         await Minus.show(); await Slates.show(T.choices);
         const right = T.choices.indexOf(T.answer); Slates.state(right, 'glow');
         const h = Slates.handAt(right); Hand.show(h.x, h.y);
-        await play(T, L, { teach: true });
+        await play(T, L, { teach: true, ready: asked });
         // Guddu: "Umm... it's 1,61,240 to be exact. But your number is so close. Good job!"
         await COACH.say(T.exact); await wait(.3);
         Guddu.exit();
@@ -194,7 +194,7 @@
     glowAlong(L.ask, [[.12, () => Bill.glow()], [.45, () => { Panel.glow(); Cart.glow(); }]]);
     await wait(.4); await Minus.show(); await Slates.show(b.choices);
     SND.setCurrent(L.ask);
-    await play(b, L, { i });
+    await play(b, L, { i, ready: ask });
     await ask;
   }
 
@@ -216,16 +216,19 @@
     const imgs = ov.querySelectorAll('#done3Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
     ov.querySelectorAll('#done3Badges img').forEach((im, i) => im.style.left = (40 + i * 104) + 'px');
-    ov.querySelector('.sub').textContent = `7 shopkeepers paid — about ${rs(Panel.v)} is left.`;
-    ov.querySelector('#done3Money .v').textContent = '≈ ' + rs(Panel.v);
+    /* feedback + agreed with the user: the money left is shown as the exact amount rounded (₹83,165 ≈ ₹83,000), with our running
+       estimate (≈ ₹84,000, the board's last value) as a small second line — both are true, nothing contradicts the board */
+    const exact = D.bills.reduce((m, b) => m - b.price, D.start);
+    ov.querySelector('.sub').textContent = `All 7 paid! Our estimate was about ${rs(Panel.v)}.`;
+    ov.querySelector('#done3Money .v').textContent = '≈ ' + rs(D.round(exact));
+    ov.querySelector('#done3Money .ex').textContent = `exactly ${rs(exact)}`;
     SND.sfx('confetti'); confetti(90);
     Fw.show([[280, 220, 280], [1665, 185, 250]], 1.2, 2);
     await gsap.fromTo('#done3Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
     await GFX.stars(imgs, nStars);
     gsap.from('#done3Badges img', { y: -60, opacity: 0, duration: .4, stagger: .08, ease: 'back.out(2)' });
     const cta = $('#done3Cta'); cta.classList.add('pulse');
-    // moves on by itself once the card has been seen; tapping the button just goes a little sooner (same as L1/L2)
-    await Promise.race([wait(3), new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }))]);
+    await new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }));   // the child taps "Go to …" (feedback: it used to move on by itself)
     return { stars: nStars, gold, perShop: result.stars.slice(), left: Panel.v };
   }
 

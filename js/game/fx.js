@@ -10,6 +10,7 @@
 (function () {
   const { $, sparks } = ST;
   const mk = (id, cls, html = '') => { const d = document.createElement('div'); if (id) d.id = id; if (cls) d.className = cls; d.innerHTML = html; return d; };
+  const SUN1 = $('#sun1');
   const amb = mk('gAmb'), grade = mk('gGrade', '', '<i class="gold"></i><i class="dusk"></i>'), focus = mk('gFocus', 'gfocus'), flash = mk('gFlash', 'gflash');
   $('#gBg').after(amb, grade, focus, flash);
   const trail = mk('gTrail'); $('#gudiya').before(trail);                  // under Gudiya, over the number line
@@ -22,8 +23,14 @@
   /* ---------- sunset grade ----------
      p = sun position on the story's scale (L1 .12 → .35, L2 .35 → .6). gold builds through L1, dusk joins in L2. */
   const G = { p: 0 };
+  /* L1 sun: sinks + reddens as the shops are done (p .12 → .35), behind the bunting, above the stall roof */
+  function placeSun1() {
+    const k = clamp((G.p - .1) / .26);
+    SUN1.style.translate = `${1560 + 40 * k}px ${96 + 82 * k}px`;   // the individual property: GSAP owns transform (sunHint scale)
+    SUN1.style.filter = `hue-rotate(${-8 - 12 * k}deg) saturate(${1.1 + .2 * k}) brightness(${.92 - .1 * k}) drop-shadow(0 0 ${22 - 6 * k}px rgba(255,${150 - 40 * k},60,.5))`;
+  }
   function applyGrade() {
-    const g = clamp((G.p - .1) / .36), d = clamp((G.p - .38) / .26);
+    const g = clamp((G.p - .1) / .36), d = clamp((G.p - .38) / .26); placeSun1();
     grade.children[0].style.opacity = g; grade.children[1].style.opacity = d;
     $('#game').style.setProperty('--cg', `sepia(${(.04 + .16 * g + .08 * d).toFixed(3)}) saturate(${(1 + .1 * g).toFixed(3)}) brightness(${(1 - .04 * g - .08 * d).toFixed(3)})`);
   }
@@ -33,7 +40,7 @@
     if (!dur) { G.p = p; applyGrade(); return; }
     // the overlay glides; the character filter changes once, at the end of the step (a filter that animates every frame is costly)
     gradeTw = gsap.to(G, { p, duration: dur, ease: 'sine.inOut', onUpdate() {
-      grade.children[0].style.opacity = clamp((G.p - .1) / .36); grade.children[1].style.opacity = clamp((G.p - .38) / .26);
+      grade.children[0].style.opacity = clamp((G.p - .1) / .36); grade.children[1].style.opacity = clamp((G.p - .38) / .26); placeSun1();
     }, onComplete: applyGrade });
   }
 
@@ -160,7 +167,7 @@
     }
   }
   function ambient(level) {
-    stopLife(); GFX.level = level; calmed = false;
+    stopLife(); GFX.level = level; calmed = false; SUN1.style.display = level === 1 ? 'block' : 'none';
     if (level === 1) { amb.className = 'l1'; bunting(() => ({ x: 694, y: 74 }), BGP(281, 369), 26, 10, 0); bunting(() => ({ x: 1226, y: 74 }), BGP(1676, 385), 26, 10, 3); birdCall = gsap.delayedCall(4, flock); }   // tied to each awning's slanted edge (visible at every pan step)
     if (level === 2) { amb.className = 'l2'; motes(); }
   }
@@ -201,10 +208,20 @@
       { x: x - 6 + (Math.random() - .5) * 70, y: y + 60 + Math.random() * 70, rotation: '+=' + (120 + Math.random() * 200), opacity: 0, duration: .8 + Math.random() * .4, ease: 'power1.in', onComplete: () => p.remove() });
   }
 
+  /* answers wait for the VO: dimmed + not tappable until `ready` resolves, then they pop (feedback Oct 2026) */
+  function lockFor(els, ready, go) {
+    els = [...els]; els.forEach(e => e.classList.add('vowait'));
+    Promise.resolve(ready).then(() => {
+      els.forEach(e => { if (!e.classList.contains('vowait')) return; e.classList.remove('vowait'); try { e.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 320, easing: 'ease-out' }); } catch (x) { } });
+      go();
+    });
+  }
   function reset() {
     setFocus(false); gsap.set([focus, focus3, flash, flash3], { opacity: 0 });
     trail.innerHTML = ''; stopLife(); twinkle(0); gsap.set(tw3, { opacity: 1 });
   }
 
-  window.GFX = { level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
+  /* how-to "Look at the sun too": the sun glows and bobs */
+  function sunHint() { gsap.fromTo(SUN1, { scale: 1 }, { scale: 1.22, duration: .4, yoyo: true, repeat: 3, ease: 'sine.inOut', transformOrigin: '50% 50%' }); }
+  window.GFX = { sunHint, lockFor, level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
 })();

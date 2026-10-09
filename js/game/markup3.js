@@ -55,7 +55,7 @@
         <div class="sub"></div>
         <div id="done3Stars"><img alt=""><img alt=""><img alt=""></div>
         <div id="done3Badges">${D.bills.map(b => `<img src="${A(b.badge + '.webp')}" alt="">`).join('')}</div>
-        <div id="done3Money"><img src="${A('money_board.webp')}" alt=""><div class="lab">MONEY LEFT</div><div class="v"></div></div>
+        <div id="done3Money"><img src="${A('money_board.webp')}" alt=""><div class="lab">MONEY LEFT</div><div class="v"></div><div class="ex"></div></div>
         <div class="gbtn cta abs" id="done3Cta">${D.completeCta}</div>
       </div>
     </div>`;

@@ -121,7 +121,7 @@
       const [hx, hy] = D.hooks[i]; Bill.i = i;
       if (sway) { sway.kill(); sway = null; }
       const [cx, cy] = D.catch[i];
-      B.className = teach ? 'teach' : ''; gsap.set(B, { clearProps: 'transform,opacity' }); Object.assign(B.style, { left: (cx - 150) + 'px', top: (cy - 7) + 'px' });   // the rope loop (bill x 150, y 4) over the stall's ring/hook
+      B.className = teach ? 'teach' : '';   /* also clears .paidrow */ gsap.set(B, { clearProps: 'transform,opacity' }); Object.assign(B.style, { left: (cx - 180) + 'px', top: (cy - 8) + 'px' });   // the rope loop (bill x 180, y 5) over the stall's ring/hook
       hookAt(i);
       B.querySelector('.price').textContent = rs(price);
       gsap.set(B.querySelector('.chip'), { opacity: 0, scale: 1 }); gsap.set(B.querySelector('.paid'), { opacity: 0 });
@@ -142,13 +142,13 @@
     },
     glow() { return glowOn(B.querySelector('.price'), '255,214,90', 18, 3); },
     async paid() {
-      const p = B.querySelector('.paid'); SND.sfx('stamp', .8);
+      const p = B.querySelector('.paid'); B.classList.add('paidrow'); await wait(.3); SND.sfx('stamp', .8);   // the chip slides left, PAID stamps beside it
       gsap.fromTo(B, { scale: 1.07 }, { scale: 1, duration: .4, ease: 'elastic.out(1,.4)' });
-      await gsap.fromTo(p, { opacity: 0, scale: 1.7, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: .22, ease: 'power3.in' });
+      await gsap.fromTo(p, { opacity: 0, scale: 1.7, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: .22, ease: 'power3.in' });
     },
     away() { if (sway) { sway.kill(); sway = null; } gsap.to(HK, { opacity: 0, duration: .3, onComplete: () => { HK.style.display = 'none'; gsap.set(HK, { opacity: 1 }); } });
       return gsap.to(B, { y: -260, rotation: 10, opacity: 0, duration: .55, ease: 'power2.in', onComplete: () => B.classList.add('hidden') }); },
-    centre() { const [hx, hy] = D.catch[Bill.i]; return { x: hx - Cam.x, y: hy + 125 }; }
+    centre() { const [hx, hy] = D.catch[Bill.i]; return { x: hx - Cam.x, y: hy + 150 }; }
   };
 
   /* ---------- the three answer slates (takhti) ---------- */
@@ -288,7 +288,8 @@
     }
   };
   const SUN = $('#sun3');
-  const Sun = { set(paid) { gsap.set(SUN, { top: 50 + 60 * paid }); }, to(paid) { return gsap.to(SUN, { top: 50 + 60 * paid, duration: 1.2, ease: 'sine.inOut' }); } };
+  const sunF = paid => `sepia(.25) hue-rotate(${-22 - 3 * paid}deg) saturate(${1.35 + .05 * paid}) brightness(${.7 - .03 * paid}) drop-shadow(0 0 14px rgba(255,${90 - 8 * paid},40,.4))`;   // a low, red-orange evening sun
+  const Sun = { set(paid) { gsap.set(SUN, { top: 50 + 60 * paid, filter: sunF(paid) }); }, to(paid) { return gsap.to(SUN, { top: 50 + 60 * paid, filter: sunF(paid), duration: 1.2, ease: 'sine.inOut' }); } };   // sinks + reddens
 
   /* ---------- fireworks (6×6 sheet, 256², 24 fps, anchor centre) ---------- */
   const FW = $('#fw3');

@@ -431,6 +431,23 @@ function sign(parent, html, x, y, size = 56, name = 'sign') {
   gsap.set(s, { xPercent: -50, y: -700, rotate: 0 });
   return s;
 }
+/* signGate: the story waits on a "Go to …" sign until the child taps it (feedback Oct 2026: transitions used to move on by
+   themselves). At time t the timeline pauses, the sign glows + pulses, and a tap target over it (in #ui, which sits above the
+   world) resumes the story. Skip still jumps past it. */
+function signGate(tl, t, s) {
+  tl.call(() => {
+    if (SKIPPING) return;
+    tl.pause();
+    const board = s.querySelector('.board'), st = document.getElementById('stage').getBoundingClientRect(), k = st.width / W, r = board.getBoundingClientRect();
+    const hit = el('div', 'signhit', ui, '<span>Tap to go ▶</span>', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: r.width / k + 40 + 'px', height: r.height / k + 40 + 'px' });
+    board.classList.add('tapme');
+    const pulse = gsap.to(board, { scale: 1.06, duration: .55, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    gsap.fromTo(hit.firstChild, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .4, delay: .6 });
+    const go = e => { if (e) e.stopPropagation(); pulse.kill(); gsap.to(board, { scale: 1, duration: .15 }); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop'); tl.play(); };
+    hit.addEventListener('click', go, { once: true });
+    tl.eventCallback('onUpdate', () => { if (tl.progress() >= 1 && hit.isConnected) { hit.remove(); pulse.kill(); } });   // Skip
+  }, null, t);
+}
 function dropSign(tl, t, s) {
   tl.to(s, { y: 0, duration: .9, ease: 'bounce.out' }, t);
   tl.fromTo(s, { rotate: -5 }, { rotate: 0, duration: 2.2, ease: 'elastic.out(1,0.3)', immediateRender: false }, t + .6);
