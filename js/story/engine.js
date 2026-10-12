@@ -393,14 +393,20 @@ function bubbleFor(s, o, text, side = null) {
 }
 // say: bubble + voice + typewriter + bounce. returns end time
 // act: play that talking animation (CH[key].acts) for the line instead of the pose + mouth; end = pose to settle into.
+/* SPEECH_BUBBLES = false (storyboard Oct 2026: "no dialog boxes — only the sheets' on-screen text"): characters speak with
+   their voice + lip sync / talking frames only. Set it to true to bring the Union-PNG bubbles back. */
+const SPEECH_BUBBLES = false;
 function say(tl, s, t, id, o, text, { gap = .35, hold = .15, p = null, act = null, end = null, side = null } = {}) {
   text = LAYOUT.text[id] || text;
-  const d = DUR[id] || 2.5, b = reg(bubbleFor(s, o, text, side), 'bubble_' + id), ws = b.querySelectorAll('.w');
+  const d = DUR[id] || 2.5;
   if (p) pose(tl, t - .05, o, p);
-  tl.to(b, { opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.4)' }, t);
-  tl.call(() => { voice(id); sfx('bubble', .5); talkOn(o); }, null, t + .05);
-  tl.call(() => talkOff(o), null, t + d + .08);
+  tl.call(() => { voice(id); talkOn(o); }, null, t + .05);
   if (act) { tl.call(() => actOn(o, act), null, t); tl.call(() => actOff(o, end), null, t + d + .08); }
+  if (!SPEECH_BUBBLES) { tl.call(() => talkOff(o), null, t + d + .08); talk(tl, t + .05, o, d, id); tl.set({}, {}, t + d + hold); return t + d + hold + gap; }
+  const b = reg(bubbleFor(s, o, text, side), 'bubble_' + id), ws = b.querySelectorAll('.w');
+  tl.to(b, { opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.4)' }, t);
+  tl.call(() => sfx('bubble', .5), null, t + .05);
+  tl.call(() => talkOff(o), null, t + d + .08);
   tl.to(ws, { opacity: 1, duration: .08, stagger: Math.max(.04, (d * .88) / ws.length) }, t + .1);
   talk(tl, t + .05, o, d, id);
   tl.to(b, { opacity: 0, scale: .85, y: -14, duration: .25, ease: 'power2.in' }, t + d + hold);

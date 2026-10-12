@@ -173,6 +173,7 @@
 
   const Coach = {
     cast: CAST, pari: CAST.pari, fullPari: true, pariSpot: 'stand', depth: 'front',
+    bubbles: false,   // no speech bubbles (storyboard: only the on-screen text in the sheets); #game.nobubbles hides them
     show() { const c = $('#coach'); if (!c.classList.contains('hidden')) return; c.classList.remove('hidden'); Object.values(CAST).forEach(a => a.reset()); who = null; Coach.depth = 'front'; gsap.set('#avatar', { scale: 0 }); },
     /* L1: 'back' when the number line comes up, 'front' when the stage is clear again — everyone on stage glides there */
     step(d) {
@@ -210,12 +211,12 @@
           gsap.fromTo('#avatar', { rotation: -8, scale: .5 }, { rotation: 0, scale: 1, duration: .45, ease: 'back.out(2.5)' });
         }
       }
-      // the bubble sits by whoever is talking
+      // the bubble sits by whoever is talking (hidden: storyboard Oct 2026 — no dialog boxes, the voice + talking sprite carry the line)
       const b = $('#bubble'); placeBubble(actor || null, false);
       $('#bubbleName').textContent = w.name; $('#bubbleName').style.background = w.colour;
       $('#bubbleText').innerHTML = line.text.replace(/(₹[\d,]+)/g, '<b>$1</b>');
       if (append) gsap.fromTo('#bubbleText', { opacity: .3 }, { opacity: 1, duration: .3 });
-      else { SND.sfx('bubble'); gsap.fromTo(b, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .38, ease: 'back.out(2)' }); }
+      else if (Coach.bubbles) { SND.sfx('bubble'); gsap.fromTo(b, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .38, ease: 'back.out(2)' }); }
       SND.setCurrent(line);
       if (talk) { talk.kill(); talk = null; gsap.set('#avatar img', { y: 0 }); }
       Object.values(CAST).forEach(a => { if (a !== actor) a.quiet(true); });   // only the speaker talks

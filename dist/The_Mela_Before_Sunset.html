@@ -141,6 +141,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #game #bubble.posR.tailD::after{left:auto;right:62px}
 #game #avatar{left:36px;top:318px;width:150px;height:150px;border-radius:50%;overflow:hidden;background:#fff1c9;border:5px solid var(--wood);box-shadow:0 5px 0 rgba(58,34,15,.3)}
 #game #avatar img{position:absolute}
+/* no dialog boxes (storyboard Oct 2026): the coach bubble and Gudiya's "Meh-eh!" bubble are hidden; voice + sprites carry the lines */
+#game.nobubbles #bubble,#game.nobubbles #bleat{display:none!important}
 #game #bubble{left:214px;bottom:692px;width:470px;padding:30px 30px 26px;background:linear-gradient(#fffaf0,#fbefd6);border:4px solid var(--wood);border-radius:30px;font:600 27px/1.45 Poppins;color:var(--ink);box-shadow:0 6px 0 rgba(58,34,15,.22);transform-origin:0 100%}
 #game #bubble::before,#game #bubble::after{content:'';position:absolute;left:-30px;bottom:26px;border-style:solid}
 #game #bubble::before{border-width:16px 34px 16px 0;border-color:transparent var(--wood) transparent transparent;left:-36px;bottom:22px}
@@ -920,14 +922,20 @@ function bubbleFor(s, o, text, side = null) {
 }
 // say: bubble + voice + typewriter + bounce. returns end time
 // act: play that talking animation (CH[key].acts) for the line instead of the pose + mouth; end = pose to settle into.
+/* SPEECH_BUBBLES = false (storyboard Oct 2026: "no dialog boxes — only the sheets' on-screen text"): characters speak with
+   their voice + lip sync / talking frames only. Set it to true to bring the Union-PNG bubbles back. */
+const SPEECH_BUBBLES = false;
 function say(tl, s, t, id, o, text, { gap = .35, hold = .15, p = null, act = null, end = null, side = null } = {}) {
   text = LAYOUT.text[id] || text;
-  const d = DUR[id] || 2.5, b = reg(bubbleFor(s, o, text, side), 'bubble_' + id), ws = b.querySelectorAll('.w');
+  const d = DUR[id] || 2.5;
   if (p) pose(tl, t - .05, o, p);
-  tl.to(b, { opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.4)' }, t);
-  tl.call(() => { voice(id); sfx('bubble', .5); talkOn(o); }, null, t + .05);
-  tl.call(() => talkOff(o), null, t + d + .08);
+  tl.call(() => { voice(id); talkOn(o); }, null, t + .05);
   if (act) { tl.call(() => actOn(o, act), null, t); tl.call(() => actOff(o, end), null, t + d + .08); }
+  if (!SPEECH_BUBBLES) { tl.call(() => talkOff(o), null, t + d + .08); talk(tl, t + .05, o, d, id); tl.set({}, {}, t + d + hold); return t + d + hold + gap; }
+  const b = reg(bubbleFor(s, o, text, side), 'bubble_' + id), ws = b.querySelectorAll('.w');
+  tl.to(b, { opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.4)' }, t);
+  tl.call(() => sfx('bubble', .5), null, t + .05);
+  tl.call(() => talkOff(o), null, t + d + .08);
   tl.to(ws, { opacity: 1, duration: .08, stagger: Math.max(.04, (d * .88) / ws.length) }, t + .1);
   talk(tl, t + .05, o, d, id);
   tl.to(b, { opacity: 0, scale: .85, y: -14, duration: .25, ease: 'power2.in' }, t + d + hold);
@@ -1248,6 +1256,11 @@ async function hookA() {
   for (let i = 0; i < 14; i++) { const pe = el('div', '', g.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: '-30px', width: '14px', height: '9px', borderRadius: '50%', background: ['#f7b733', '#e8870e', '#ff9f1c'][i % 3] });
     tl.fromTo(pe, { y: Math.random() * 300 }, { y: 700 + Math.random() * 400, x: 60 + Math.random() * 120, rotate: 540, duration: 3.6, ease: 'none' }, 0); }
   camMove(tl, g, 0, cut[0] + .3, { x: 960, y: 540, s: 1 }, { x: 1000, y: 600, s: 1.3 }, 'power1.inOut');
+  // storyboard OST (Story sheet, hook 1): "Mela Day in Apnapur!" over the gate shot, on "It's Mela day in Apnapur!"
+  const mday = reg(el('div', 'ost-pill', ui, 'Mela Day in Apnapur!', { position: 'absolute', left: '960px', top: '850px', fontSize: '64px', whiteSpace: 'nowrap', zIndex: 20 }), 'meladay');
+  gsap.set(mday, { xPercent: -50, opacity: 0, y: 30 });
+  tl.to(mday, { opacity: 1, y: 0, duration: .5, ease: 'back.out(2)' }, V + .3);
+  tl.to(mday, { opacity: 0, y: -20, duration: .35, ease: 'power2.in' }, cut[0] - .35);
   // 2 "It starts in the evening. There will be lights," a dreamy glimpse of the Mela at dusk, panning along the bulb strings
   const d = shot(s, 'bg_05_mela_dusk'); xf(d, cut[0]);
   for (let i = 0; i < 16; i++) { const k = el('div', '', d.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: (80 + Math.random() * 520) + 'px', width: (18 + Math.random() * 30) + 'px', height: '0', paddingBottom: '0', borderRadius: '50%' });
@@ -1931,7 +1944,7 @@ window.LEVEL3 = {
 window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' + p;
 (function () {
   const root = document.createElement('div');
-  root.id = 'game'; root.className = 'hidden';
+  root.id = 'game'; root.className = 'hidden nobubbles';
   root.innerHTML = `
     <div id="gBg"></div>
     <img id="sun1" src="${GA('l3/sun_disc.webp')}" alt="">   <!-- L1: the sun Pari asks us to watch (sinks a step with each shop) -->
@@ -2678,6 +2691,7 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
 
   const Coach = {
     cast: CAST, pari: CAST.pari, fullPari: true, pariSpot: 'stand', depth: 'front',
+    bubbles: false,   // no speech bubbles (storyboard: only the on-screen text in the sheets); #game.nobubbles hides them
     show() { const c = $('#coach'); if (!c.classList.contains('hidden')) return; c.classList.remove('hidden'); Object.values(CAST).forEach(a => a.reset()); who = null; Coach.depth = 'front'; gsap.set('#avatar', { scale: 0 }); },
     /* L1: 'back' when the number line comes up, 'front' when the stage is clear again — everyone on stage glides there */
     step(d) {
@@ -2715,12 +2729,12 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
           gsap.fromTo('#avatar', { rotation: -8, scale: .5 }, { rotation: 0, scale: 1, duration: .45, ease: 'back.out(2.5)' });
         }
       }
-      // the bubble sits by whoever is talking
+      // the bubble sits by whoever is talking (hidden: storyboard Oct 2026 — no dialog boxes, the voice + talking sprite carry the line)
       const b = $('#bubble'); placeBubble(actor || null, false);
       $('#bubbleName').textContent = w.name; $('#bubbleName').style.background = w.colour;
       $('#bubbleText').innerHTML = line.text.replace(/(₹[\d,]+)/g, '<b>$1</b>');
       if (append) gsap.fromTo('#bubbleText', { opacity: .3 }, { opacity: 1, duration: .3 });
-      else { SND.sfx('bubble'); gsap.fromTo(b, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .38, ease: 'back.out(2)' }); }
+      else if (Coach.bubbles) { SND.sfx('bubble'); gsap.fromTo(b, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .38, ease: 'back.out(2)' }); }
       SND.setCurrent(line);
       if (talk) { talk.kill(); talk = null; gsap.set('#avatar img', { y: 0 }); }
       Object.values(CAST).forEach(a => { if (a !== actor) a.quiet(true); });   // only the speaker talks

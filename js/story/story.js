@@ -141,6 +141,11 @@ async function hookA() {
   for (let i = 0; i < 14; i++) { const pe = el('div', '', g.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: '-30px', width: '14px', height: '9px', borderRadius: '50%', background: ['#f7b733', '#e8870e', '#ff9f1c'][i % 3] });
     tl.fromTo(pe, { y: Math.random() * 300 }, { y: 700 + Math.random() * 400, x: 60 + Math.random() * 120, rotate: 540, duration: 3.6, ease: 'none' }, 0); }
   camMove(tl, g, 0, cut[0] + .3, { x: 960, y: 540, s: 1 }, { x: 1000, y: 600, s: 1.3 }, 'power1.inOut');
+  // storyboard OST (Story sheet, hook 1): "Mela Day in Apnapur!" over the gate shot, on "It's Mela day in Apnapur!"
+  const mday = reg(el('div', 'ost-pill', ui, 'Mela Day in Apnapur!', { position: 'absolute', left: '960px', top: '850px', fontSize: '64px', whiteSpace: 'nowrap', zIndex: 20 }), 'meladay');
+  gsap.set(mday, { xPercent: -50, opacity: 0, y: 30 });
+  tl.to(mday, { opacity: 1, y: 0, duration: .5, ease: 'back.out(2)' }, V + .3);
+  tl.to(mday, { opacity: 0, y: -20, duration: .35, ease: 'power2.in' }, cut[0] - .35);
   // 2 "It starts in the evening. There will be lights," a dreamy glimpse of the Mela at dusk, panning along the bulb strings
   const d = shot(s, 'bg_05_mela_dusk'); xf(d, cut[0]);
   for (let i = 0; i < 16; i++) { const k = el('div', '', d.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: (80 + Math.random() * 520) + 'px', width: (18 + Math.random() * 30) + 'px', height: '0', paddingBottom: '0', borderRadius: '50%' });

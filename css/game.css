@@ -51,6 +51,8 @@
 #game #bubble.posR.tailD::after{left:auto;right:62px}
 #game #avatar{left:36px;top:318px;width:150px;height:150px;border-radius:50%;overflow:hidden;background:#fff1c9;border:5px solid var(--wood);box-shadow:0 5px 0 rgba(58,34,15,.3)}
 #game #avatar img{position:absolute}
+/* no dialog boxes (storyboard Oct 2026): the coach bubble and Gudiya's "Meh-eh!" bubble are hidden; voice + sprites carry the lines */
+#game.nobubbles #bubble,#game.nobubbles #bleat{display:none!important}
 #game #bubble{left:214px;bottom:692px;width:470px;padding:30px 30px 26px;background:linear-gradient(#fffaf0,#fbefd6);border:4px solid var(--wood);border-radius:30px;font:600 27px/1.45 Poppins;color:var(--ink);box-shadow:0 6px 0 rgba(58,34,15,.22);transform-origin:0 100%}
 #game #bubble::before,#game #bubble::after{content:'';position:absolute;left:-30px;bottom:26px;border-style:solid}
 #game #bubble::before{border-width:16px 34px 16px 0;border-color:transparent var(--wood) transparent transparent;left:-36px;bottom:22px}
