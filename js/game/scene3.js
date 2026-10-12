@@ -288,8 +288,12 @@
     }
   };
   const SUN = $('#sun3');
-  const sunF = paid => `sepia(.25) hue-rotate(${-22 - 3 * paid}deg) saturate(${1.35 + .05 * paid}) brightness(${.7 - .03 * paid}) drop-shadow(0 0 14px rgba(255,${90 - 8 * paid},40,.4))`;   // a low, red-orange evening sun
-  const Sun = { set(paid) { gsap.set(SUN, { top: 50 + 60 * paid, filter: sunF(paid) }); }, to(paid) { return gsap.to(SUN, { top: 50 + 60 * paid, filter: sunF(paid), duration: 1.2, ease: 'sine.inOut' }); } };   // sinks + reddens
+  // the game's one sun (GFX.sunAt): L3 covers p .6 → .85, so it carries on from where Level 1 left it and sets behind the stalls
+  const sunP = paid => (LEVEL3.sun ? LEVEL3.sun[0] + (LEVEL3.sun[1] - LEVEL3.sun[0]) * paid / 7 : .6 + .25 * paid / 7);
+  const Sun = {
+    set(paid) { const s = GFX.sunAt(sunP(paid)); gsap.set(SUN, { left: s.x, top: s.y, filter: s.f }); },
+    to(paid) { const s = GFX.sunAt(sunP(paid)); return gsap.to(SUN, { left: s.x, top: s.y, filter: s.f, duration: 1.4, ease: 'sine.inOut' }); }
+  };
 
   /* ---------- fireworks (6×6 sheet, 256², 24 fps, anchor centre) ---------- */
   const FW = $('#fw3');

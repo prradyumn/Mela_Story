@@ -128,12 +128,14 @@
     HUD.chip(`${D.chip} · How to play`);
     const s = D.howtoSample;
     for (const line of D.howto) {
+      const t0 = gsap.globalTimeline.time(), d = (window.DUR && DUR[line.vo]) || ST.readTime(line.text), at = f => Math.max(0, d * f - (gsap.globalTimeline.time() - t0));
       await beat(line, async () => {
         if (line.show === 'tag') await Tag.show(s.item, s.icon, s.price);
         if (line.show === 'line') { await Line.show(s.lo, s.hi); await Marker.show(s.lo, s.hi, s.price); }
         if (line.show === 'hud') {
           await Promise.all([Marker.hideAll(), Line.hide()]); await Tag.swingOut(); COACH.step('front');
-          HUD.glow('#glowMari'); gsap.delayedCall(1.4, () => GFX.sunHint());   // "Look at the sun too": the sun in the sky glows
+          gsap.delayedCall(at(.18), () => HUD.demo());       // "…lights up a marigold": the chain lights flower by flower
+          gsap.delayedCall(at(.5), () => GFX.sunHint());     // "Look at the sun too": the sun in the sky glows
         }
       });
       if (skipping) return;
@@ -147,6 +149,7 @@
     const L = { ans: T.answer, ok: T.ok, oops: T.oops, hint: T.hint, nudge: T.nudge, idle: T.idle };
     for (const line of T.lines) {
       if (skipping) return;
+      const t0 = gsap.globalTimeline.time(), d = (window.DUR && DUR[line.vo]) || ST.readTime(line.text);
       if (line.show === 'buttons') {
         COACH.dismiss('manju');                   // Manju is done teaching: the right edge is Gudiya's
         skipBtn(false);
@@ -159,7 +162,7 @@
         return;
       }
       await beat(line, async () => {
-        if (line.show === 'tag') await Tag.show(T.item, T.icon, T.price);
+        if (line.show === 'tag') { await Tag.show(T.item, T.icon, T.price); gsap.delayedCall(Math.max(0, d * .55 - (gsap.globalTimeline.time() - t0)), () => Tag.thousands()); }   // on "…nearest thousand"
         if (line.show === 'line') { await Line.show(T.lo, T.hi); await Marker.show(T.lo, T.hi, T.price); }
         if (line.show === 'digit') { Tag.digit(true); await wait(.4); Rule.show(D.rule); }
       });

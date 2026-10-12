@@ -32,9 +32,14 @@
       await gsap.to(rig, { x: -1200, rotation: -18, duration: .5, ease: 'power2.in' });
       rig.classList.add('hidden'); gsap.set(rig, { x: 0, rotation: 0 });
     },
+    /* Manju: "…to the nearest thousand" → the thousands digits (all digits before the last three) glow one by one and stay lit */
+    thousands() {
+      const ds = [...$('#tagPrice').querySelectorAll('.d')], digits = ds.filter(x => /\d/.test(x.textContent)), th = digits.slice(0, -3);
+      th.forEach((d, i) => gsap.delayedCall(i * .45, () => { d.classList.add('thou'); SND.sfx('tick', .35, 1 + i * .12); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(3)' }); }));
+    },
     digit(on) {
       const ds = $('#tagPrice').querySelectorAll('.d'); const d = ds[ds.length - 3];
-      ds.forEach(x => x.classList.remove('glow'));
+      ds.forEach(x => x.classList.remove('glow', 'thou'));
       if (on && d) { d.classList.add('glow'); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .5, ease: 'back.out(3)' }); }
     },
     iconCentre() { const t = $('#tag'); return { x: t.offsetLeft + 26 + 60, y: 188 + 114 + 60 }; },

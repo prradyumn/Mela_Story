@@ -34,6 +34,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 .sign .rope{position:absolute;top:-120px;width:6px;height:124px;background:repeating-linear-gradient(#8a5a2b 0 8px,#6b3d16 8px 16px);border-radius:3px}
 /* a "Go to …" sign waiting for a tap (signGate) */
 .signhit{position:absolute;cursor:pointer;pointer-events:auto;z-index:30;border-radius:28px}
+.signhand{position:absolute;width:150px;height:150px;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(40,20,5,.35))}
 .signhit span{position:absolute;left:50%;bottom:-58px;transform:translateX(-50%);padding:8px 22px 10px;border-radius:24px;background:#fffaf0;border:4px solid #5a3212;font:800 30px/1 Baloo;color:#3a220f;white-space:nowrap;box-shadow:0 5px 0 rgba(58,34,15,.3)}
 .sign .board.tapme{box-shadow:0 16px 0 rgba(58,34,15,.25),inset 0 0 0 5px rgba(255,220,160,.35),0 0 34px 10px rgba(255,214,90,.85)}
 .sign .board{position:relative;padding:22px 46px 26px;background:linear-gradient(#c98a4a,#a8672f);border:6px solid #5a3212;border-radius:20px;box-shadow:0 16px 0 rgba(58,34,15,.25),inset 0 0 0 5px rgba(255,220,160,.35);color:#fff7e3;text-align:center;font-family:Baloo;font-weight:800;text-shadow:0 4px 0 rgba(58,34,15,.5)}

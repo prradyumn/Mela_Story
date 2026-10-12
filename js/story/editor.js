@@ -140,5 +140,5 @@
   $e('edRsA').onclick = () => { if (!confirm('Reset every layout edit?')) return; LAYOUT.items = {}; LAYOUT.text = {}; save(); location.search = '?edit=1&from=' + (window.CUR_SCREEN || 'title'); };
   $e('edX').onclick = () => toggle();
   function toggle() { on = !on; P.style.display = on ? 'block' : 'none'; document.body.classList.toggle('editing', on); if (!on && paused) setPaused(false); tag.style.display = on && paused ? 'block' : 'none'; fill(); list(); }
-  if (q.get('edit') === '1') toggle();
+  if (q.get('edit') === '1' && LOCAL) toggle();   // final build: the editor only runs locally
 })();

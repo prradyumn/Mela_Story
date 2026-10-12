@@ -445,13 +445,18 @@ function signGate(tl, t, s) {
     if (SKIPPING) return;
     tl.pause();
     const board = s.querySelector('.board'), st = document.getElementById('stage').getBoundingClientRect(), k = st.width / W, r = board.getBoundingClientRect();
-    const hit = el('div', 'signhit', ui, '<span>Tap to go ▶</span>', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: r.width / k + 40 + 'px', height: r.height / k + 40 + 'px' });
+    const bw = r.width / k, bh = r.height / k;
+    const hit = el('div', 'signhit', ui, '', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: bw + 40 + 'px', height: bh + 40 + 'px' });
+    // the game's hint hand taps the sign (its fingertip is at 75,120 of the 150-px image): on the board, right of centre
+    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 75) + 'px', top: (20 + bh * .72 - 120) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';   // on the arrow end, clear of the words
     board.classList.add('tapme');
-    const pulse = gsap.to(board, { scale: 1.06, duration: .55, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-    gsap.fromTo(hit.firstChild, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .4, delay: .6 });
-    const go = e => { if (e) e.stopPropagation(); pulse.kill(); gsap.to(board, { scale: 1, duration: .15 }); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop'); tl.play(); };
+    const pulse = gsap.to(board, { scale: 1.04, duration: .55, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    gsap.set(hand, { opacity: 0 });
+    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { y: -30, scale: 1 }, { y: 0, duration: .35, ease: 'power2.in' })
+      .to(hand, { scale: .9, duration: .12, yoyo: true, repeat: 1 }).to(hand, { y: -30, duration: .35, ease: 'power2.out' }).to({}, { duration: .25 });
+    const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); gsap.to(board, { scale: 1, duration: .15 }); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop'); tl.play(); };
     hit.addEventListener('click', go, { once: true });
-    tl.eventCallback('onUpdate', () => { if (tl.progress() >= 1 && hit.isConnected) { hit.remove(); pulse.kill(); } });   // Skip
+    tl.eventCallback('onUpdate', () => { if (tl.progress() >= 1 && hit.isConnected) { hit.remove(); pulse.kill(); tap.kill(); } });   // Skip
   }, null, t);
 }
 function dropSign(tl, t, s) {

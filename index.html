@@ -1,6 +1,12 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<html lang="en" translate="no"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<meta name="theme-color" content="#1d1208">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <title>The Mela Before Sunset</title>
 <link rel="icon" href="favicon.svg">
 <link rel="stylesheet" href="css/story.css">
@@ -15,7 +21,7 @@
   <div id="wipe"><div class="pat"></div></div>
   <div id="fade"></div>
   <div id="skip">Skip ⏭</div>
-  <div id="loader"><div class="cover"></div><div class="ctitle"><div class="kicker">Apnapur · Mela Day</div><h1>The Mela<br>Before Sunset</h1><div class="sub">Addition &amp; subtraction by estimation</div></div><div class="bar"><i></i></div><p id="lp">Loading Apnapur…</p></div>
+  <div id="loader"><div class="cover"></div><div class="ctitle"><h1>The Mela<br>Before Sunset</h1></div><div class="bar"><i></i></div><p id="lp">Loading Apnapur…</p></div>
 </div></div>
 <!-- story -->
 <script src="js/story/layout.js"></script>
@@ -40,6 +46,8 @@
 <script src="js/game/scene3.js"></script>
 <script src="js/game/level3.js"></script>
 <script src="js/game/game.js"></script>
+<!-- final-build hardening: no zoom, no copying the art, phone rotate/fullscreen -->
+<script src="js/guard.js"></script>
 <!-- layout editor (?edit=1, or E when local) -->
 <script src="js/story/editor.js"></script>
 <!-- QA shortcuts: jump to Level 1 / Level 2 (local, or ?qa=1 on the live site) -->

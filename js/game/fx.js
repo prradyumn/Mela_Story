@@ -23,11 +23,20 @@
   /* ---------- sunset grade ----------
      p = sun position on the story's scale (L1 .12 → .35, L2 .35 → .6). gold builds through L1, dusk joins in L2. */
   const G = { p: 0 };
-  /* L1 sun: sinks + reddens as the shops are done (p .12 → .35), behind the bunting, above the stall roof */
+  /* ONE sun for the whole game (user, Oct 2026): the same disc and size in every outdoor level, on one path driven by the story's
+     sun value p (L1 .12 → .35 · L2 indoors .35 → .6 · L3 .6 → .85): it only ever goes lower, warmer and redder, toward sunset.
+     sunAt(p) = top-left of the 150-px disc + its colour filter. Used by L1 (#sun1) and L3 (#sun3, Sun.set/to). */
+  function sunAt(p) {
+    const t = clamp((p - .1) / .78);
+    // height: high in Level 1 (top 40 → 120), lower in Level 3 (140 → 300: in open sky over the roofs, then sinking behind them)
+    const y = p <= .35 ? 40 + clamp((p - .12) / .23) * 80 : p <= .6 ? 120 + (p - .35) / .25 * 20 : 140 + clamp((p - .6) / .25) * 160;
+    return { x: 1560 + 100 * t, y,
+      f: `hue-rotate(${-2 - 22 * t}deg) saturate(${1.05 + .3 * t}) brightness(${1 - .3 * t}) drop-shadow(0 0 ${26 - 12 * t}px rgba(255,${185 - 100 * t},${70 - 30 * t},.55))` };
+  }
   function placeSun1() {
-    const k = clamp((G.p - .1) / .26);
-    SUN1.style.translate = `${1560 + 40 * k}px ${96 + 82 * k}px`;   // the individual property: GSAP owns transform (sunHint scale)
-    SUN1.style.filter = `hue-rotate(${-8 - 12 * k}deg) saturate(${1.1 + .2 * k}) brightness(${.92 - .1 * k}) drop-shadow(0 0 ${22 - 6 * k}px rgba(255,${150 - 40 * k},60,.5))`;
+    const s = sunAt(G.p);
+    SUN1.style.translate = `${s.x}px ${s.y}px`;   // the individual property: GSAP owns transform (sunHint scale)
+    SUN1.style.filter = s.f;
   }
   function applyGrade() {
     const g = clamp((G.p - .1) / .36), d = clamp((G.p - .38) / .26); placeSun1();
@@ -223,5 +232,5 @@
 
   /* how-to "Look at the sun too": the sun glows and bobs */
   function sunHint() { gsap.fromTo(SUN1, { scale: 1 }, { scale: 1.22, duration: .4, yoyo: true, repeat: 3, ease: 'sine.inOut', transformOrigin: '50% 50%' }); }
-  window.GFX = { sunHint, lockFor, level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
+  window.GFX = { sunAt, sunHint, lockFor, level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
 })();

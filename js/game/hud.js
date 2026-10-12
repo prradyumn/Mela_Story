@@ -50,6 +50,12 @@
     sun(p, dur = 0.9) { GFX.grade(p, Math.max(1.2, dur)); return gsap.to(sunState, { p, duration: dur, ease: 'power2.inOut', onUpdate: placeSun }); },   // the light warms with the sun (no tracker in the games)
     setSun(p) { sunState.p = p; placeSun(); GFX.grade(p, 0); },
     glow(id) { const g = $(id); return gsap.timeline().to(g, { opacity: 1, duration: .25 }).to(g, { opacity: .3, duration: .3, yoyo: true, repeat: 3 }).to(g, { opacity: 0, duration: .3 }); },
+    /* how-to "lights up a marigold": the chain lights up flower by flower, glows, then goes back to unlit (only the demo) */
+    demo() {
+      HUD.glow('#glowMari');
+      maris.forEach((m, i) => gsap.delayedCall(i * .16, () => { m.classList.add('lit'); gsap.fromTo(m, { scale: 1.55 }, { scale: 1, duration: .4, ease: 'back.out(3)' }); SND.sfx('tick', .28, 1 + i * .08); }));
+      gsap.delayedCall(7 * .16 + 1.6, () => maris.forEach((m, i) => { if (i >= HUD.lit) m.classList.remove('lit'); }));
+    },
     celebrate() { maris.forEach((m, i) => gsap.fromTo(m, { scale: 1 }, { scale: 1.35, duration: .22, yoyo: true, repeat: 1, delay: i * .08, ease: 'power2.out' })); }
   };
 
