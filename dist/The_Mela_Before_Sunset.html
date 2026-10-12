@@ -204,6 +204,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 /* ---------- cart ---------- */
 #game #cart{left:1486px;top:162px;width:420px;height:250px;z-index:25;opacity:0;pointer-events:none}
 #game #cart .cart-img{position:absolute;left:0;top:0;width:420px;height:242.7px;filter:var(--cg,sepia(0))}
+/* the cart's near side board + wheels drawn again over the items, so they sit IN the cart (user, Oct 2026) */
+#game #cart .cart-front{z-index:3;clip-path:inset(128px 0 0 0)}
 #game #cart .cshadow{position:absolute;left:10px;top:214px;width:400px;height:40px;border-radius:50%;background:radial-gradient(closest-side,rgba(70,35,8,.38),rgba(70,35,8,0))}
 #game #cartItems{position:absolute;inset:0}
 #game #cartItems img{position:absolute;width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(58,34,15,.3))}
@@ -1982,7 +1984,7 @@ window.GA = p => (window.EMBED && window.EMBED['game/' + p]) || 'assets/game/' +
     <div id="bleat" class="abs">Meh-eh!</div>
 
     <!-- cart (appears only when an item is collected) -->
-    <div id="cart" class="abs"><i class="cshadow"></i><div id="cartItems"></div><img class="cart-img" src="${GA('cart_empty.webp')}" alt=""><div id="cartCount">0 / 7</div></div>
+    <div id="cart" class="abs"><i class="cshadow"></i><div id="cartItems"></div><img class="cart-img" src="${GA('cart_empty.webp')}" alt=""><img class="cart-img cart-front" src="${GA('cart_empty.webp')}" alt=""><div id="cartCount">0 / 7</div></div>
 
     <!-- hint strip + hand -->
     <div id="rule" class="abs"><span class="bulb"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="#f7b733" stroke="#8a5a10" stroke-width="1.6" stroke-linejoin="round"/></svg></span><span id="ruleText"></span></div>
@@ -3017,7 +3019,8 @@ window.GUDIYA_POSES = {
 
   // ---------- cart (only shown when an item is collected) ----------
   // slots on the cart bed (cart art is 330 px wide; the bed sits at y ≈ 97). Back row first, then front row.
-  const SLOTS = [[150, 115], [222, 112], [294, 109], [366, 106], [186, 130], [258, 127], [330, 124]];   // bottom-centre of each item on a 420-px cart
+  // bottom-centre of each item on a 420-px cart: sitting ON the bed (y 110–128), bases hidden behind the front side board (.cart-front)
+  const SLOTS = [[160, 133], [228, 132], [296, 131], [364, 130], [196, 143], [266, 142], [336, 141]];
   const Cart = {
     n: 0, shown: false, items: [],
     setItems(list) { Cart.items = list.slice(); Cart.n = list.length; render(); },

@@ -134,7 +134,8 @@
 
   // ---------- cart (only shown when an item is collected) ----------
   // slots on the cart bed (cart art is 330 px wide; the bed sits at y ≈ 97). Back row first, then front row.
-  const SLOTS = [[150, 115], [222, 112], [294, 109], [366, 106], [186, 130], [258, 127], [330, 124]];   // bottom-centre of each item on a 420-px cart
+  // bottom-centre of each item on a 420-px cart: sitting ON the bed (y 110–128), bases hidden behind the front side board (.cart-front)
+  const SLOTS = [[160, 133], [228, 132], [296, 131], [364, 130], [196, 143], [266, 142], [336, 141]];
   const Cart = {
     n: 0, shown: false, items: [],
     setItems(list) { Cart.items = list.slice(); Cart.n = list.length; render(); },
