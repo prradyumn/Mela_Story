@@ -518,6 +518,7 @@ function drawJalebi(s) {
 }
 let lastT = performance.now();
 function fxLoop(now) {
+  if (window.GAME_PAUSED) { lastT = now; requestAnimationFrame(fxLoop); return; }   // Pause (js/controls.js): particles freeze
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   fxc.clearRect(0, 0, W, H);
   for (let i = P.length - 1; i >= 0; i--) {
