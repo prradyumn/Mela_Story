@@ -157,6 +157,9 @@
   async function complete() {
     COACH.hideBubble(); HUD.chip(`${D.chip} · 7 of 7`); HUD.celebrate(); HUD.sun(D.sun[1]);
     const gold = result.stars.filter(s => s === 'gold').length, nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    /* no complete card (feedback Oct 2026, same as L1): bridge2's talk ends with the "Go to the Mela Ground" sign */
+    SND.sfx('confetti'); confetti(90); await wait(1.8);
+    if (window.GAME_LEVELS) return { stars: nStars, gold, perShop: result.stars.slice() };
     const ov = $('#done2'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#done2Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });

@@ -5,7 +5,7 @@
   const fmt = n => LEVEL1.fmt(n), rs = n => '₹' + fmt(n);
   const BILL = { x: 1000, y: 196, w: 620, h: 775 }, BC = { x: BILL.x + BILL.w / 2, y: BILL.y + BILL.h / 2 };
   const SLOT = i => ({ left: 50 + i * 265, top: 740 });                 // on the desk (top edge y 860, office_desk_l2)
-  const PILE_C = { x: 1775, y: 867 }, BASKET_C = { x: 1775, y: 944 };   // pile + basket drawn at 80% (css scale)
+  const PILE_C = { x: 1725, y: 867 }, BASKET_C = { x: 1725, y: 944 };   // pile + basket drawn at 80% (css scale)
 
   /* ---------- the bill ---------- */
   const state = { title: '', items: [], show: 0, chips: null, chipVis: [false, false], total: false, mark: null };
@@ -206,7 +206,7 @@
   const PKT_W = 46, PKT_H = 58;
   const pktHTML = (n, k = 1) => PKT_SLOTS.slice(0, Math.min(n, 7)).map(([x, y, r]) =>
     `<div class="pkt" style="left:${(x - PKT_W / 2) * k}px;top:${(y - PKT_H / 2) * k}px;width:${PKT_W * k}px;height:${PKT_H * k}px;transform:rotate(${r}deg)"></div>`).join('');
-  const BASKET_AT = { x: 1650, y: 930, s: .8 };   // #basket2 on stage (scale .8, origin top centre)
+  const BASKET_AT = { x: 1600, y: 930, s: .8 };   // #basket2 on stage (scale .8, origin top centre)
   const slotStage = i => { const [x, y] = PKT_SLOTS[Math.min(i, 6)]; return { x: BASKET_AT.x + 125 + (x - 125) * BASKET_AT.s, y: BASKET_AT.y + y * BASKET_AT.s }; };
   const Basket = {
     n: 0, html: pktHTML, slot: slotStage,

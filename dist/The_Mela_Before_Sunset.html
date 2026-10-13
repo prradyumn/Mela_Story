@@ -262,10 +262,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 
 /* ================= Level 2 · Panchayat office ================= */
 #game #l2{position:absolute;inset:0}
-#game #pile2{scale:.8;transform-origin:50% 0;left:1650px;top:775px;width:250px;height:200px}
+#game #pile2{scale:.8;transform-origin:50% 0;left:1600px;top:775px;width:250px;height:200px}
 #game #pile2 .pile-art{position:absolute;left:0;top:40px;width:250px;height:150px}
 #game #pileLeft{position:absolute;left:30px;top:0;width:190px;height:44px;border-radius:22px;background:var(--cream);border:3px solid var(--wood);font:800 24px/38px Baloo;text-align:center;white-space:nowrap}
-#game #basket2{scale:.8;transform-origin:50% 0;left:1650px;top:930px;width:250px;height:190px}
+#game #basket2{scale:.8;transform-origin:50% 0;left:1600px;top:930px;width:250px;height:190px}
 #game #basket2 .basket-art{position:absolute;left:0;top:0;width:250px;height:178.4px}
 /* the basket's front rim + body, drawn again over the letters so they stand inside it */
 #game .basket-art.front{clip-path:polygon(0.0% 29.1%,5.0% 32.1%,10.0% 33.7%,15.0% 34.7%,20.0% 35.5%,25.0% 36.0%,30.0% 36.5%,35.0% 36.8%,40.0% 37.0%,45.0% 37.2%,50.0% 37.2%,55.0% 37.2%,60.0% 37.0%,65.0% 36.8%,70.0% 36.5%,75.0% 36.0%,80.0% 35.5%,85.0% 34.7%,90.0% 33.7%,95.0% 32.1%,100.0% 29.1%,100% 100%,0 100%)}
@@ -536,7 +536,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
   <div id="loader"><div class="cover"></div><div class="ctitle"><h1>The Mela<br>Before Sunset</h1></div><div class="bar"><i></i></div><p id="lp">Loading Apnapur…</p></div>
 </div></div>
 <!-- Back + Pause (before the engine: its pausable setTimeout must wrap every timer) -->
-<script>/* js/controls.js — Back + Pause buttons (top-left of the stage, story and games alike). Loaded right after the
+<script>/* js/controls.js — Back + Pause buttons (bottom-right corner of the stage, story and games alike; feedback: not on the top). Loaded right after the
    stage markup, before the engine, so its pausable setTimeout is in place for every wait() / timer that follows.
    · Pause ⏸: freezes everything where it is — GSAP (all tweens/timelines), Web/CSS animations, the particle canvas
      (engine fxLoop checks GAME_PAUSED), mouths (EDIT_PAUSED), all audio (AudioContext suspended) and every pending
@@ -557,11 +557,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
   const stage = document.getElementById('stage');
   const css = document.createElement('style');
   css.textContent = `
-  #ctl{position:absolute;left:40px;top:34px;z-index:76;display:none;gap:16px}
+  #ctl{position:absolute;right:18px;bottom:18px;z-index:76;display:none;flex-direction:column;gap:12px}
   #ctl.on{display:flex}
-  #ctl .cb{width:96px;height:96px;border-radius:50%;background:#fffaf0;border:4px solid #7a4a1f;box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .08s}
+  #ctl .cb{width:72px;height:72px;opacity:.9;border-radius:50%;background:#fffaf0;border:4px solid #7a4a1f;box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .08s}
   #ctl .cb:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(58,34,15,.25)}
-  #ctl .cb svg{width:50px;height:50px}
+  #ctl .cb svg{width:38px;height:38px}
   #pauseOv{position:absolute;inset:0;z-index:75;display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;background:rgba(29,18,8,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);cursor:pointer}
   #pauseOv.on{display:flex}
   #pauseOv h2{font:800 96px/1 Baloo,Fredoka,sans-serif;color:#fff3d6;text-shadow:0 6px 0 rgba(0,0,0,.35);letter-spacing:2px}
@@ -570,8 +570,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
   #pauseOv p{font:600 34px Poppins,sans-serif;color:#f3d9b0}
   @keyframes pz{50%{transform:scale(1.06)}}
   body.gpaused #stage *:not(#pauseOv):not(#pauseOv *){animation-play-state:paused!important}
-  /* make room: the game's 🔊 + Skip and the story chip move right of Back + Pause */
-  #game #btnSpeaker{left:264px!important} #game #btnSkip{left:384px} #stage > #hud .chip{left:264px}`;
+`;
   document.head.appendChild(css);
 
   const ICON = {
@@ -632,7 +631,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
   if (new URLSearchParams(location.search).has('from')) document.addEventListener('DOMContentLoaded', () => {
     const lp = document.getElementById('lp'); new MutationObserver(() => { if (lp.classList.contains('ready') && lp.textContent !== 'Continue ▶') lp.textContent = 'Continue ▶'; }).observe(lp, { childList: true, attributes: true });
   });
-  const watch = setInterval(() => { if (!document.getElementById('loader')) { ctl.classList.add('on'); gsap.fromTo(ctl, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)' }); clearInterval(watch); } }, 300);
+  const watch = setInterval(() => { if (!document.getElementById('loader')) { ctl.classList.add('on'); gsap.fromTo(ctl, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)' }); clearInterval(watch); } }, 300);
 })();
 </script>
 <!-- story -->
@@ -3253,7 +3252,7 @@ window.GUDIYA_POSES = {
   const { $, NL, vx, rs, fmt, wait, sparks, confetti } = ST;
   const { Tag, Line, Marker, Btns, Cart, Rule, Hand, bgShift } = SC;
   const D = window.LEVEL1;
-  const CORNER = { x: 1820, y: 1036, h: 205 };     // Gudiya waits here
+  const CORNER = { x: 1730, y: 1036, h: 205 };     // Gudiya waits here (left of the Back/Pause buttons in the corner)
   const ON_BAR = { y: NL.top + 4, h: 165 };          // Gudiya standing on the number line
 
   const result = { stars: [] };   // per shop: 'gold' | 'silver' | 'none'
@@ -3445,6 +3444,9 @@ window.GUDIYA_POSES = {
     GUDIYA.hide();
     const gold = result.stars.filter(s => s === 'gold').length;
     const nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    /* inside the story there is no complete card (feedback Oct 2026): bridge1's Pari–Aaru talk ends with the
+       "Go to the office" sign the child taps, so the card's own "Go to the office" was a duplicate */
+    if (embedded) { SND.sfx('confetti'); confetti(90); await wait(1.8); return { stars: nStars, gold, perShop: result.stars.slice() }; }
     const ov = $('#doneOv'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#doneStars img');
     imgs.forEach((im, i) => { im.src = i < nStars ? GA('ui_star_gold.webp') : GA('ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
@@ -3521,7 +3523,7 @@ window.GUDIYA_POSES = {
   const fmt = n => LEVEL1.fmt(n), rs = n => '₹' + fmt(n);
   const BILL = { x: 1000, y: 196, w: 620, h: 775 }, BC = { x: BILL.x + BILL.w / 2, y: BILL.y + BILL.h / 2 };
   const SLOT = i => ({ left: 50 + i * 265, top: 740 });                 // on the desk (top edge y 860, office_desk_l2)
-  const PILE_C = { x: 1775, y: 867 }, BASKET_C = { x: 1775, y: 944 };   // pile + basket drawn at 80% (css scale)
+  const PILE_C = { x: 1725, y: 867 }, BASKET_C = { x: 1725, y: 944 };   // pile + basket drawn at 80% (css scale)
 
   /* ---------- the bill ---------- */
   const state = { title: '', items: [], show: 0, chips: null, chipVis: [false, false], total: false, mark: null };
@@ -3722,7 +3724,7 @@ window.GUDIYA_POSES = {
   const PKT_W = 46, PKT_H = 58;
   const pktHTML = (n, k = 1) => PKT_SLOTS.slice(0, Math.min(n, 7)).map(([x, y, r]) =>
     `<div class="pkt" style="left:${(x - PKT_W / 2) * k}px;top:${(y - PKT_H / 2) * k}px;width:${PKT_W * k}px;height:${PKT_H * k}px;transform:rotate(${r}deg)"></div>`).join('');
-  const BASKET_AT = { x: 1650, y: 930, s: .8 };   // #basket2 on stage (scale .8, origin top centre)
+  const BASKET_AT = { x: 1600, y: 930, s: .8 };   // #basket2 on stage (scale .8, origin top centre)
   const slotStage = i => { const [x, y] = PKT_SLOTS[Math.min(i, 6)]; return { x: BASKET_AT.x + 125 + (x - 125) * BASKET_AT.s, y: BASKET_AT.y + y * BASKET_AT.s }; };
   const Basket = {
     n: 0, html: pktHTML, slot: slotStage,
@@ -3893,6 +3895,9 @@ window.GUDIYA_POSES = {
   async function complete() {
     COACH.hideBubble(); HUD.chip(`${D.chip} · 7 of 7`); HUD.celebrate(); HUD.sun(D.sun[1]);
     const gold = result.stars.filter(s => s === 'gold').length, nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    /* no complete card (feedback Oct 2026, same as L1): bridge2's talk ends with the "Go to the Mela Ground" sign */
+    SND.sfx('confetti'); confetti(90); await wait(1.8);
+    if (window.GAME_LEVELS) return { stars: nStars, gold, perShop: result.stars.slice() };
     const ov = $('#done2'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#done2Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });

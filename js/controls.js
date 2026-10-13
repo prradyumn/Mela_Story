@@ -1,4 +1,4 @@
-/* js/controls.js — Back + Pause buttons (top-left of the stage, story and games alike). Loaded right after the
+/* js/controls.js — Back + Pause buttons (bottom-right corner of the stage, story and games alike; feedback: not on the top). Loaded right after the
    stage markup, before the engine, so its pausable setTimeout is in place for every wait() / timer that follows.
    · Pause ⏸: freezes everything where it is — GSAP (all tweens/timelines), Web/CSS animations, the particle canvas
      (engine fxLoop checks GAME_PAUSED), mouths (EDIT_PAUSED), all audio (AudioContext suspended) and every pending
@@ -19,11 +19,11 @@
   const stage = document.getElementById('stage');
   const css = document.createElement('style');
   css.textContent = `
-  #ctl{position:absolute;left:40px;top:34px;z-index:76;display:none;gap:16px}
+  #ctl{position:absolute;right:18px;bottom:18px;z-index:76;display:none;flex-direction:column;gap:12px}
   #ctl.on{display:flex}
-  #ctl .cb{width:96px;height:96px;border-radius:50%;background:#fffaf0;border:4px solid #7a4a1f;box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .08s}
+  #ctl .cb{width:72px;height:72px;opacity:.9;border-radius:50%;background:#fffaf0;border:4px solid #7a4a1f;box-shadow:0 6px 0 rgba(58,34,15,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .08s}
   #ctl .cb:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(58,34,15,.25)}
-  #ctl .cb svg{width:50px;height:50px}
+  #ctl .cb svg{width:38px;height:38px}
   #pauseOv{position:absolute;inset:0;z-index:75;display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;background:rgba(29,18,8,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);cursor:pointer}
   #pauseOv.on{display:flex}
   #pauseOv h2{font:800 96px/1 Baloo,Fredoka,sans-serif;color:#fff3d6;text-shadow:0 6px 0 rgba(0,0,0,.35);letter-spacing:2px}
@@ -32,8 +32,7 @@
   #pauseOv p{font:600 34px Poppins,sans-serif;color:#f3d9b0}
   @keyframes pz{50%{transform:scale(1.06)}}
   body.gpaused #stage *:not(#pauseOv):not(#pauseOv *){animation-play-state:paused!important}
-  /* make room: the game's 🔊 + Skip and the story chip move right of Back + Pause */
-  #game #btnSpeaker{left:264px!important} #game #btnSkip{left:384px} #stage > #hud .chip{left:264px}`;
+`;
   document.head.appendChild(css);
 
   const ICON = {
@@ -94,5 +93,5 @@
   if (new URLSearchParams(location.search).has('from')) document.addEventListener('DOMContentLoaded', () => {
     const lp = document.getElementById('lp'); new MutationObserver(() => { if (lp.classList.contains('ready') && lp.textContent !== 'Continue ▶') lp.textContent = 'Continue ▶'; }).observe(lp, { childList: true, attributes: true });
   });
-  const watch = setInterval(() => { if (!document.getElementById('loader')) { ctl.classList.add('on'); gsap.fromTo(ctl, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)' }); clearInterval(watch); } }, 300);
+  const watch = setInterval(() => { if (!document.getElementById('loader')) { ctl.classList.add('on'); gsap.fromTo(ctl, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(2)' }); clearInterval(watch); } }, 300);
 })();

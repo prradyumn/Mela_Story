@@ -165,10 +165,10 @@
 
 /* ================= Level 2 · Panchayat office ================= */
 #game #l2{position:absolute;inset:0}
-#game #pile2{scale:.8;transform-origin:50% 0;left:1650px;top:775px;width:250px;height:200px}
+#game #pile2{scale:.8;transform-origin:50% 0;left:1600px;top:775px;width:250px;height:200px}
 #game #pile2 .pile-art{position:absolute;left:0;top:40px;width:250px;height:150px}
 #game #pileLeft{position:absolute;left:30px;top:0;width:190px;height:44px;border-radius:22px;background:var(--cream);border:3px solid var(--wood);font:800 24px/38px Baloo;text-align:center;white-space:nowrap}
-#game #basket2{scale:.8;transform-origin:50% 0;left:1650px;top:930px;width:250px;height:190px}
+#game #basket2{scale:.8;transform-origin:50% 0;left:1600px;top:930px;width:250px;height:190px}
 #game #basket2 .basket-art{position:absolute;left:0;top:0;width:250px;height:178.4px}
 /* the basket's front rim + body, drawn again over the letters so they stand inside it */
 #game .basket-art.front{clip-path:polygon(0.0% 29.1%,5.0% 32.1%,10.0% 33.7%,15.0% 34.7%,20.0% 35.5%,25.0% 36.0%,30.0% 36.5%,35.0% 36.8%,40.0% 37.0%,45.0% 37.2%,50.0% 37.2%,55.0% 37.2%,60.0% 37.0%,65.0% 36.8%,70.0% 36.5%,75.0% 36.0%,80.0% 35.5%,85.0% 34.7%,90.0% 33.7%,95.0% 32.1%,100.0% 29.1%,100% 100%,0 100%)}

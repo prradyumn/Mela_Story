@@ -6,7 +6,7 @@
   const { $, NL, vx, rs, fmt, wait, sparks, confetti } = ST;
   const { Tag, Line, Marker, Btns, Cart, Rule, Hand, bgShift } = SC;
   const D = window.LEVEL1;
-  const CORNER = { x: 1820, y: 1036, h: 205 };     // Gudiya waits here
+  const CORNER = { x: 1730, y: 1036, h: 205 };     // Gudiya waits here (left of the Back/Pause buttons in the corner)
   const ON_BAR = { y: NL.top + 4, h: 165 };          // Gudiya standing on the number line
 
   const result = { stars: [] };   // per shop: 'gold' | 'silver' | 'none'
@@ -198,6 +198,9 @@
     GUDIYA.hide();
     const gold = result.stars.filter(s => s === 'gold').length;
     const nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    /* inside the story there is no complete card (feedback Oct 2026): bridge1's Pari–Aaru talk ends with the
+       "Go to the office" sign the child taps, so the card's own "Go to the office" was a duplicate */
+    if (embedded) { SND.sfx('confetti'); confetti(90); await wait(1.8); return { stars: nStars, gold, perShop: result.stars.slice() }; }
     const ov = $('#doneOv'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#doneStars img');
     imgs.forEach((im, i) => { im.src = i < nStars ? GA('ui_star_gold.webp') : GA('ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
