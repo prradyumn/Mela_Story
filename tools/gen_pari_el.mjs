@@ -3,7 +3,7 @@
 // Writes the ElevenLabs mp3 to _source/pari_el_masters/<id>.mp3, then game lines → assets/game/vo/<id>.mp3/.ogg and
 // story lines → assets/audio/<id>.mp3/.ogg (same trim + -16 LUFS + codecs as convert_vo.sh). Skips masters that exist.
 //   ELEVENLABS_API_KEY=... node tools/gen_pari_el.mjs [--force] [id ...]     (key from the environment only, never a file here)
-import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url';
+import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url'; import { indic } from './indic_words.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), KEY = process.env.ELEVENLABS_API_KEY;
 if (!KEY) { console.error('set ELEVENLABS_API_KEY'); process.exit(1); }
 const VOICE = 'e3FEEanj39p8QCSMe8iV', MODEL = 'eleven_v3';
@@ -30,13 +30,13 @@ const small = n => n >= 100 ? U[Math.floor(n / 100)] + ' hundred' + (n % 100 ? '
 // (Oct 2026 feedback "Pari's numbers before level 1 don't sound Indian": L1_teach_nudge is now a Devanagari take picked from --takes, so PLAIN is empty.)
 const PLAIN = new Set([]);
 function say(text, id) {
-  if (PLAIN.has(id) && !process.argv.includes('--deva')) return D.spoken(text);
+  if (PLAIN.has(id) && !process.argv.includes('--deva')) return indic(D.spoken(text));
   let t = text.replace(/[’‘]/g, "'").replace(/→/g, 'means');
   t = t.replace(/₹\s?([\d,]+)/g, (_, d) => '\u0001' + dev(D.spoken('₹' + d)) + '\u0002');            // amounts: words + rupees
   t = t.replace(/\b\d{1,3}(?:,\d{2,3})+\b/g, d => '\u0001' + dev(D.spoken(d)) + '\u0002');             // 34,000 …
   t = t.replace(/\b\d{1,3}\b/g, d => '\u0001' + dev(small(+d)) + '\u0002');                              // the hundreds digit 8, 22 and 43 …
   t = t.replace(/\u0002 thousand\b/g, ' थाउज़ेंड\u0002').replace(/[\u0001\u0002]/g, '');            // 200 thousand
-  return t.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());
+  return indic(t.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase()));   // + Indian names/words in Devanagari
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));

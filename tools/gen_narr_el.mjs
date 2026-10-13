@@ -4,7 +4,7 @@
 // Writes _source/narr_el_masters/<id>.mp3 and assets/audio/<id>.mp3 + .ogg (same trim + -16 LUFS + codecs as the story voices).
 //   ELEVENLABS_API_KEY=... node tools/gen_narr_el.mjs [id ...]        (key from the environment only, never a file here)
 // After n1 changes, re-time the hookA montage cuts to its word times (story.js, hookA).
-import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url';
+import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url'; import { indic } from './indic_words.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), KEY = process.env.ELEVENLABS_API_KEY;
 if (!KEY) { console.error('set ELEVENLABS_API_KEY'); process.exit(1); }
 const VOICE = process.env.NARR_VOICE || 'AENoBp8y6Xe7vGqG1oj4', MODEL = 'eleven_multilingual_v2';
@@ -13,7 +13,7 @@ const story = fs.readFileSync(path.join(ROOT, 'js/story/story.js'), 'utf8');
 const TXT = eval('(' + story.match(/const TXT = (\{[\s\S]*?\n\});/)[1] + ')');
 const win = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/game/data/level1.js'), 'utf8'), { window: win });
 const LINES = { t0: 'The Mela Before Sunset.', n1: TXT.n1, n2: TXT.n2, n3: TXT.n3, n4: TXT.n4, x1: 'You are Apnapur’s Smart Guess Star!' };
-const say = t => win.LEVEL1.spoken(t.replace(/[’‘]/g, "'"));
+const say = t => indic(win.LEVEL1.spoken(t.replace(/[’‘]/g, "'"))).replace(/\bsix लाख rupees\b/, 'सिक्स लाख रुपीज़');   // same Indian number style as Pari   // Indian names/words in Devanagari (Mela, Panchayat…)
 const FILT = 'silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11';
 const ids = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(LINES);
 for (const id of ids) {
