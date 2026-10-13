@@ -414,3 +414,16 @@
 #game #done3Badges img{top:386px}
 #game #done3Money{top:486px}
 #game #done3Cta{top:762px}
+
+/* QA Oct 2026 (less clutter): answers breathe gently while Pari talks; a tap then pops a "listen" sign (fx.js) */
+#game .gbtn.vowait,#game .stamp2.vowait,#game .slate3.vowait{animation:gbreathe 1.8s ease-in-out infinite}
+@keyframes gbreathe{50%{scale:1.035}}
+#game .glisten{position:absolute;width:76px;height:76px;border-radius:50%;background:#fffaf0;border:4px solid #e8870e;box-shadow:0 6px 14px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;z-index:60;pointer-events:none}
+#game .glisten svg{width:44px;height:44px}
+/* L1: the rule is a small chip on the number line (between the answers) instead of a strip along the bottom */
+#game #rule{top:878px!important;height:76px!important;padding:0 30px 0 12px!important;gap:12px!important;font-size:28px!important}
+#game #rule .bulb{width:52px!important;height:52px!important}
+#game #rule .dir{font:800 34px/1 Baloo;color:#b5361d}
+/* L1: the halfway label reads clearly */
+#game .nl-label.mid{color:var(--ink)!important;font-weight:600!important;font-size:calc(32px * var(--txt,1))!important}
+#game #minus3{display:none!important}   /* retired (QA Oct 2026) */

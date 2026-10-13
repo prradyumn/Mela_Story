@@ -42,7 +42,7 @@
         gsap.delayedCall(.75, () => { if (!done && strikes < 3) Btns.state(side, ''); });
         const fb = l => COACH.say(l);   // the child can answer again once Pari's feedback line is over
         if (strikes === 1) { GUDIYA.bleat(); await fb(L.oops); }
-        else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule); await fb(L.hint); }
+        else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule, q.price); await fb(L.hint); }
         else {
           Btns.state(wrongSide, 'faded'); Btns.state(correctSide, 'glow');
           const h = Btns.handAt(correctSide); Hand.show(h.x, h.y);
@@ -164,7 +164,7 @@
       await beat(line, async () => {
         if (line.show === 'tag') { await Tag.show(T.item, T.icon, T.price); gsap.delayedCall(Math.max(0, d * .55 - (gsap.globalTimeline.time() - t0)), () => Tag.thousands()); }   // on "…nearest thousand"
         if (line.show === 'line') { await Line.show(T.lo, T.hi); await Marker.show(T.lo, T.hi, T.price); }
-        if (line.show === 'digit') { Tag.digit(true); await wait(.4); Rule.show(D.rule); }
+        if (line.show === 'digit') { Tag.digit(true); await wait(.4); Rule.show(D.rule, T.price); }
       });
     }
   }

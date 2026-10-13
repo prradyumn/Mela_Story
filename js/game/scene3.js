@@ -104,11 +104,9 @@
 
   /* ---------- the "−" (take away) ---------- */
   const M = $('#minus3');
-  const Minus = {
-    show() { SND.sfx('pop', .4); return gsap.to(M, { scale: 1, duration: .35, ease: 'back.out(3)' }); },
-    hide() { return gsap.to(M, { scale: 0, duration: .2 }); },
-    glow() { return glowOn(M, '255,214,90', 22, 3); }
-  };
+  /* the red "−" between the board and the bill is retired (QA Oct 2026, less clutter: the bill, the slates and Pari's line already
+     say "take it away"); the calls stay so the flow is unchanged */
+  const Minus = { show() { return Promise.resolve(); }, hide() { return Promise.resolve(); }, glow() { return Promise.resolve(); } };
 
   /* ---------- the shopkeeper's bill on the stall hook ---------- */
   const B = $('#bill3'), HK = $('#hook3');

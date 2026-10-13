@@ -53,7 +53,7 @@ async function cutTo() { await fadeOut(.35); NEXT_IN = 'fade'; }   // same locat
 function hudState({ sun = null, sunVis = null, hud = false, chip: c = '', flowers: f = 0 } = {}) {
   if (sun != null) { SUN.p = sun; sunPos(sun); }
   if (sunVis != null) gsap.to(sunEl, { opacity: sunVis ? 1 : 0, duration: .4 });
-  gsap.to([chip, flowers], { opacity: hud ? 1 : 0, duration: .4 }); if (hud) { chip.textContent = c; setFlowers(f); }
+  gsap.to(flowers, { opacity: hud ? 1 : 0, duration: .4 }); gsap.to(chip, { opacity: hud && c ? 1 : 0, duration: .4 }); if (hud) { chip.textContent = c; setFlowers(f); }   // no chip when there is no text (QA: the bridges showed '7 of 7 done!' + marigolds + sun — 3 trackers)
 }
 function panel(parent, html, css, name) { return reg(el('div', 'card', parent, html, css), name); }
 
@@ -366,7 +366,7 @@ async function level(n) {
 
 // ---------------- BRIDGE 1 (row 5) ----------------
 async function bridge1() {
-  SCN = 'bridge1'; hudState({ sun: .35, sunVis: true, hud: true, chip: '7 of 7 done!', flowers: 7 });
+  SCN = 'bridge1'; hudState({ sun: .35, sunVis: true, hud: true, chip: '', flowers: 7 });
   const s = newScene();
   bgImg(s, 'bg_03_bazaar', { left: -(2593 - 1920) + 'px' });
   warmTint(s, .35);
@@ -391,7 +391,7 @@ async function bridge1() {
 }
 // ---------------- BRIDGE 2 (row 7) ----------------
 async function bridge2() {
-  SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '7 of 7 done!', flowers: 7 });
+  SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '', flowers: 7 });
   const s = newScene();
   bgImg(s, 'bg_04_office', { left: '0px' });
   const guddu = officeGuddu(s, 'write');   // 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari

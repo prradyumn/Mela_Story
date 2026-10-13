@@ -201,7 +201,10 @@
   // ---------- rule strip + hand ----------
   const Rule = {
     on: false,
-    show(text) { if (Rule.on) { gsap.fromTo('#rule', { scale: 1.06 }, { scale: 1, duration: .3 }); return; } Rule.on = true; $('#ruleText').textContent = text; SND.sfx('rise', .35); return gsap.fromTo('#rule', { y: 140, opacity: 0, xPercent: -50, x: 0 }, { y: 0, opacity: 1, xPercent: -50, duration: .45, ease: 'back.out(1.6)' }); },
+    show(text, price) { if (Rule.on) { gsap.fromTo('#rule', { scale: 1.06 }, { scale: 1, duration: .3 }); return; } Rule.on = true;
+      /* QA Oct 2026: a small chip on the number line that shows only the half of the rule that applies to this price */
+      const up = price != null && Math.floor(price / 100) % 10 >= 5;
+      if (price != null) $('#ruleText').innerHTML = up ? '5 or more → <b class="dir">go up ➜</b>' : 'Less than 5 → <b class="dir">stay down ⬅</b>'; else $('#ruleText').textContent = text; SND.sfx('rise', .35); return gsap.fromTo('#rule', { y: 140, opacity: 0, xPercent: -50, x: 0 }, { y: 0, opacity: 1, xPercent: -50, duration: .45, ease: 'back.out(1.6)' }); },
     hide() { if (!Rule.on) return; Rule.on = false; return gsap.to('#rule', { y: 140, opacity: 0, duration: .3, ease: 'power2.in' }); }
   };
   gsap.set('#rule', { xPercent: -50, x: 0 }); $('#rule').style.transform = '';
