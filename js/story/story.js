@@ -126,9 +126,9 @@ async function hookA() {
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 80), null, 0);
   // ---- opening montage: one slow camera move per shot, each cut on the word (n1 voice starts at V) ----
-  // n1 word times (faster-whisper, Oct 2026 voice): "It starts in the evening" 3.38 · "sweets" 6.30 · "a big giant wheel" 7.02 ·
-  // "The Panchayat" 9.26 · "six lakh rupees" 10.28–11.60 · "All items…" 14.62 · "sun" 17.42. Cuts land ~.2 s before the word.
-  const V = .9, cut = [V + 3.2, V + 6.08, V + 6.85, V + 9.07];   // "It starts in the evening…" (dusk lights) | "sweets" | "a big giant wheel" | "The Panchayat…"
+  // n1 word times (faster-whisper, ElevenLabs narrator Tripti, Oct 2026): "It starts in the evening" 3.02 · "sweets" 6.40 · "a big giant wheel" 7.30 ·
+  // "The Panchayat" 9.52 · "six lakh rupees" 10.50–11.76 · "All items…" 16.04 · "sun" 18.82. Cuts land ~.2 s before the word.
+  const V = .9, cut = [V + 2.84, V + 6.16, V + 7.12, V + 9.33];   // "It starts in the evening…" (dusk lights) | "sweets" | "a big giant wheel" | "The Panchayat…"
   let prev = null;   // crossfade in on the cut, then hide the shot underneath so it can't show through later
   const xf = (sh, at) => { gsap.set(sh.wrap, { opacity: 0 }); tl.to(sh.wrap, { opacity: 1, duration: .35, ease: 'sine.inOut' }, at - .2);
     if (prev) tl.set(prev.wrap, { opacity: 0 }, at + .2); prev = sh; };
@@ -169,14 +169,14 @@ async function hookA() {
   Object.assign(ost.querySelector('.board').style, { background: 'linear-gradient(#237a43,#1a5c33)', border: '8px solid #d9a93a', borderRadius: '22px', color: '#fff3c4', textShadow: '0 5px 0 rgba(10,40,20,.45)', boxShadow: '0 16px 0 rgba(58,34,15,.25), inset 0 0 0 4px rgba(255,225,140,.35)' });
   const amt = ost.querySelector('.amt');
   dropSign(tl, cut[3] - .05, ost);
-  const c0 = cut[3] + .55, c1 = V + 11.35, steps = 12;
+  const c0 = cut[3] + .55, c1 = V + 11.55, steps = 12;
   for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
   tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
   tl.fromTo(amt, { scale: 1 }, { scale: 1.16, duration: .18, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
   // 6 "All items need to be bought before the sun goes down." the light warms and the sunset tracker appears on "sun"
-  tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 14.6);
-  tl.to(sunEl, { opacity: 1, duration: .6 }, V + 17.42); tl.call(() => sfx('rise', .6), null, V + 17.42);
-  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false }, V + 17.42);
+  tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 16.0);
+  tl.to(sunEl, { opacity: 1, duration: .6 }, V + 18.82); tl.call(() => sfx('rise', .6), null, V + 18.82);
+  tl.fromTo(sunEl, { scale: 1.6, transformOrigin: '100% 0%' }, { scale: 1, duration: .8, ease: 'back.out(2)', immediateRender: false }, V + 18.82);
   let t = voiceOver(tl, V - .1, 'n1');   // voice only: the pictures carry the story, no narration text
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);

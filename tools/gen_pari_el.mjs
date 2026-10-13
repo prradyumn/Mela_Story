@@ -26,10 +26,11 @@ const dev = w => w.replace(/[A-Za-z]+/g, x => DEV[x.toLowerCase()] || x);
 const U = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
   TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const small = n => n >= 100 ? U[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + small(n % 100) : '') : n < 20 ? U[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + U[n % 10] : '');
-// very short lines have no context and the Devanagari number drifts too Hindi ("Tap 35,000" came out "putty five"): English words there
-const PLAIN = new Set(['L1_teach_nudge']);
+// very short lines have no context and the Devanagari number can drift ("Tap 35,000" came out "putty five"): English words there.
+// (Oct 2026 feedback "Pari's numbers before level 1 don't sound Indian": L1_teach_nudge is now a Devanagari take picked from --takes, so PLAIN is empty.)
+const PLAIN = new Set([]);
 function say(text, id) {
-  if (PLAIN.has(id)) return D.spoken(text);
+  if (PLAIN.has(id) && !process.argv.includes('--deva')) return D.spoken(text);
   let t = text.replace(/[’‘]/g, "'").replace(/→/g, 'means');
   t = t.replace(/₹\s?([\d,]+)/g, (_, d) => '\u0001' + dev(D.spoken('₹' + d)) + '\u0002');            // amounts: words + rupees
   t = t.replace(/\b\d{1,3}(?:,\d{2,3})+\b/g, d => '\u0001' + dev(D.spoken(d)) + '\u0002');             // 34,000 …
@@ -62,6 +63,14 @@ function convert(l) {
 
 const args = process.argv.slice(2), force = args.includes('--force'), only = args.filter(a => !a.startsWith('--'));
 if (args.includes('--list')) { for (const l of ALL) console.log(l.id, '|', say(l.text, l.id)); process.exit(0); }
+// --takes N id…: N alternative takes per line into _source/pari_el_masters/_takes/<id>_<k>.mp3 (nothing converted) — pick the most
+// Indian-sounding take that transcribes clean, then --use id=k promotes it to the master + game files.
+const takesN = +(args.find(a => a.startsWith('--takes='))?.split('=')[1] || 0);
+if (takesN) { const T = path.join(MAST, '_takes'); fs.mkdirSync(T, { recursive: true });
+  for (const l of ALL.filter(l => only.includes(l.id))) for (let k = 1; k <= takesN; k++) { fs.writeFileSync(path.join(T, `${l.id}_${k}.mp3`), await tts(l)); console.log('take', l.id, k); }
+  process.exit(0); }
+const uses = args.filter(a => a.startsWith('--use=')).map(a => a.slice(6).split('='));
+if (uses.length) { for (const [id, k] of uses) { const l = ALL.find(x => x.id === id); fs.copyFileSync(path.join(MAST, '_takes', `${id}_${k}.mp3`), path.join(MAST, id + '.mp3')); convert(l); console.log('use', id, k); } process.exit(0); }
 const todo = ALL.filter(l => (!only.length || only.includes(l.id)) && (force || !fs.existsSync(path.join(MAST, l.id + '.mp3'))));
 console.log(`${todo.length} of ${ALL.length} Pari lines`);
 let next = 0;
