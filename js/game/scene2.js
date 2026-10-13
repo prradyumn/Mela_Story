@@ -187,8 +187,8 @@
       await wait(.12);
       Bill.showMark(value);
       s.classList.remove('pressed'); art.src = GA('stamp_tool.webp');
-      await gsap.to(s, { top: 420, duration: .25, ease: 'power2.out' });
-      await gsap.to(s, { left: slot.left, top: 470, duration: .42, ease: 'power2.inOut' });   // up and over the other stamps
+      await gsap.to(s, { top: 520, duration: .25, ease: 'power2.out' });
+      await gsap.to(s, { left: slot.left, top: 560, duration: .42, ease: 'power2.inOut' });   // up and over the other stamps (lower than before: it covered Pari's face)
       await gsap.to(s, { top: slot.top, duration: .2, ease: 'power2.in' });
     }
   };

@@ -4,6 +4,13 @@
    Run alone:  index.html?scene=level1 (&shop=4)  ·  ?scene=level2 (&bill=3)  ·  ?scene=level3 (&bill=3)  ·  faster: &speed=3 */
 window.GAME_LEVELS = window.GAME_LEVELS || {};
 
+/* Hand back to the story WITHOUT a blank flash (QA Oct 2026): the game stays on screen; story.js level() iris-wipes over it and
+   only then calls GAME_HANDBACK, which hides the game layer and brings the story HUD back underneath the wipe.
+   (It used to fade #game out over the hidden story scene: ~1 s of dark brown + the old level chip.) */
+function handBack(api, root, extra) {
+  window.GAME_HANDBACK = () => { root.classList.add('hidden'); gsap.set(root, { opacity: 1 }); if (extra) extra(); gsap.set(api.hud, { opacity: 1 }); };
+}
+
 window.GAME_LEVELS[1] = async (api) => {
   const root = document.getElementById('game');
   const q = new URLSearchParams(location.search);
@@ -22,9 +29,7 @@ window.GAME_LEVELS[1] = async (api) => {
   // hand back: story HUD shows 7 marigolds and the sun where the level ended
   GFX.reset(); api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
-  await gsap.to(root, { opacity: 0, duration: .35 });
-  root.classList.add('hidden');
-  gsap.to(api.hud, { opacity: 1, duration: .3 });
+  handBack(api, root);
 };
 
 window.GAME_LEVELS[2] = async (api) => {
@@ -39,9 +44,7 @@ window.GAME_LEVELS[2] = async (api) => {
   window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level2: res }); GFX.reset();
   api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
-  await gsap.to(root, { opacity: 0, duration: .35 });
-  root.classList.add('hidden'); document.getElementById('l2').classList.add('hidden');
-  gsap.to(api.hud, { opacity: 1, duration: .3 });
+  handBack(api, root, () => document.getElementById('l2').classList.add('hidden'));
 };
 
 window.GAME_LEVELS[3] = async (api) => {
@@ -56,9 +59,7 @@ window.GAME_LEVELS[3] = async (api) => {
   window.GAME_RESULT = Object.assign(window.GAME_RESULT || {}, { level3: res }); GFX.reset();
   api.setFlowers(7); api.setSun(api.level.sun[1]);
   SND.stopVo();
-  await gsap.to(root, { opacity: 0, duration: .35 });
-  root.classList.add('hidden'); document.getElementById('l3').classList.add('hidden'); gsap.set('#gBg', { clearProps: 'all' });
-  gsap.to(api.hud, { opacity: 1, duration: .3 });
+  handBack(api, root, () => { document.getElementById('l3').classList.add('hidden'); gsap.set('#gBg', { clearProps: 'all' }); });
 };
 
 /* 🔊 replay button */

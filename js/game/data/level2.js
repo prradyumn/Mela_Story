@@ -8,8 +8,8 @@ window.LEVEL2 = {
 
   howto: [
     { who: 'pari', vo: 'L2_howto_1', text: 'Look! Seven bills on Guddu Bhaiya\'s desk. Each bill has two prices.', show: 'pile' },
-    { who: 'pari', vo: 'L2_howto_2', text: 'Do not need to add the numbers as they are. Make each price a round number in your head. Then add the round numbers.', show: 'example' },
-    { who: 'pari', vo: 'L2_howto_3', text: 'Choose the answer that is the closest thousand.', show: 'stamps' }
+    { who: 'pari', vo: 'L2_howto_2', text: 'You do not need to add the numbers as they are. Make each price a round number in your head. Then add the round numbers.', show: 'example' },
+    { who: 'pari', vo: 'L2_howto_3', text: 'Choose the answer closest to the total.', show: 'stamps' }
   ],
   example: { title: 'EXAMPLE', items: [['Rice', 31472], ['Oil', 18915]], choices: [40000, 50000, 60000] },
 

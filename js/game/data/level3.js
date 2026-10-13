@@ -44,7 +44,7 @@ window.LEVEL3 = {
     idle:  { who: 'pari', vo: 'L3_teach_idle',  text: 'Take the round number away from the money.' }
   },
 
-  oops: { who: 'pari', vo: 'L3_oops', text: 'Oops! Try again. We are paying money, so the money gets less.' },
+  oops: { who: 'pari', vo: 'L3_oops', text: 'Oops! Try again. We are paying, so the money gets less.' },
   idle: { who: 'pari', vo: 'L3_idle', text: 'Round the bill first. Then take it away from the money.' },
 
   // who = how Pari names the shopkeeper · choices in storyboard order

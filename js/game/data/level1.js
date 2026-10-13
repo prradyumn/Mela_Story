@@ -10,7 +10,7 @@ window.LEVEL1 = {
   sun: [0.02, 0.32],          // sun moves from → to across the 7 questions (0 = sunrise side, 1 = sunset side)
 
   howto: [
-    { who: 'pari', vo: 'L1_howto_1', text: 'Welcome to the bazaar! Every item category has a price tag. The prices are big and messy.', show: 'tag' },
+    { who: 'pari', vo: 'L1_howto_1', text: 'Welcome to the bazaar! Every item has a price tag. The prices are big and messy.', show: 'tag' },
     { who: 'pari', vo: 'L1_howto_2', text: 'Tap the number that the price is closest to.', show: 'line' },
     { who: 'pari', vo: 'L1_howto_3', text: 'Every right answer lights up a marigold. Look at the sun too. Let’s finish before sunset!', show: 'hud' }
   ],
@@ -64,8 +64,8 @@ window.LEVEL1 = {
     const hd = Math.floor(q.price / 100) % 10;
     return {
       ans,
-      ask:   { who: 'pari', vo: `L1_q${n}`,       text: `The ${q.word} cost ${rs(q.price)}. Is it closer to ${fmt(q.lo)} or ${fmt(q.hi)}? Tap the answer.` },
-      ask1:  `The ${q.word} cost ${rs(q.price)}.`,
+      ask:   { who: 'pari', vo: `L1_q${n}`,       text: `The ${q.word} ${q.word.endsWith('s') ? 'cost' : 'costs'} ${rs(q.price)}. Is it closer to ${fmt(q.lo)} or ${fmt(q.hi)}? Tap the answer.` },
+      ask1:  `The ${q.word} ${q.word.endsWith('s') ? 'cost' : 'costs'} ${rs(q.price)}.`,
       ok:    { who: 'pari', vo: `L1_q${n}_ok`,    text: `Yes! ${rs(q.price)} is about ${rs(ans)}.` },
       oops:  D.oops,
       hint:  { who: 'pari', vo: `L1_q${n}_hint`,  text: `Hint: Look at the hundreds digit. It is ${hd}. ${hd} is ${hd >= 5 ? '5 or more, so we go up' : 'less than 5, so we stay down'}.` },

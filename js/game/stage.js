@@ -40,11 +40,11 @@
       gsap.fromTo(d, { x: x - 20, y: y - 14, scale: .5, opacity: .9 }, { x: x - 20 + dir * 46, y: y - 22, scale: 1.4, opacity: 0, duration: .45, ease: 'power2.out', onComplete: () => d.remove() });
     }
   }
-  function confetti(n = 80) {
+  function confetti(n = 80, sides = false) {   // sides: only left/right of a centred card (QA: it fell over the card text)
     const cols = ['#e8870e', '#f7b733', '#b5361d', '#3fa34d', '#2f62c9', '#e85d9b'];
     for (let i = 0; i < n; i++) {
       const d = document.createElement('div'); d.className = 'confetti'; d.style.background = cols[i % cols.length]; fx.appendChild(d);
-      const x = 300 + Math.random() * 1320;
+      const x = sides ? (i % 2 ? 1330 + Math.random() * 430 : 160 + Math.random() * 430) : 300 + Math.random() * 1320;
       gsap.fromTo(d, { x, y: -40, rotation: Math.random() * 360 },
         { x: x + (Math.random() - .5) * 400, y: 1120, rotation: '+=' + (360 + Math.random() * 540), duration: 2.2 + Math.random() * 1.6, delay: Math.random() * .6, ease: 'power1.in', onComplete: () => d.remove() });
     }

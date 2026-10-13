@@ -15,7 +15,7 @@ const TXT = {
   n3: 'The sun goes down. The Mela lights are finally on! The giant wheel starts to turn. We bought everything, and there is still money left.',
   g3: 'I finished! Exactly ₹83,165 is left.',   // Oct 2026: matches the L3 bills (₹6,00,000 − ₹5,16,835); g3 voice must say this too
   p6: 'We said about ₹84,000. That is nearly the same!',
-  r3: 'Yayy! Now jalebees for everyone!',
+  r3: 'Yayy! Now jalebis for everyone!',   // spelling only (QA): the voice is unchanged
   n4: 'The Sarpanch gives you a gold badge.',
 };
 const inr = v => '₹' + Math.round(v).toString().replace(/(\d)(?=(\d\d)+\d$)/g, '$1,');
@@ -360,6 +360,7 @@ async function level(n) {
     await wait(.5);
   }
   await irisOut(50, 50); NEXT_IN = 'iris';
+  if (window.GAME_HANDBACK) { window.GAME_HANDBACK(); window.GAME_HANDBACK = null; }   // the game layer goes only once the wipe covers it (no blank flash)
 }
 
 
@@ -381,7 +382,7 @@ async function bridge1() {
   let t = say(tl, s, 2.1, 'r2', aaru, T('r2'));
   cheer(tl, 2.4, pari, 'happy');                                   // Pari claps and fist-pumps while Aaru cheers
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
-  const go = sign(s, 'Go to the office ➜', 960, 420, 58, 'gosign'); dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);
+  const go = sign(s, 'Go to the office ➜', 960, 300, 58, 'gosign'); /* high enough that Pari walks under it (QA) */ dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);
   move(tl, t - .3, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
   move(tl, t - .2, aaru, 'run', 0, 600, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .8);
@@ -512,7 +513,7 @@ async function badge() {
   tl.call(() => reveal(50, 40), null, 0);
   tl.from(card, { scale: .6, opacity: 0, duration: .5, ease: 'back.out(2)' }, .1);
   tl.fromTo(medal, { rotateY: 900, scale: 0, y: -200 }, { rotateY: 0, scale: 1, y: 0, duration: 1.3, ease: 'power3.out' }, .15);   // with the card, so it is never an empty card
-  tl.call(() => { confetti(220, 960, 360); sfx('confetti', 1); sfx('sparkle', 1); }, null, 1.9);
+  tl.call(() => { confetti(110, 330, 380); confetti(110, 1590, 380); /* two side bursts: not over the medal text (QA) */ sfx('confetti', 1); sfx('sparkle', 1); }, null, 1.9);
   tl.call(() => voice('x1'), null, 2.0);
   tl.fromTo(medal.querySelector('.shine'), { x: -160 }, { x: 180, duration: 1, ease: 'power2.inOut', repeat: -1, repeatDelay: 1.6 }, 2);
   tl.to([t1, t2], { opacity: 1, y: 0, duration: .5, stagger: .2, ease: 'back.out(2)' }, .9);

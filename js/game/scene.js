@@ -164,7 +164,7 @@
     async moment(iconSrc, from) {
       const c = $('#cart'), C = Cart.CEN, dx = C.x - (1486 + 210), dy = C.y - (162 + 125);
       gsap.set(c, { transformOrigin: '50% 50%' });
-      if (!Cart.shown) { Cart.shown = true; gsap.set(c, { x: dx - 1500, y: dy, scale: C.s, rotation: 0, opacity: 1 }); }
+      if (!Cart.shown) { Cart.shown = true; gsap.set(c, { x: dx - 460, y: dy, scale: C.s, rotation: 0, opacity: 0 }); gsap.to(c, { opacity: 1, duration: .35 }); }   // QA: starting off-screen left it rolled through Pari
       SND.sfx('whoosh', .4);
       const bob = rollBob(c);
       await gsap.to(c, { x: dx, duration: 1.1, ease: 'power2.out' });

@@ -222,13 +222,17 @@
     ov.querySelector('.sub').textContent = `All 7 paid! Our estimate was about ${rs(Panel.v)}.`;
     ov.querySelector('#done3Money .v').textContent = '≈ ' + rs(D.round(exact));
     ov.querySelector('#done3Money .ex').textContent = `exactly ${rs(exact)}`;
-    SND.sfx('confetti'); confetti(90);
+    SND.sfx('confetti'); confetti(90, true);
     Fw.show([[280, 220, 280], [1665, 185, 250]], 1.2, 2);
+    // the button works from the moment the card is up (QA: it ignored taps while the stars stamped in)
+    const cta = $('#done3Cta'), tapped = new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(true); }, { once: true }));
     await gsap.fromTo('#done3Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
-    await GFX.stars(imgs, nStars);
-    gsap.from('#done3Badges img', { y: -60, opacity: 0, duration: .4, stagger: .08, ease: 'back.out(2)' });
-    const cta = $('#done3Cta'); cta.classList.add('pulse');
-    await new Promise(res => cta.addEventListener('pointerdown', e => { e.preventDefault(); SND.sfx('pop'); res(); }, { once: true }));   // the child taps "Go to …" (feedback: it used to move on by itself)
+    const early = await Promise.race([GFX.stars(imgs, nStars).then(() => false), tapped]);
+    if (!early) {
+      gsap.from('#done3Badges img', { y: -60, opacity: 0, duration: .4, stagger: .08, ease: 'back.out(2)' });
+      cta.classList.add('pulse');
+      await tapped;   // the child taps "See the Mela at sunset" (feedback: it used to move on by itself)
+    }
     return { stars: nStars, gold, perShop: result.stars.slice(), left: Panel.v };
   }
 
