@@ -34,7 +34,7 @@ Use Chrome or Safari (audio needs the "Tap to begin" gesture). `file://` mostly 
 | `?speed=3` | Speed up all GSAP time (story + game). |
 | `?scene=level1&shop=4` | Game: skip how-to/teach and start at shop 4. |
 | `?edit=1` | Layout editor (§7). **E** also works locally. |
-| `?qa=1` | QA shortcuts: a small **QA** tab (bottom-left of the window) that opens **Level 1 · Bazaar** / **Level 2 · Office**; each reloads into that game (`?from=levelN`, keeps `?speed=`). Always on locally and in the single file (file://); on the live site only with `?qa=1`; `?qa=0` hides it. `js/qa.js`. |
+| **Q key** / `?qa=1` | **QA panel** (`js/qa.js`): press **Q** anywhere (live site too) to open it; jump to Story start, Smart guess (hookD), Ending, Badge, or any level from its start or straight to shop/bill/payment 1–7 (reloads with `?from=levelN&shop|bill=N`). While open, 1/2/3 jump to that level, Esc closes. The small QA tab (bottom-left) shows locally or with `?qa=1` (for tablets, no Q key); `?qa=0` hides it. |
 
 - **Single-file build** (to share/email): `python3 tools/build.py` → `dist/The_Mela_Before_Sunset.html` (~28 MB). It inlines all CSS, fonts, story images/audio **and the game art + game VO (mp3)** into `window.EMBED`. Rebuild after changes you want to share.
 - **Vercel:** no build. This folder is the site. `vercel.json` sets cache headers; `.vercelignore` keeps `_source/`, `tools/`, `dist/`, docs out of the upload. Deploy with `npx vercel --prod`.
