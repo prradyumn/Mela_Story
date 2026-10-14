@@ -55,7 +55,7 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|pari_cheer|manju_talk|guddu_talk|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const LATER = /^(pari_explain|pari_cheer|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
   const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
@@ -167,13 +167,16 @@ const CH = {
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
-    acts: { talk: { file: 'guddu_talk', n: 36, h: 650.2, fps: 10.5, mode: 'pp', lift: -6 } } },
+    acts: { talk: { file: 'guddu_talk', n: 36, h: 650.2, fps: 10.5, mode: 'pp', lift: -6 } },
+    // idle loop (user's ludo sheet, Oct 2026): while he rests in 'write' he keeps writing — 36 frames, mouth shut, sized so his body matches
+    // guddu_write exactly (head, belt, feet); _source/guddu_sprites/write → assets/story/guddu_writeloop_0–35 (710 px tall, q76)
+    idle: { pose: 'write', file: 'guddu_writeloop', n: 36, h: 644.9, fps: 14.7, lift: 0 } },
   manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 36, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },
   gudiya: { name: 'Gudiya', h: 250, color: '#b5361d', poses: ['idle', 'hop'], cycles: { trot: { file: 'gudiya_trot', n: 4, h: 229.2, speed: 300, fps: 8, lift: 3 } } },
 };
 Object.entries(CH).forEach(([k, c]) => {
   Object.keys(c.talk || {}).forEach(p => IMAGES.push(`${k}_${p}_m`));
-  [...Object.values(c.cycles || {}), ...Object.values(c.acts || {})].forEach(cy => { for (let i = 0; i < cy.n; i++) IMAGES.push(`${cy.file}_${i}`); });
+  [...Object.values(c.cycles || {}), ...Object.values(c.acts || {}), ...(c.idle ? [c.idle] : [])].forEach(cy => { for (let i = 0; i < cy.n; i++) IMAGES.push(`${cy.file}_${i}`); });
 });
 const IDLE = [];
 function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, name = key } = {}) {
@@ -186,8 +189,10 @@ function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, 
   Object.keys(c.talk || {}).forEach(p => { const i = el('img', 'mouth', body); i.src = IMG[`${key}_${p}_m`].src; i.style.height = c.h * scale + 'px'; i.style.transform = tf; mouths[p] = i; });
   Object.entries(c.cycles || {}).forEach(([n, cy]) => { frames[n] = [...Array(cy.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${cy.file}_${j}`].src; i.style.height = cy.h * scale + 'px'; i.style.bottom = cy.lift * scale + 'px'; return i; }); });
   Object.entries(c.acts || {}).forEach(([n, a]) => { frames[n] = [...Array(a.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${a.file}_${j}`].src; i.style.height = a.h * scale + 'px'; i.style.bottom = (a.lift || 0) * scale + 'px'; i.style.transform = tf; return i; }); });
+  if (c.idle) frames.__idle = [...Array(c.idle.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${c.idle.file}_${j}`].src; i.style.height = c.idle.h * scale + 'px'; i.style.bottom = (c.idle.lift || 0) * scale + 'px'; i.style.transform = tf; i.style.opacity = 0; return i; });
   imgs[pose].style.opacity = 1;
   const o = { key, c, wrap, body, imgs, mouths, frames, pose, x, ground, h: c.h * scale, scale, flip, moving: null, act: null };
+  if (c.idle) IDLERS.add(o);
   reg(wrap, name, 'char'); wrap._o = o; if (Object.keys(mouths).length) RESTERS.add(o);
   const br = gsap.to(body, { scaleY: 1.012, scaleX: .995, duration: 1.6 + Math.random() * .5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
   IDLE.push(br);
@@ -238,6 +243,19 @@ function move(tl, t, o, cyc, from, to, dur = null, { ease = 'power1.inOut', end 
 // Clocked on the global GSAP timeline, so ?speed= and the editor's pause apply. Skip jumps straight to `end`.
 const ACTORS = new Set();
 const actClock = () => gsap.globalTimeline.time();
+/* idle loops (CH[key].idle): while a character rests in that pose — not acting, not walking — its loop plays instead of the still
+   (Guddu keeps writing). The still stays underneath until the loop's frames have loaded (they load in the background, LATER). */
+const IDLERS = new Set();
+gsap.ticker.add(() => {
+  IDLERS.forEach(o => {
+    if (!o.wrap.isConnected) { IDLERS.delete(o); return; }
+    const d = o.c.idle, F = o.frames.__idle, still = o.imgs[d.pose];
+    const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
+    const on = o.pose === d.pose && !o.act && !o.moving && ready;
+    if (on) { if (o.idleK !== k) { if (o.idleK != null) F[o.idleK].style.opacity = 0; F[k].style.opacity = 1; o.idleK = k; } if (still) still.style.visibility = 'hidden'; }
+    else if (o.idleK != null) { F[o.idleK].style.opacity = 0; o.idleK = null; if (still) still.style.visibility = ''; }
+  });
+});
 function actOn(o, name, end = null) {
   const a = o.c.acts && o.c.acts[name]; if (!a || o.moving) return;
   if (o.act && o.act.name === name && o.act.stopAt == null) return;      // already explaining: keep going
