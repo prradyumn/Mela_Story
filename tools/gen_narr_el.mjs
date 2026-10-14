@@ -15,7 +15,16 @@ const win = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/game/data
 const LINES = { t0: 'The Mela Before Sunset.', n1: TXT.n1, n2: TXT.n2, n3: TXT.n3, n4: TXT.n4, x1: 'You are Apnapur’s Smart Guess Star!' };
 const say = t => indic(win.LEVEL1.spoken(t.replace(/[’‘]/g, "'"))).replace(/\bsix लाख rupees\b/, 'सिक्स लाख रुपीज़');   // same Indian number style as Pari   // Indian names/words in Devanagari (Mela, Panchayat…)
 const FILT = 'silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11';
+const TAKES = +(process.env.TAKES || 0);   // TAKES=n: n alternative takes per id into _source/narr_el_masters/_takes/<id>_<k>.mp3 (no conversion)
 const ids = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(LINES);
+if (TAKES) { const T = path.join(MAST, '_takes'); fs.mkdirSync(T, { recursive: true });
+  for (const id of ids) for (let k = 1; k <= TAKES; k++) {
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_192`, { method: 'POST', headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: say(LINES[id]), model_id: MODEL, voice_settings: { stability: 0.55, similarity_boost: 0.9, style: 0.25, use_speaker_boost: true } }) });
+    if (!r.ok) { console.error(id, r.status, (await r.text()).slice(0, 200)); process.exit(1); }
+    fs.writeFileSync(path.join(T, `${id}_${k}.mp3`), Buffer.from(await r.arrayBuffer())); console.log('take', id, k);
+  }
+  process.exit(0); }
 for (const id of ids) {
   const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_192`, { method: 'POST',
     headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' },
