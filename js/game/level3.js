@@ -40,7 +40,14 @@
   }
 
   /* ---------- one question: 3-strike play ---------- */
+  /* question camera (user, Oct 2026): a slow push-in toward the bill, board and slates while the child thinks; zooms back out on the right
+     answer so the payment and the stall lighting up read wide. Pari stands beside the cart breathing meanwhile (no frozen frame). */
+  function qCam(on) {
+    gsap.to('#l3', on ? { scale: 1.05, x: 0, transformOrigin: '960px 700px', duration: 7, ease: 'sine.inOut', overwrite: 'auto' }
+                      : { scale: 1, x: 0, transformOrigin: '960px 700px', duration: .9, ease: 'power2.inOut', overwrite: 'auto' });
+  }
   function play(q, L, { teach = false, i = 0, ready = null } = {}) {   // ready = the question's VO: answers locked until it is over
+    Pari.stand(true); qCam(true);
     return new Promise(resolve => {
       let strikes = 0, idleCall = null, idlePlayed = false, done = false;
       const right = q.choices.indexOf(L.ans);
@@ -66,6 +73,7 @@
       }
       async function correct() {
         SND.stopVo(); Hand.hide(); if (!teach) Baba.exit();   // Baba steps back out before Aaru runs to the stall
+        qCam(false); Pari.stand(false);   // zoom back out; Pari takes the handle again (after her OK line if she is talking)
         q.choices.forEach((v, j) => Slates.state(j, j === right ? 'correct' : 'faded')); Slates.tick(right);
         GFX.ring(Slates.S[right]); GFX.focus(false); { const c = Bill.centre(); GFX.flash(c.x, c.y); }
         SND.sfx('bell'); SND.sfx('ding');

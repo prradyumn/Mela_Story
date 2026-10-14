@@ -22,18 +22,34 @@
      0–4 hands apart, 5–30 loop, 31–35 hands together), then takes the handle again (back to the push sprite). */
   const TP = $('#cart3 .talkp'), CO = $('#cart3 .cartonly');
   const tImgs = [...Array(36)].map(() => { const im = document.createElement('img'); im.alt = ''; TP.appendChild(im); return im; });
+  /* standing beside the cart during a question (user, Oct 2026: "Pari and the cart freeze"): the story's namaste breathing loop, sized to sit
+     exactly on her hands-together explain frame (×1.0076, 3 px lower) */
+  const bImgs = [...Array(36)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = '570.3px'; im.style.bottom = '-3.3px'; TP.appendChild(im); return im; });
+  let bLoaded = false, standing = false, bShown = -1;
+  const bFrame = k => { if (k === bShown) return; if (bShown >= 0) bImgs[bShown].style.opacity = 0; if (k >= 0) bImgs[k].style.opacity = 1; bShown = k; };
   let tLoaded = false, tOn = false, tTalk = false, tT0 = 0, tStop = null, tShown = -1, tQuiet = null;
   const tFrame = k => { if (k === tShown) return; tImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); tShown = k; };
   const swap = talking => { tOn = talking; gsap.to(P, { opacity: talking ? 0 : 1, duration: .22 }); gsap.to([CO, TP], { opacity: talking ? 1 : 0, duration: .22 });
     gsap.fromTo(TP, { x: talking ? -46 : 0 }, { x: talking ? 0 : -46, duration: .32, ease: 'power2.out' }); };   // a step off / back onto the handle, not a pop
   gsap.ticker.add(() => {
-    if (!tOn) return;
-    if (tTalk) { const f = Math.floor((clock() - tT0) * 12); tFrame(f < 5 ? f : 5 + (f - 5) % 26); }
-    else if (tStop != null) { const k = 31 + Math.floor((clock() - tStop) * 12); if (k >= 36) { tStop = null; tFrame(35); swap(false); } else tFrame(k); }   // hands together → hold the cart again
+    if (!tOn) { bFrame(-1); return; }
+    if (tTalk) { bFrame(-1); const f = Math.floor((clock() - tT0) * 12); tFrame(f < 5 ? f : 5 + (f - 5) % 26); }
+    else if (tStop != null) { const k = 31 + Math.floor((clock() - tStop) * 12); if (k >= 36) { tStop = null; tFrame(35); if (!standing) swap(false); } else tFrame(k); }   // hands together → hold the cart again (or keep standing)
+    else if (standing) { const k = Math.floor(clock() * 12.2) % 36; if (bImgs[k].complete && bImgs[k].naturalWidth) { tFrame(-1); bFrame(k); } }   // breathing beside the cart
+    else { bFrame(-1); tFrame(35); swap(false); }   // stand ended and she isn't talking: back onto the handle
   });
   const Pari = {
-    walk(on) { if (on) Pari.talk(false, true); pariOn = on; pariT0 = clock(); if (!on) pariFrame(REST); },
-    reset() { pariOn = false; pariFrame(REST); Pari.talk(false, true); },
+    walk(on) { if (on) { standing = false; Pari.talk(false, true); } pariOn = on; pariT0 = clock(); if (!on) pariFrame(REST); },
+    reset() { pariOn = false; pariFrame(REST); standing = false; Pari.talk(false, true); },
+    /* question time: step off the handle and stand beside the cart breathing; off = back onto the handle (for the payment / the next push) */
+    stand(on) {
+      if (MAPON) return;
+      if (on) {
+        if (!bLoaded) { bImgs.forEach((im, i) => im.src = SIMG('pari_breathe_' + i)); bLoaded = true; }
+        if (!tLoaded) { tImgs.forEach((im, i) => im.src = SIMG('pari_explain_' + i)); tLoaded = true; }
+        standing = true; if (!tOn) { tFrame(35); swap(true); }
+      } else standing = false;   // the ticker takes her back to the handle once she is not talking (her OK line may start right now)
+    },
     /* on: let go + explain · off: hands together, then back on the handle (now = instantly, e.g. before a push) */
     talk(on, now = false) {
       if (tQuiet) { tQuiet.kill(); tQuiet = null; }
@@ -42,7 +58,7 @@
         if (!tLoaded) { tImgs.forEach((im, i) => im.src = SIMG('pari_explain_' + i)); tLoaded = true; }
         if (!tOn) { tFrame(0); swap(true); }
         if (!tTalk) { tTalk = true; tStop = null; tT0 = clock(); }
-      } else if (now) { tTalk = false; tStop = null; if (tOn) { gsap.killTweensOf([P, CO, TP]); gsap.set(P, { opacity: 1 }); gsap.set([CO, TP], { opacity: 0 }); tOn = false; } }
+      } else if (now) { tTalk = false; tStop = null; bFrame(-1); if (tOn) { gsap.killTweensOf([P, CO, TP]); gsap.set(P, { opacity: 1 }); gsap.set([CO, TP], { opacity: 0 }); tOn = false; } }
       else if (tTalk) tQuiet = gsap.delayedCall(.45, () => { tQuiet = null; tTalk = false; tStop = clock(); });   // short gaps between lines keep her talking
     }
   };
