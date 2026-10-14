@@ -186,7 +186,7 @@
   const CAST = {
     pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 },
       rest: { file: 'pari_breathe', n: 36, fps: 12.2, h: 489.7, dy: -2.8 } }),
-    manju: Actor('manju', { file: 'manju_talk', n: 36, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),
+    manju: Actor('manju', { file: 'manju_talk', n: 22, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),   // frames 22–35 had her hand cut off by the sheet's cell edge (user, Oct 2026)
     guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 12, mode: 'pp', h: 584, lift: -8 })   // L2: comes in only for his line (no idle swap — it glitched)
   };
   gsap.ticker.add(() => Object.values(CAST).forEach(a => a.tick()));

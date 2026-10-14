@@ -192,7 +192,7 @@ const CH = {
     // idle loop (user's ludo sheet, Oct 2026): while he rests in 'write' he keeps writing — 36 frames, mouth shut, sized so his body matches
     // guddu_write exactly (head, belt, feet); _source/guddu_sprites/write → assets/story/guddu_writeloop_0–35 (710 px tall, q76)
     idle: { pose: 'write', file: 'guddu_writeloop', n: 36, h: 644.9, fps: 14.7, lift: 0, sound: { sfx: 'scribble', gain: .07 } } },
-  manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 36, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },
+  manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 22, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },   // 0–21 only: 22–35 cut her hand at the cell edge
   gudiya: { name: 'Gudiya', h: 250, color: '#b5361d', poses: ['idle', 'hop'], cycles: { trot: { file: 'gudiya_trot', n: 4, h: 229.2, speed: 300, fps: 8, lift: 3 } } },
 };
 Object.entries(CH).forEach(([k, c]) => {

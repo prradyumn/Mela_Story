@@ -64,7 +64,10 @@
     const el = inL3() ? focus3 : focus, f = FOCUS[GFX.level] || FOCUS[1];
     el.style.setProperty('--fx', f.x); el.style.setProperty('--fy', f.y);
     gsap.to(el, { opacity: on ? f.o : 0, duration: on ? .8 : .5, ease: 'sine.inOut', overwrite: true });
-    if (inL3()) gsap.to(dim3, { opacity: on ? 1 : 0, duration: on ? .8 : .5, ease: 'sine.inOut', overwrite: true });
+    if (inL3()) {   // the pool of lamplight is centred on the hanging bill (dim3 lives in lane coordinates, offset −2000, −400)
+      const B = $('#bill3'); if (on && B.style.left) { dim3.style.setProperty('--bx', (parseFloat(B.style.left) + 180 + 2000) + 'px'); dim3.style.setProperty('--by', (parseFloat(B.style.top) + 150 + 400) + 'px'); }
+      gsap.to(dim3, { opacity: on ? 1 : 0, duration: on ? .8 : .5, ease: 'sine.inOut', overwrite: true });
+    }
     calm(on);
   }
   function doFlash(x = 960, y = 600) {
