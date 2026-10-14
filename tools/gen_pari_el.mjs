@@ -6,11 +6,13 @@
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url'; import { indic } from './indic_words.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), KEY = process.env.ELEVENLABS_API_KEY;
 if (!KEY) { console.error('set ELEVENLABS_API_KEY'); process.exit(1); }
-// WHO=baba (feedback Oct 2026: Baba asks the L3 questions) re-voices every Baba line (story b1 + L3) with "Dr. Sahni" (elderly Indian
-// male, warm; eleven_multilingual_v2 keeps his own accent), same Devanagari numbers/words. Default WHO=pari.
+// WHO=baba (feedback Oct 2026: Baba asks the L3 questions) re-voices every Baba line (story b1 + L3), same Devanagari numbers/words.
+// Default WHO=pari.
 const WHO = process.env.WHO || 'pari';
 const CFG = { pari: { voice: 'e3FEEanj39p8QCSMe8iV', model: 'eleven_v3', settings: { stability: 0.5 }, story: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], dir: 'pari_el_masters' },
-              baba: { voice: 'LuN0fbpldemhhWn9yLaT', model: 'eleven_multilingual_v2', settings: { stability: 0.55, similarity_boost: 0.9, style: 0.25, use_speaker_boost: true }, story: ['b1'], dir: 'baba_el_masters' } }[WHO];
+              // Baba (Oct 2026, user pick after "Dr. Sahni sounds robotic"): "Grandpa Danish" (raspy, nostalgic old Indian man) on eleven_v3,
+              // each line led by a delivery tag (not spoken) so he sounds like a warm, slow village grandfather
+              baba: { voice: 'iBRcUZbbi4hxPMzDCm71', model: 'eleven_v3', settings: { stability: 0.5 }, story: ['b1'], dir: 'baba_el_masters', tag: '[warmly, slowly, like a kind old grandfather] ' } }[WHO];
 if (process.env.STAB) CFG.settings = { ...CFG.settings, stability: +process.env.STAB };   // e.g. STAB=1 (v3 'Robust') for steadier retakes
 const VOICE = CFG.voice, MODEL = CFG.model;
 const MAST = path.join(ROOT, '_source', CFG.dir); fs.mkdirSync(MAST, { recursive: true });
@@ -69,7 +71,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function tts(l) {
   for (let a = 0; a < 6; a++) {
     const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_192`, { method: 'POST',
-      headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: say(l.text, l.id), model_id: MODEL, voice_settings: CFG.settings }) })
+      headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: (CFG.tag || '') + say(l.text, l.id), model_id: MODEL, voice_settings: CFG.settings }) })
       .catch(e => ({ ok: false, status: 0, text: async () => String(e) }));
     if (r.ok) return Buffer.from(await r.arrayBuffer());
     const msg = (await r.text()).slice(0, 160); console.log(`  ${l.id}: ${r.status} ${msg}`);
