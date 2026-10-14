@@ -89,7 +89,7 @@
              desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
   };
   const spotOf = key => (key === 'pari' && Coach.pariSpot === 'desk' && !Coach.gudduIn && SPOTS.pari.deskC) || SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
-  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null, idle = null }) {
+  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null, idle = null, rest = null }) {
     const box = $('#' + key + 'Coach'), clock = () => gsap.globalTimeline.time();
     const imgs = [...Array(n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = h + 'px'; im.style.bottom = lift + 'px';
       if (flip) im.style.transform = 'translateX(-50%) scaleX(-1)'; box.appendChild(im); return im; });
@@ -108,6 +108,16 @@
       sImg.style.marginLeft = idle.scratch.dx + 'px'; sImg.style.transition = 'opacity .22s'; box.appendChild(sImg);
     }
     const scratch = on => { if (sImg) sImg.style.opacity = on ? 1 : 0; };
+    /* rest loop (Oct 2026, Pari's breathing sheet): while she is not talking / finishing a line / cheering, a breathing + blinking namaste
+       loop replaces her hands-together rest frame (same body height and feet; the frames are the story's pari_breathe_*) */
+    const rImgs = rest ? [...Array(rest.n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = rest.h + 'px'; im.style.bottom = (lift + (rest.dy || 0)) + 'px'; im.style.opacity = 0; box.appendChild(im); return im; }) : [];
+    let rK = null;
+    const restOff = () => { if (rK != null) { rImgs[rK].style.opacity = 0; rK = null; } };
+    function restTick() {
+      const k = Math.floor(clock() * rest.fps) % rest.n;
+      if (!(rImgs[k].complete && rImgs[k].naturalWidth)) { restOff(); return; }   // not loaded yet: the rest frame stays
+      if (rK === k) return; frame(-1); if (rK != null) rImgs[rK].style.opacity = 0; rImgs[k].style.opacity = 1; rK = k;
+    }
     function idleTick() {
       const t = clock() - idleT0, others = Object.values(CAST).some(a => a !== A && a.on && a.isTalking());
       if (others) { scratch(false); frame(idle.listen[Math.floor(t / 1.3) % idle.listen.length]); return; }
@@ -128,7 +138,7 @@
         (animate ? gsap.to : gsap.set)(box, { left: sp.x, top: sp.y, scale: sp.s, ...(animate ? { duration: .6, ease: 'power2.inOut' } : {}) });
       },
       show() {
-        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); cImgs.forEach((im, i) => im.src = SA(`${cheer.file}_${i}`)); if (sImg) sImg.src = SA(idle.scratch.file); loaded = true; }
+        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); cImgs.forEach((im, i) => im.src = SA(`${cheer.file}_${i}`)); if (sImg) sImg.src = SA(idle.scratch.file); rImgs.forEach((im, i) => im.src = SA(`${rest.file}_${i}`)); loaded = true; }
         idleT0 = clock();
         A.place(false);
         if (shown < 0) frame(0);
@@ -136,7 +146,7 @@
       },
       hide() { if (A.on) { A.on = false; gsap.to(box, { opacity: 0, duration: .25 }); } A.quiet(true); },
       talk() {
-        if (quietCall) { quietCall.kill(); quietCall = null; } scratch(false); if (talking) return;
+        if (quietCall) { quietCall.kill(); quietCall = null; } scratch(false); if (rK != null) { restOff(); frame(mode === 'pp' ? 0 : n - 1); } if (talking) return;
         if (idle && shown < 0) frame(0);
         t0 = clock() - (mode === 'pp' ? Math.max(0, shown) : (stopAt != null ? intro : 0)) / fps; talking = true; stopAt = null;
       },
@@ -145,11 +155,11 @@
         const stop = () => { quietCall = null; if (talking) { talking = false; stopAt = clock(); from = Math.max(0, shown); } };
         if (now) stop(); else quietCall = gsap.delayedCall(.45, stop);
       },
-      reset() { cheerT0 = null; cFrame(-1); scratch(false); if (cheerDone) { cheerDone(); cheerDone = null; } talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
+      reset() { cheerT0 = null; cFrame(-1); scratch(false); restOff(); if (cheerDone) { cheerDone(); cheerDone = null; } talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
       /* one-shot cheer; resolves when it has played (then the talk loop / rest frame shows again) */
       cheer() {
         if (!cheer || !A.on) return Promise.resolve();
-        cheerT0 = clock(); imgs.forEach(im => im.style.opacity = 0); shown = -1;
+        restOff(); cheerT0 = clock(); imgs.forEach(im => im.style.opacity = 0); shown = -1;
         return new Promise(r => { cheerDone = r; });
       },
       tick() {
@@ -168,12 +178,14 @@
           if (mode === 'pp') { const k = from - Math.floor(s * 3); if (k <= 0) { stopAt = null; frame(0); idleT0 = clock(); } else frame(k); }   // glide back to rest
           else { const k = outro + Math.floor(s); if (k >= n) { stopAt = null; frame(n - 1); } else frame(k); }               // hands back together
         } else if (idle && A.on && cheerT0 == null) idleTick();
+        else if (rest && A.on && cheerT0 == null) restTick();
       }
     };
     return A;
   }
   const CAST = {
-    pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 } }),
+    pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 },
+      rest: { file: 'pari_breathe', n: 36, fps: 12.2, h: 489.7, dy: -2.8 } }),
     manju: Actor('manju', { file: 'manju_talk', n: 36, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),
     guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 12, mode: 'pp', h: 584, lift: -8 })   // L2: comes in only for his line (no idle swap — it glitched)
   };

@@ -55,7 +55,7 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|pari_cheer|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const LATER = /^(pari_explain|pari_cheer|pari_breathe|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
   const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
@@ -162,7 +162,10 @@ const CH = {
   pari: { name: 'Pari', h: 540, color: '#2f63c9', poses: ['idle', 'point', 'happy'], talk: { point: 'closed', happy: 'open' },
     cycles: { walk: { file: 'pari_walk', n: 20, h: 534.9, speed: 220, fps: 12, lift: 2 } },
     acts: { explain: { file: 'pari_explain', n: 36, h: 541.2, fps: 12, intro: 5, outro: 31 },
-            cheer: { file: 'pari_cheer', n: 36, h: 539.5, fps: 15, mode: 'once' } } },   // claps (0–21), fist-pump (22–35)
+            cheer: { file: 'pari_cheer', n: 36, h: 539.5, fps: 15, mode: 'once' } },   // claps (0–21), fist-pump (22–35)
+    // idle loop (user's ludo sheet, Oct 2026): breathing + blinking in namaste whenever she rests in 'happy'; sized/shifted to sit exactly on
+    // pari_happy (her body is 29 px left of that image's centre); _source/pari_sprites/breathe → assets/story/pari_breathe_0–35 (760 px)
+    idle: { pose: 'happy', file: 'pari_breathe', n: 36, h: 545.6, fps: 12.2, lift: -3.1, dx: -29 } },
   aaru: { name: 'Aaru', h: 480, color: '#e8701a', poses: ['run', 'shout', 'jump'], talk: { shout: 'closed', jump: 'closed' },
     cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } } },
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
@@ -190,7 +193,7 @@ function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, 
   Object.keys(c.talk || {}).forEach(p => { const i = el('img', 'mouth', body); i.src = IMG[`${key}_${p}_m`].src; i.style.height = c.h * scale + 'px'; i.style.transform = tf; mouths[p] = i; });
   Object.entries(c.cycles || {}).forEach(([n, cy]) => { frames[n] = [...Array(cy.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${cy.file}_${j}`].src; i.style.height = cy.h * scale + 'px'; i.style.bottom = cy.lift * scale + 'px'; return i; }); });
   Object.entries(c.acts || {}).forEach(([n, a]) => { frames[n] = [...Array(a.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${a.file}_${j}`].src; i.style.height = a.h * scale + 'px'; i.style.bottom = (a.lift || 0) * scale + 'px'; i.style.transform = tf; return i; }); });
-  if (c.idle) frames.__idle = [...Array(c.idle.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${c.idle.file}_${j}`].src; i.style.height = c.idle.h * scale + 'px'; i.style.bottom = (c.idle.lift || 0) * scale + 'px'; i.style.transform = tf; i.style.opacity = 0; return i; });
+  if (c.idle) frames.__idle = [...Array(c.idle.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${c.idle.file}_${j}`].src; i.style.height = c.idle.h * scale + 'px'; i.style.bottom = (c.idle.lift || 0) * scale + 'px'; i.style.marginLeft = (flip ? -1 : 1) * (c.idle.dx || 0) * scale + 'px'; i.style.transform = tf; i.style.opacity = 0; return i; });
   imgs[pose].style.opacity = 1;
   const o = { key, c, wrap, body, imgs, mouths, frames, pose, x, ground, h: c.h * scale, scale, flip, moving: null, act: null };
   if (c.idle) IDLERS.add(o);
@@ -252,9 +255,10 @@ gsap.ticker.add(() => {
     if (!o.wrap.isConnected) { idleSound(o, false); IDLERS.delete(o); return; }   // stop his pencil sound with the scene
     const d = o.c.idle, F = o.frames.__idle, still = o.imgs[d.pose];
     const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
-    const on = o.pose === d.pose && !o.act && !o.moving && ready;
-    if (on) { if (o.idleK !== k) { if (o.idleK != null) F[o.idleK].style.opacity = 0; F[k].style.opacity = 1; o.idleK = k; } if (still) still.style.visibility = 'hidden'; }
-    else if (o.idleK != null) { F[o.idleK].style.opacity = 0; o.idleK = null; if (still) still.style.visibility = ''; }
+    const on = o.pose === d.pose && !o.act && !o.moving && !TALKERS.has(o) && ready;   // never while the mouth flaps on the still (talking)
+    const mo = o.mouths && o.mouths[d.pose];                                              // the still's mouth overlay must hide with it
+    if (on) { if (o.idleK !== k) { if (o.idleK != null) F[o.idleK].style.opacity = 0; F[k].style.opacity = 1; o.idleK = k; } if (still) still.style.visibility = 'hidden'; if (mo) mo.style.visibility = 'hidden'; }
+    else if (o.idleK != null) { F[o.idleK].style.opacity = 0; o.idleK = null; if (still) still.style.visibility = ''; if (mo) mo.style.visibility = ''; }
     idleSound(o, on && d.sound);
   });
 });
