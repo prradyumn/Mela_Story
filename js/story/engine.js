@@ -184,8 +184,8 @@ const CH = {
     // idle loops (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_breathe_* / aaru_toehop_*, 540 px):
     // calm breathing whenever he rests in 'shout' (he only cups his mouth while he actually speaks); excited toe-hopping whenever he
     // rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
-    idles: [{ pose: 'shout', file: 'aaru_breathe', n: 36, h: 491.6, fps: 12, lift: -4.2, dx: .9 },
-            { pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 24, lift: -4.2, dx: .9 }] },
+    idles: [{ pose: 'shout', file: 'aaru_breathe', n: 36, h: 491.6, fps: 8, lift: -4.2, dx: .9 },    // 4.5 s a breath: calm, like Pari (user: "too fast")
+            { pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce (was 1.5 s)
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
