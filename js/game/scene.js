@@ -165,7 +165,7 @@
       const c = $('#cart'), C = Cart.CEN, dx = C.x - (1486 + 210), dy = C.y - (162 + 125);
       gsap.set(c, { transformOrigin: '50% 50%' });
       if (!Cart.shown) { Cart.shown = true; gsap.set(c, { x: dx - 460, y: dy, scale: C.s, rotation: 0, opacity: 0 }); gsap.to(c, { opacity: 1, duration: .35 }); }   // QA: starting off-screen left it rolled through Pari
-      SND.sfx('whoosh', .4);
+      SND.sfx('cart', .45);   // wooden wheels on the dirt (was a whoosh)
       const bob = rollBob(c);
       await gsap.to(c, { x: dx, duration: 1.1, ease: 'power2.out' });
       bob.kill(); gsap.to(c, { y: dy, rotation: 0, duration: .15 });
@@ -182,7 +182,7 @@
     },
     /* roll on out to the right, off the scene; ready to roll in again next time */
     async leave() {
-      const c = $('#cart'); Cart.shown = false; SND.sfx('whoosh', .3);
+      const c = $('#cart'); Cart.shown = false; SND.sfx('cart', .4);
       const bob = rollBob(c);
       await gsap.to(c, { x: '+=1500', duration: 1.1, ease: 'power2.in' });
       bob.kill(); gsap.set(c, { opacity: 0, x: 0, y: 0, scale: 1, rotation: 0 });

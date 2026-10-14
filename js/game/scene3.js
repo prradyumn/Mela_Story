@@ -96,7 +96,7 @@
     /* Pari pushes the cart: the lane scrolls to camera `to`, the wheels turn distance/80 rad, Pari plays her push frames */
     async push(to, { dur = 1.4, ease = 'power2.inOut' } = {}) {
       const from = Cam.x, o = { x: from }; if (Math.abs(to - from) < 1) return;
-      Cart.rollStart(); Pari.walk(to > from); if (to > from) { Cart.speed(true); SND.sfx('whoosh', .25); }
+      Cart.rollStart(); Pari.walk(to > from); if (to > from) { Cart.speed(true); SND.sfx('whoosh', .25); SND.sfx('cart', .3); }   // + the cart's wheels
       await gsap.to(o, { x: to, duration: dur, ease, onUpdate() { Cam.set(o.x); Cart.roll(o.x - from); } });
       Pari.walk(false); Cart.speed(false);
     }
@@ -331,7 +331,7 @@
       gsap.set(BU, { left: D.wheel[0] - 420, top: D.wheel[1] - 420, width: 840, height: 840 });
       gsap.fromTo(BU, { scale: .5, opacity: 1 }, { scale: 1.2, opacity: 0, duration: 1.6, ease: 'power2.out', onComplete: () => gsap.set(BU, { width: 720, height: 720 }) });
       spin = gsap.to(ROT, { rotation: 360, duration: 8, ease: 'none', repeat: -1, onUpdate: placeCabins }); spin.timeScale(0);
-      gsap.to(spin, { timeScale: 1, duration: 2.5, ease: 'power1.in' });
+      gsap.to(spin, { timeScale: 1, duration: 2.5, ease: 'power1.in' }); SND.sfx('wheel', .5);   // the big wheel creaks into motion
     },
     reset() { if (spin) { spin.kill(); spin = null; } gsap.set(ROT, { rotation: 0 }); placeCabins(); WH.style.display = 'none'; gsap.set(['#lane3', '#laneLit3'], { clipPath: 'none' }); gsap.set('#laneLit3', { opacity: 0 }); }
   };

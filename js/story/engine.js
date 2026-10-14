@@ -37,6 +37,7 @@ const IMAGES = ['bg_01_gate', 'bg_02_chaupal', 'bg_03_bazaar', 'bg_04_office', '
 const AUDIO = ['m_title', 'm_village_long', 'm_hurry', 'm_festive',
   'sfx_boing', 'sfx_bubble', 'sfx_coins', 'sfx_confetti', 'sfx_cycle_bell', 'sfx_ding', 'sfx_drumroll_hit', 'sfx_paper', 'sfx_pop',
   'sfx_rise', 'sfx_scribble', 'sfx_sparkle', 'sfx_stamp', 'sfx_swish', 'sfx_tick', 'sfx_whoosh', 'sfx_goat', 'sfx_whoosh_soft', 'sfx_swish_soft',
+  'sfx_hoof', 'sfx_cart', 'sfx_wheel', 'amb_village', 'amb_bazaar', 'amb_office', 'amb_mela',   // Oct 2026 sound pass (ElevenLabs SFX)
   't0', 'n1', 'b1', 'g1', 'n2', 'r1', 'p1', 'p2', 'p3', 'r2', 'p4', 'g2', 'p5', 'n3', 'g3', 'p6', 'r3', 'n4', 'x1'];
 const SRC = window.EMBED || {};
 const imgURL = n => SRC[n] || `assets/story/${n}.webp`;
@@ -94,6 +95,17 @@ function play(n, { bus = sfxBus, gain = 1, loop = false, offset = 0, rate = 1 } 
 }
 const sfx = (n, gain = 1, rate = 1) => { if (!SKIPPING) play('sfx_' + n, { gain, rate }); };
 let music = null;
+/* place ambience (Oct 2026 sound pass): one quiet loop per location (village, bazaar, office, mela at dusk), on the music bus so it
+   ducks under voices with the music; crossfades when the place changes; setAmbience(null) fades it out. */
+let amb = null; const AMB_GAIN = .55;
+function setAmbience(n, fade = 1.5) {
+  if (!AC || (amb && amb.n === n)) return;
+  const now = AC.currentTime;
+  if (amb) { const old = amb; old.g.gain.cancelScheduledValues(now); old.g.gain.setValueAtTime(old.g.gain.value, now); old.g.gain.linearRampToValueAtTime(0, now + fade); setTimeout(() => { try { old.s.stop(); } catch (e) { } }, fade * 1000 + 100); amb = null; }
+  if (!n || !BUF[n]) return;
+  amb = play(n, { bus: musicBus, gain: 0, loop: true, offset: Math.random() * BUF[n].duration });
+  if (amb) { amb.g.gain.setValueAtTime(0, now); amb.g.gain.linearRampToValueAtTime(AMB_GAIN, now + fade); }
+}
 function playMusic(n, { fade = 1.2, gain = 1, loop = true, offset = 0 } = {}) {
   if (music && music.n === n) return;
   const now = AC.currentTime;

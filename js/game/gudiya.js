@@ -84,6 +84,7 @@ window.GUDIYA_POSES = {
     /* Small hops along the line, landing exactly on (x, y) */
     async hopTo(x, y, hops = 3) {
       idleBreath(false); const x0 = st.x; G.face(x > x0);
+      if (window.SND) SND.sfx('hoof', .35, .95 + Math.random() * .1);   // soft hoof taps (the sound holds three light hops)
       for (let i = 1; i <= hops; i++) {
         setPose('hop');
         if (window.GFX) GFX.hopTrail(st.x, x0 + (x - x0) * i / hops, y - st.h * .42, 54, .3);   // dotted arc behind her

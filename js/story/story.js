@@ -532,6 +532,9 @@ async function badge() {
 
 
 // ---------------- RUN ----------------
+// which ambience bed plays under each screen (village chaupal, bazaar, Panchayat office, Mela at dusk); badge = none
+const AMB_OF = { title: 'amb_village', hookA: 'amb_village', hookB: 'amb_village', hookC: 'amb_village', hookD: 'amb_village', hookE: 'amb_village',
+  level1: 'amb_bazaar', bridge1: 'amb_bazaar', level2: 'amb_office', bridge2: 'amb_office', level3: 'amb_mela', endA: 'amb_mela', endB: 'amb_mela', endC: 'amb_mela' };
 const FLOW = [
   ['title', title], ['hookA', hookA], ['hookB', hookB], ['hookC', hookC], ['hookD', hookD], ['hookE', hookE],
   ['level1', () => level(1)], ['bridge1', bridge1], ['level2', () => level(2)], ['bridge2', bridge2], ['level3', () => level(3)],
@@ -555,6 +558,7 @@ async function main() {
   const once = q.has('scene');
   while (true) {
     window.CUR_SCREEN = FLOW[i][0]; if (window.onScreen) window.onScreen(FLOW[i][0]);
+    setAmbience(AMB_OF[FLOW[i][0]] || null);   // the place's quiet ambience bed (Oct 2026)
     await FLOW[i][1]();
     if (once) return;
     i = (i + 1) % FLOW.length;
