@@ -7,7 +7,7 @@
      `once:true` plays the sheet once per hop (take-off → land), otherwise it loops.
      A list of separate images works too: `frames:['a.png','b.png',…]` (that is how `trot` works now). */
 window.GUDIYA_POSES = {
-  idle: { src: GA('gudiya_idle.webp'), aspect: 507 / 640, cx: .513, foot: .987, face: 'left', scale: 1 },
+  idle: { src: imgURL('gudiya_idle'),   /* the story's own Gudiya (already loaded): the game copy was a duplicate */ aspect: 507 / 640, cx: .513, foot: .987, face: 'left', scale: 1 },
   hop:  { src: GA('gudiya_hop.webp'),  aspect: 732 / 640, cx: .534, foot: .90,  face: 'left', scale: 1 },
   trot: { frames: [0, 1, 2, 3].map(i => GA(`gudiya_trot_${i}.webp`)), fps: 10, aspect: 867 / 640, cx: .42, foot: 1, face: 'right', scale: .74 }
 };

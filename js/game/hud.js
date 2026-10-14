@@ -61,7 +61,7 @@
 
   // ---------- coach ----------
   const WHO = {
-    pari:  { name: 'Pari',        img: GA('pari_happy.webp'),  x: -84, y: 4,  h: 520, colour: '#2f62c9' },
+    pari:  { name: 'Pari',        img: imgURL('pari_happy'),   /* story image (already loaded) — game copy removed */  x: -84, y: 4,  h: 520, colour: '#2f62c9' },
     manju: { name: 'Manju Mausi', img: GA('manju_teach.webp'), x: -88, y: 2,  h: 520, colour: '#8a3fb5' },
     guddu: { name: 'Guddu Bhaiya', img: GA('guddu_scratch.webp'), x: -96, y: 0, h: 520, colour: '#2e7d32' },
     aaru:  { name: 'Aaru',        img: GA('aaru_jump.webp'),   x: -70, y: 18, h: 470, colour: '#c0392b' }
