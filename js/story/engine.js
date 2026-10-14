@@ -56,7 +56,7 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
   const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
@@ -181,11 +181,10 @@ const CH = {
     idle: { pose: 'happy', file: 'pari_breathe', n: 36, h: 545.6, fps: 12.2, lift: -3.1, dx: -29 } },
   aaru: { name: 'Aaru', h: 480, color: '#e8701a', poses: ['run', 'shout', 'jump'], talk: { shout: 'closed', jump: 'closed' },
     cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } },
-    // idle loops (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_breathe_* / aaru_toehop_*, 540 px):
-    // calm breathing whenever he rests in 'shout' (he only cups his mouth while he actually speaks); excited toe-hopping whenever he
-    // rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
-    idles: [{ pose: 'shout', file: 'aaru_breathe', n: 36, h: 491.6, fps: 8, lift: -4.2, dx: .9 },    // 4.5 s a breath: calm, like Pari (user: "too fast")
-            { pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce (was 1.5 s)
+    // idle loop (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_toehop_*, 540 px): excited toe-hopping whenever
+    // he rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
+    // (A breathing loop for 'shout' was tried and removed on user feedback — he keeps his still shout pose.)
+    idles: [{ pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
