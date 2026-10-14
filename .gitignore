@@ -1,3 +1,11 @@
 .DS_Store
 **/.DS_Store
 _source/gemini_pari_backup/
+
+# GitHub keeps ONLY the game (user, Oct 2026). These stay on the local machine:
+/_source/
+/dist/
+/tools/
+/CLAUDE.md
+/README.md
+/sprite-max-px-frames-*
