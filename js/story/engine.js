@@ -56,7 +56,7 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|pari_cheer|pari_breathe|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
+  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
   const total = now.length + AUDIO.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
@@ -170,6 +170,7 @@ async function fadeIn(d = .4) { await gsap.to(fade, { opacity: 0, duration: d, e
 // mode 'pp' (sheets that don't loop back to frame 0): forward and back while talking, then glide back to frame 0.
 // lift = px the frames sit up (negative = down) to put the feet on the same ground as the poses.
 // (Mouth overlays and cycle frames are made from the ChatGPT sheets by art_package/tools/import_sheets.py.)
+const IDLES_OF = c => c.idles || (c.idle ? [c.idle] : []);   // idle loops of a character (one per resting pose)
 const CH = {
   pari: { name: 'Pari', h: 540, color: '#2f63c9', poses: ['idle', 'point', 'happy'], talk: { point: 'closed', happy: 'open' },
     cycles: { walk: { file: 'pari_walk', n: 20, h: 534.9, speed: 220, fps: 12, lift: 2 } },
@@ -179,7 +180,12 @@ const CH = {
     // pari_happy (her body is 29 px left of that image's centre); _source/pari_sprites/breathe → assets/story/pari_breathe_0–35 (760 px)
     idle: { pose: 'happy', file: 'pari_breathe', n: 36, h: 545.6, fps: 12.2, lift: -3.1, dx: -29 } },
   aaru: { name: 'Aaru', h: 480, color: '#e8701a', poses: ['run', 'shout', 'jump'], talk: { shout: 'closed', jump: 'closed' },
-    cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } } },
+    cycles: { run: { file: 'aaru_run', n: 36, h: 462, speed: 420, fps: 9, lift: 5 } },
+    // idle loops (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_breathe_* / aaru_toehop_*, 540 px):
+    // calm breathing whenever he rests in 'shout' (he only cups his mouth while he actually speaks); excited toe-hopping whenever he
+    // rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
+    idles: [{ pose: 'shout', file: 'aaru_breathe', n: 36, h: 491.6, fps: 12, lift: -4.2, dx: .9 },
+            { pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 24, lift: -4.2, dx: .9 }] },
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
@@ -192,7 +198,7 @@ const CH = {
 };
 Object.entries(CH).forEach(([k, c]) => {
   Object.keys(c.talk || {}).forEach(p => IMAGES.push(`${k}_${p}_m`));
-  [...Object.values(c.cycles || {}), ...Object.values(c.acts || {}), ...(c.idle ? [c.idle] : [])].forEach(cy => { for (let i = 0; i < cy.n; i++) IMAGES.push(`${cy.file}_${i}`); });
+  [...Object.values(c.cycles || {}), ...Object.values(c.acts || {}), ...IDLES_OF(c)].forEach(cy => { for (let i = 0; i < cy.n; i++) IMAGES.push(`${cy.file}_${i}`); });
 });
 const IDLE = [];
 function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, name = key } = {}) {
@@ -205,10 +211,10 @@ function char(s, key, x, pose, { ground = 1030, flip = false, scale = 1, z = 5, 
   Object.keys(c.talk || {}).forEach(p => { const i = el('img', 'mouth', body); i.src = IMG[`${key}_${p}_m`].src; i.style.height = c.h * scale + 'px'; i.style.transform = tf; mouths[p] = i; });
   Object.entries(c.cycles || {}).forEach(([n, cy]) => { frames[n] = [...Array(cy.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${cy.file}_${j}`].src; i.style.height = cy.h * scale + 'px'; i.style.bottom = cy.lift * scale + 'px'; return i; }); });
   Object.entries(c.acts || {}).forEach(([n, a]) => { frames[n] = [...Array(a.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${a.file}_${j}`].src; i.style.height = a.h * scale + 'px'; i.style.bottom = (a.lift || 0) * scale + 'px'; i.style.transform = tf; return i; }); });
-  if (c.idle) frames.__idle = [...Array(c.idle.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${c.idle.file}_${j}`].src; i.style.height = c.idle.h * scale + 'px'; i.style.bottom = (c.idle.lift || 0) * scale + 'px'; i.style.marginLeft = (flip ? -1 : 1) * (c.idle.dx || 0) * scale + 'px'; i.style.transform = tf; i.style.opacity = 0; return i; });
+  const idleSets = IDLES_OF(c).map((d, n) => ({ d, k: null, F: frames['__idle' + n] = [...Array(d.n)].map((_, j) => { const i = el('img', 'frame', body); i.src = IMG[`${d.file}_${j}`].src; i.style.height = d.h * scale + 'px'; i.style.bottom = (d.lift || 0) * scale + 'px'; i.style.marginLeft = (flip ? -1 : 1) * (d.dx || 0) * scale + 'px'; i.style.transform = tf; i.style.opacity = 0; return i; }) }));
   imgs[pose].style.opacity = 1;
   const o = { key, c, wrap, body, imgs, mouths, frames, pose, x, ground, h: c.h * scale, scale, flip, moving: null, act: null };
-  if (c.idle) IDLERS.add(o);
+  o.idleSets = idleSets; if (idleSets.length) IDLERS.add(o);
   reg(wrap, name, 'char'); wrap._o = o; if (Object.keys(mouths).length) RESTERS.add(o);
   const br = gsap.to(body, { scaleY: 1.012, scaleX: .995, duration: 1.6 + Math.random() * .5, yoyo: true, repeat: -1, ease: 'sine.inOut' });
   IDLE.push(br);
@@ -265,13 +271,20 @@ const IDLERS = new Set();
 gsap.ticker.add(() => {
   IDLERS.forEach(o => {
     if (!o.wrap.isConnected) { idleSound(o, false); IDLERS.delete(o); return; }   // stop his pencil sound with the scene
-    const d = o.c.idle, F = o.frames.__idle, still = o.imgs[d.pose];
-    const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
-    const on = o.pose === d.pose && !o.act && !o.moving && !TALKERS.has(o) && ready;   // never while the mouth flaps on the still (talking)
-    const mo = o.mouths && o.mouths[d.pose];                                              // the still's mouth overlay must hide with it
-    if (on) { if (o.idleK !== k) { if (o.idleK != null) F[o.idleK].style.opacity = 0; F[k].style.opacity = 1; o.idleK = k; } if (still) still.style.visibility = 'hidden'; if (mo) mo.style.visibility = 'hidden'; }
-    else if (o.idleK != null) { F[o.idleK].style.opacity = 0; o.idleK = null; if (still) still.style.visibility = ''; if (mo) mo.style.visibility = ''; }
-    idleSound(o, on && d.sound);
+    // a jump / tap-hop is moving the body: show the still pose for it (the loops are drawn standing on the ground)
+    const airborne = gsap.getTweensOf(o.body).some(t => t.isActive() && 'y' in t.vars);
+    let sound = false;
+    o.idleSets.forEach(S => {
+      const d = S.d, F = S.F, still = o.imgs[d.pose];
+      const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
+      const on = o.pose === d.pose && !o.act && !o.moving && !TALKERS.has(o) && !airborne && ready;   // never while talking (mouth on the still)
+      const mo = o.mouths && o.mouths[d.pose];                                                        // the still's mouth overlay hides with it
+      if (on) { if (S.k !== k) { if (S.k != null) F[S.k].style.opacity = 0; F[k].style.opacity = 1; S.k = k; } if (still) still.style.visibility = 'hidden'; if (mo) mo.style.visibility = 'hidden'; }
+      else if (S.k != null) { F[S.k].style.opacity = 0; S.k = null; if (still) still.style.visibility = ''; if (mo) mo.style.visibility = ''; }
+      if (on && d.sound) sound = d.sound;
+    });
+    o.idleK = (o.idleSets.find(S => S.k != null) || {}).k ?? null;   // (read by QA scripts)
+    idleSound(o, sound);
   });
 });
 /* a very soft pencil scratch under the writing loop (Oct 2026); silent while any voice is playing, gone with the scene */

@@ -12,7 +12,7 @@
       $('#tagIcon').src = GA(`ic_${icon}.webp`);
       $('#tagName').textContent = item;
       $('#tagPrice').innerHTML = [...rs(price)].map(c => `<span class="d">${c}</span>`).join('');
-      $('#tagPrice').style.visibility = '';
+      $('#tagPrice').style.visibility = ''; Tag.focus(false, null, true);
       gsap.set('#tagStamp', { opacity: 0 });
       const rig = $('#tagRig'); rig.classList.remove('hidden');
       const tag = $('#tag'); tag.style.left = '0px';
@@ -35,12 +35,29 @@
     /* Manju: "…to the nearest thousand" → the thousands digits (all digits before the last three) glow one by one and stay lit */
     thousands() {
       const ds = [...$('#tagPrice').querySelectorAll('.d')], digits = ds.filter(x => /\d/.test(x.textContent)), th = digits.slice(0, -3);
-      th.forEach((d, i) => gsap.delayedCall(i * .45, () => { d.classList.add('thou'); SND.sfx('tick', .35, 1 + i * .12); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(3)' }); }));
+      if (!th.length) return;
+      th[0].classList.add('tf'); th[th.length - 1].classList.add('tl');   // the thousands read as ONE blue pill (rounded at its two ends)
+      Tag.focus(true, th, 'thousands');
+      th.forEach((d, i) => gsap.delayedCall(.25 + i * .45, () => { d.classList.add('thou'); SND.sfx('tick', .35, 1 + i * .12); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(3)' }); }));
     },
     digit(on) {
       const ds = $('#tagPrice').querySelectorAll('.d'); const d = ds[ds.length - 3];
-      ds.forEach(x => x.classList.remove('glow', 'thou'));
-      if (on && d) { d.classList.add('glow'); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .5, ease: 'back.out(3)' }); }
+      ds.forEach(x => x.classList.remove('glow', 'thou', 'tf', 'tl'));
+      if (on && d) { d.classList.add('glow'); Tag.focus(true, [d], 'hundreds digit'); gsap.fromTo(d, { scale: 1.5 }, { scale: 1, duration: .5, ease: 'back.out(3)' }); }
+      else Tag.focus(false);
+    },
+    /* emphasis (UI feedback Oct 2026: "the highlighted number isn't visible properly"): while a part of the price is highlighted the tag grows
+       ×1.22, the other digits fade to 35 %, and a small label in the highlight's colour sits under it ("thousands" blue / "hundreds digit" red) */
+    focus(on, digits, label, now) {
+      const tag = $('#tag'), P = $('#tagPrice'); let lab = $('#tagLab');
+      if (!lab) { lab = document.createElement('div'); lab.id = 'tagLab'; tag.appendChild(lab); }
+      P.classList.toggle('focusing', !!on);
+      gsap.to(tag, { scale: on ? 1.22 : 1, duration: now ? 0 : .45, ease: on ? 'back.out(1.8)' : 'power2.out', transformOrigin: '50% 12%', overwrite: 'auto' });
+      if (!on || !digits || !digits.length) { gsap.to(lab, { opacity: 0, duration: now ? 0 : .2 }); return; }
+      const a = digits[0], b = digits[digits.length - 1], x0 = a.offsetLeft, x1 = b.offsetLeft + b.offsetWidth;
+      lab.textContent = label; lab.className = label === 'thousands' ? 'blue' : 'red';
+      lab.style.left = ((x0 + x1) / 2) + 'px'; lab.style.top = (a.offsetTop + a.offsetHeight + 4) + 'px';
+      gsap.fromTo(lab, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: .35, delay: .2, ease: 'back.out(2)' });
     },
     iconCentre() { const t = $('#tag'); return { x: t.offsetLeft + 26 + 60, y: 188 + 114 + 60 }; },
     async stamp(value) {

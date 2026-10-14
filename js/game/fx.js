@@ -15,6 +15,9 @@
   $('#gBg').after(amb, grade, focus, flash);
   const trail = mk('gTrail'); $('#gudiya').before(trail);                  // under Gudiya, over the number line
   const focus3 = mk('focus3', 'gfocus'), flash3 = mk('flash3', 'gflash'); $('#world3').after(focus3, flash3);
+  /* L3 question dim (UI feedback Oct 2026: "too much going on"): a dark layer inside the lane, under the bill, so the stalls, bulbs, wheel and
+     sun step back while the bill, the money board, the slates, Pari and Baba stay bright; lifts as soon as the answer is right */
+  const dim3 = mk('dim3'); $('#bill3').before(dim3);
   const tw3 = mk('tw3'); $('#laneLit3').after(tw3);
   const stage = $('#stage');
   const clamp = v => Math.max(0, Math.min(1, v));
@@ -55,12 +58,13 @@
 
   /* ---------- focus dim + flash ---------- */
   let focusOn = false;
-  const FOCUS = { 1: { x: '50%', y: '56%', o: 1 }, 2: { x: '62%', y: '52%', o: 1 }, 3: { x: '50%', y: '52%', o: .75 } };
+  const FOCUS = { 1: { x: '50%', y: '56%', o: 1 }, 2: { x: '62%', y: '52%', o: 1 }, 3: { x: '50%', y: '52%', o: .35 } };
   function setFocus(on) {
     if (focusOn === on) return; focusOn = on;
     const el = inL3() ? focus3 : focus, f = FOCUS[GFX.level] || FOCUS[1];
     el.style.setProperty('--fx', f.x); el.style.setProperty('--fy', f.y);
     gsap.to(el, { opacity: on ? f.o : 0, duration: on ? .8 : .5, ease: 'sine.inOut', overwrite: true });
+    if (inL3()) gsap.to(dim3, { opacity: on ? 1 : 0, duration: on ? .8 : .5, ease: 'sine.inOut', overwrite: true });
     calm(on);
   }
   function doFlash(x = 960, y = 600) {
@@ -240,7 +244,7 @@
     });
   }
   function reset() {
-    setFocus(false); gsap.set([focus, focus3, flash, flash3], { opacity: 0 });
+    setFocus(false); gsap.set([focus, focus3, flash, flash3, dim3], { opacity: 0 });
     trail.innerHTML = ''; stopLife(); twinkle(0); gsap.set(tw3, { opacity: 1 });
   }
 

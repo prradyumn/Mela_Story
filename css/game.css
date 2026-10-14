@@ -299,7 +299,7 @@
 #game #cart3 .talkp img{position:absolute;bottom:0;left:0;height:566px;transform:translateX(-50%);opacity:0;filter:drop-shadow(0 8px 8px rgba(30,12,4,.3))}
 /* the MELA MONEY board is the hero of L3: ×1.3, centred over the cart bed (stage x ~611), fully above the front wall, with a warm
    halo so it reads against the dark lane (the money potli leans on its lower-left corner, below the number) */
-#game #cart3 .board{position:absolute;left:430px;top:52px;width:340px;height:212px;scale:1.3;transform-origin:0 0}
+#game #cart3 .board{position:absolute;left:464px;top:94px;width:340px;height:212px;scale:1.1;transform-origin:0 0}   /* ×1.1 (was ×1.3: too much on screen, UI feedback Oct 2026) — same bottom edge + centre */
 #game #cart3 .board::before{content:'';position:absolute;left:-90px;right:-90px;top:-70px;bottom:-60px;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(255,208,110,.42),rgba(255,190,80,.14) 60%,rgba(255,190,80,0))}
 #game #cart3 .board img{position:absolute;left:0;top:0;width:340px;height:212px}
 #game #cart3 .plabel{position:absolute;left:0;top:57px;width:340px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#ffd970;text-shadow:0 1px 0 rgba(0,0,0,.35)}
@@ -430,3 +430,14 @@
 
 /* final wrong try: the right number is written on the tag / bill for a few seconds (fx.js ghostNumber) */
 #game .gghost{position:absolute;z-index:58;transform:translate(-50%,-50%);padding:8px 26px 6px;border:4px dashed #b5361d;border-radius:18px;background:rgba(255,250,240,.94);font-family:Fredoka,Baloo,sans-serif;font-weight:700;color:#b5361d;white-space:nowrap;box-shadow:0 6px 14px rgba(60,30,5,.25);pointer-events:none}
+
+/* price tag emphasis (UI feedback Oct 2026): thousands = one deep-blue pill, hundreds digit = red; the rest fade while one part is highlighted */
+#game #tagPrice.focusing .d:not(.thou):not(.glow){opacity:.35;transition:opacity .3s}
+#game #tagPrice .d.thou{background:none!important;box-shadow:none!important;color:#fff;margin:0!important;z-index:1}
+#game #tagPrice .d.thou::before{content:'';position:absolute;left:-1px;right:-1px;top:2px;bottom:2px;background:#1f5fae;z-index:-1;box-shadow:0 4px 0 #123d75}
+#game #tagPrice .d.thou.tf::before{left:-9px;border-radius:14px 0 0 14px}
+#game #tagPrice .d.thou.tl::before{right:-9px;border-radius:0 14px 14px 0}
+#game #tagPrice .d.thou.tf.tl::before{border-radius:14px}
+#game #tagLab{position:absolute;transform:translateX(-50%);opacity:0;padding:2px 12px 3px;border-radius:10px;font:700 21px/1.1 Fredoka;color:#fff;white-space:nowrap;pointer-events:none}
+#game #tagLab.blue{background:#1f5fae} #game #tagLab.red{background:#c0392b}
+#game #dim3{position:absolute;left:-2000px;top:-400px;width:9760px;height:1880px;background:rgba(18,8,28,.5);opacity:0;pointer-events:none;will-change:opacity}
