@@ -369,6 +369,14 @@ iris-wipes to the next bridge. Game scripts load after story.js (see index.html)
   7. L1 rule = a small chip on the number line between the answers (top 878) showing only the half that applies to the price (`Rule.show(text, price)`); the halfway label is darker/bigger.
   8. L3 red "−" retired (`Minus` calls are no-ops, `#minus3` hidden).
 
+- **Feedback round 4 (Oct 2026):**
+  1. The "listen" speaker pop-up on an early tap is removed (testers found it confusing); locked answers only stay dimmed + breathe.
+  2. Pari's voice consistency: speaker-embedding audit (ECAPA cosine vs the approved sample, `_source/` notes) found plain-English lines drifting (0.31–0.45 vs median 0.70). Fix = spell the WHOLE line in Devanagari for those (`FULL_DEVA` in gen_pari_el.mjs) + best-of-3/4 takes by speaker similarity and transcription; all 127 Pari lines ≥ 0.53, median 0.70.
+  3. L2 Guddu has idle life (hud.js Actor `idle`): listens (pen up, frames 17/18) while someone talks, otherwise writes (closed-mouth pen frames 0,1,28–32) and every ~9.5 s scratches his head (story `guddu_scratch`, scaled to the same body height/feet). `COACH.CAST` is exposed read-only for QA scripts.
+  4. Final wrong try: no ghost hand — `GFX.ghostNumber()` writes the right number for ~3.5 s (L1 under the tag "≈ ₹25,000", L2 in the bill's "About total" box, L3 under the bill "≈ ₹…left"); wrong answers fade, the right one glows.
+  5. Reading time (measured with a text-visibility recorder in L3): the how-to map stays ≥ 6.5 s (its numbered stalls vanished after 0.3–1.8 s), the paid bill stays ~2.5 s before flying off.
+  6. L3: **Baba asks every question** (L3_q1–7 are `who:'baba'`), Pari helps (hints / OK / nudge). Baba walks up to the stall after the bill drops (`#baba3` at left 1600, clear of the slates), no camera push while he asks (`asking`), and steps out when the answer is right, before Aaru runs. Gudiya's oops-bleat stands between the bill and Baba (1480, 735). All Baba lines (story b1, L3_howto_1, L3_teach_baba, L3_q1–7) are ElevenLabs "Dr. Sahni" (`WHO=baba node tools/gen_pari_el.mjs`, multilingual_v2, Devanagari numbers/words); Gemini originals in `_source/gemini_pari_backup/baba/`.
+
 ### 8.7 Storyboard revision (Oct 2026) — dialogue source of truth
 - The sheets in `_source/notes/` are the Oct 2026 revision (Game.csv, Story.csv, Assets.csv; the previous ones are in `_source/notes/_v1/`). **Every voiced line follows them word for word**, with two agreed exceptions:
   1. **Money stays mathematically correct**: the sheet's Q7 "1,39,000 minus 55,000 is 83,000" / ending "about ₹83,000" / exact "₹83,380" are kept as **≈ ₹84,000** and exact **₹83,165** (TXT.g3, p6, endB banner, L3_q7_*).

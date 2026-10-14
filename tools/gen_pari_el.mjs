@@ -6,16 +6,22 @@
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { execFileSync } from 'child_process'; import { fileURLToPath } from 'url'; import { indic } from './indic_words.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), KEY = process.env.ELEVENLABS_API_KEY;
 if (!KEY) { console.error('set ELEVENLABS_API_KEY'); process.exit(1); }
-const VOICE = 'e3FEEanj39p8QCSMe8iV', MODEL = 'eleven_v3';
-const MAST = path.join(ROOT, '_source/pari_el_masters'); fs.mkdirSync(MAST, { recursive: true });
+// WHO=baba (feedback Oct 2026: Baba asks the L3 questions) re-voices every Baba line (story b1 + L3) with "Dr. Sahni" (elderly Indian
+// male, warm; eleven_multilingual_v2 keeps his own accent), same Devanagari numbers/words. Default WHO=pari.
+const WHO = process.env.WHO || 'pari';
+const CFG = { pari: { voice: 'e3FEEanj39p8QCSMe8iV', model: 'eleven_v3', settings: { stability: 0.5 }, story: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], dir: 'pari_el_masters' },
+              baba: { voice: 'LuN0fbpldemhhWn9yLaT', model: 'eleven_multilingual_v2', settings: { stability: 0.55, similarity_boost: 0.9, style: 0.25, use_speaker_boost: true }, story: ['b1'], dir: 'baba_el_masters' } }[WHO];
+if (process.env.STAB) CFG.settings = { ...CFG.settings, stability: +process.env.STAB };   // e.g. STAB=1 (v3 'Robust') for steadier retakes
+const VOICE = CFG.voice, MODEL = CFG.model;
+const MAST = path.join(ROOT, '_source', CFG.dir); fs.mkdirSync(MAST, { recursive: true });
 
 const win = {}, ctx = vm.createContext({ window: win });
 for (const f of ['level1.js', 'level2.js', 'level3.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/game/data', f), 'utf8'), ctx);
 const D = win.LEVEL1;
 const story = fs.readFileSync(path.join(ROOT, 'js/story/story.js'), 'utf8');
 const TXT = eval('(' + story.match(/const TXT = (\{[\s\S]*?\n\});/)[1] + ')');
-const ALL = [...D.allLines(), ...win.LEVEL2.allLines(), ...win.LEVEL3.allLines()].filter(l => l.who === 'pari').map(l => ({ id: l.id, text: l.text, game: true }))
-  .concat(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'].map(id => ({ id, text: TXT[id], game: false })));
+const ALL = [...D.allLines(), ...win.LEVEL2.allLines(), ...win.LEVEL3.allLines()].filter(l => l.who === WHO).map(l => ({ id: l.id, text: l.text, game: true }))
+  .concat(CFG.story.map(id => ({ id, text: TXT[id], game: false })));
 
 // number words → Devanagari (Indian pronunciation); only the words that came from numbers are touched
 const DEV = { zero: 'ज़ीरो', one: 'वन', two: 'टू', three: 'थ्री', four: 'फ़ोर', five: 'फ़ाइव', six: 'सिक्स', seven: 'सेवन', eight: 'एट', nine: 'नाइन', ten: 'टेन',
@@ -29,7 +35,27 @@ const small = n => n >= 100 ? U[Math.floor(n / 100)] + ' hundred' + (n % 100 ? '
 // very short lines have no context and the Devanagari number can drift ("Tap 35,000" came out "putty five"): English words there.
 // (Oct 2026 feedback "Pari's numbers before level 1 don't sound Indian": L1_teach_nudge is now a Devanagari take picked from --takes, so PLAIN is empty.)
 const PLAIN = new Set([]);
+// Plain-English lines (no numbers / Indian words) drifted to a different delivery than the Devanagari-number lines (speaker-similarity
+// audit, feedback "the girl's VO changes"). Spelling the whole line in Devanagari keeps her one consistent Indian voice.
+const FULL_DEVA = {
+  L1_oops: 'ऊप्स! ट्राय अगेन. लुक वेयर द रेड ऐरो इज़ ऑन द लाइन.',
+  L1_howto_2: 'टैप द नंबर दैट द प्राइस इज़ क्लोज़ेस्ट टू.',
+  L3_howto_3: 'चूज़ अबाउट हाउ मच मनी इज़ लेफ़्ट.',
+  L3_idle: 'राउंड द बिल फ़र्स्ट. देन टेक इट अवे फ़्रॉम द मनी.',
+  L3_oops: 'ऊप्स! ट्राय अगेन. वी आर पेइंग, सो द मनी गेट्स लेस.',
+  L3_teach_oops: 'ऊप्स! ट्राय अगेन. वी आर पेइंग, सो द मनी गेट्स लेस.',
+  L2_teach_idle: 'ऐड द टू राउंड नंबर्स.',
+  L3_teach_idle: 'टेक द राउंड नंबर अवे फ़्रॉम द मनी.',
+  L2_howto_3: 'चूज़ द आंसर क्लोज़ेस्ट टू द टोटल.',
+  L2_idle: 'थिंक ऑफ़ द राउंड नंबर्स. देन ऐड देम.',
+  p4: 'वेल डन! द शॉपकीपर्स सेंट देयर बिल्स टू द पंचायत ऑफ़िस. लेट्स चेक देम.',
+  p3: 'कम! लेट्स गो टू द बाज़ार.',
+  L3_howto_2: 'ईच टाइम वी पे, द मनी गेट्स लेस. मेक द बिल अ राउंड नंबर इन योर हेड. देन टेक इट अवे.',
+  L2_howto_1: 'लुक! सेवन बिल्स ऑन गुड्डू भैयाज़ डेस्क. ईच बिल हैज़ टू प्राइसेज़.',
+  L2_oops: 'ऊप्स! ट्राय अगेन. फ़र्स्ट, मेक ईच प्राइस अ राउंड नंबर इन योर हेड.',
+};
 function say(text, id) {
+  if (WHO === 'pari' && FULL_DEVA[id]) return FULL_DEVA[id];
   if (PLAIN.has(id) && !process.argv.includes('--deva')) return indic(D.spoken(text));
   let t = text.replace(/[’‘]/g, "'").replace(/→/g, 'means');
   t = t.replace(/₹\s?([\d,]+)/g, (_, d) => '\u0001' + dev(D.spoken('₹' + d)) + '\u0002');            // amounts: words + rupees
@@ -43,7 +69,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function tts(l) {
   for (let a = 0; a < 6; a++) {
     const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_192`, { method: 'POST',
-      headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: say(l.text, l.id), model_id: MODEL, voice_settings: { stability: 0.5 } }) })
+      headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: say(l.text, l.id), model_id: MODEL, voice_settings: CFG.settings }) })
       .catch(e => ({ ok: false, status: 0, text: async () => String(e) }));
     if (r.ok) return Buffer.from(await r.arrayBuffer());
     const msg = (await r.text()).slice(0, 160); console.log(`  ${l.id}: ${r.status} ${msg}`);

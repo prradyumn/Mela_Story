@@ -47,7 +47,7 @@
         else if (strikes === 2) { Bill.chips('yellow'); await fb(L.hint); }
         else {
           b.choices.forEach((v, k) => Stamps.state(k, k === right ? 'glow' : 'faded'));
-          const h = Stamps.handAt(right); Hand.show(h.x, h.y);
+          { const r = GFX.stageRect(document.querySelector('#bill2 .b-box')); GFX.ghostNumber('About ' + ST.rs(b.choices[right]), r.x + r.w / 2, r.y + r.h / 2, { size: 46 }); }   // written in the bill's box for a few seconds (no hand)
           await fb(L.nudge);
         }
         if (!done) { Stamps.enable(onPick); if (strikes < 3) Stamps.state(i, ''); armIdle(); }

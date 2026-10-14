@@ -45,7 +45,7 @@
         else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule, q.price); await fb(L.hint); }
         else {
           Btns.state(wrongSide, 'faded'); Btns.state(correctSide, 'glow');
-          const h = Btns.handAt(correctSide); Hand.show(h.x, h.y);
+          { const r = GFX.stageRect($('#tag')); GFX.ghostNumber('≈ ' + rs(L.ans), r.x + r.w / 2, r.y + r.h + 46); }   // the round number appears under the tag for a few seconds (no hand)
           await fb(L.nudge);
         }
         if (!done) { Btns.enable(onPick); if (strikes < 3) Btns.state(side, ''); armIdle(); }

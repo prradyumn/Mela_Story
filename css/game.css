@@ -332,7 +332,7 @@
 /* Guddu Bhaiya (L3 teach): stands at the right, behind the slates, with his notebook */
 #game #guddu3{position:absolute;left:1585px;top:470px;width:231px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #guddu3 img{position:absolute;left:0;bottom:-8px;height:571px;opacity:0}
-#game #baba3{position:absolute;left:1410px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #baba3{position:absolute;left:1600px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #baba3 img{position:absolute;left:0;bottom:0;height:604px;opacity:0}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}
 #game #l3 .ashadow{position:absolute;width:180px;height:32px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0));opacity:0;pointer-events:none}
@@ -427,3 +427,6 @@
 /* L1: the halfway label reads clearly */
 #game .nl-label.mid{color:var(--ink)!important;font-weight:600!important;font-size:calc(32px * var(--txt,1))!important}
 #game #minus3{display:none!important}   /* retired (QA Oct 2026) */
+
+/* final wrong try: the right number is written on the tag / bill for a few seconds (fx.js ghostNumber) */
+#game .gghost{position:absolute;z-index:58;transform:translate(-50%,-50%);padding:8px 26px 6px;border:4px dashed #b5361d;border-radius:18px;background:rgba(255,250,240,.94);font-family:Fredoka,Baloo,sans-serif;font-weight:700;color:#b5361d;white-space:nowrap;box-shadow:0 6px 14px rgba(60,30,5,.25);pointer-events:none}

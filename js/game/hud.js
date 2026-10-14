@@ -88,7 +88,7 @@
              desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
   };
   const spotOf = key => SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
-  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null }) {
+  function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null, idle = null }) {
     const box = $('#' + key + 'Coach'), clock = () => gsap.globalTimeline.time();
     const imgs = [...Array(n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = h + 'px'; im.style.bottom = lift + 'px';
       if (flip) im.style.transform = 'translateX(-50%) scaleX(-1)'; box.appendChild(im); return im; });
@@ -98,7 +98,25 @@
     let cheerT0 = null, cShown = -1, cheerDone = null;
     const cFrame = k => { if (k === cShown) return; cImgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); cShown = k; };
     const frame = k => { if (k === shown) return; imgs.forEach((im, j) => im.style.opacity = j === k ? 1 : 0); shown = k; };
+    /* idle life (feedback Oct 2026, L2: "Guddu Bhaiya seems very stable"): while someone else talks he LISTENS (pen up, mouth shut:
+       frames idle.listen); otherwise he WORKS — writes in his notebook (closed-mouth pen frames idle.work) and now and then scratches
+       his head (the story's guddu_scratch pose, scaled to the same body height and feet) */
+    let idleT0 = 0, sImg = null;
+    if (idle && idle.scratch) {
+      sImg = document.createElement('img'); sImg.alt = ''; sImg.style.height = idle.scratch.h + 'px'; sImg.style.bottom = (lift + idle.scratch.dy) + 'px';
+      sImg.style.marginLeft = idle.scratch.dx + 'px'; sImg.style.transition = 'opacity .22s'; box.appendChild(sImg);
+    }
+    const scratch = on => { if (sImg) sImg.style.opacity = on ? 1 : 0; };
+    function idleTick() {
+      const t = clock() - idleT0, others = Object.values(CAST).some(a => a !== A && a.on && a.isTalking());
+      if (others) { scratch(false); frame(idle.listen[Math.floor(t / 1.3) % idle.listen.length]); return; }
+      const c = t % 9.5;
+      if (c < 7) { scratch(false); const seq = idle.work; frame(seq[Math.floor(c * 6) % seq.length]); }
+      else if (c < 8.7) { scratch(true); frame(c < 7.3 ? idle.work[0] : -1); }   // keep the pen frame under the scratch pose while it fades in
+      else { scratch(false); frame(idle.work[0]); }
+    }
     const A = {
+      isTalking: () => talking,
       on: false, spot: SPOTS[key].front, h, key,
       /* stand on the current spot; animate = glide there (stepping forward / back) */
       place(animate) {
@@ -109,14 +127,16 @@
         (animate ? gsap.to : gsap.set)(box, { left: sp.x, top: sp.y, scale: sp.s, ...(animate ? { duration: .6, ease: 'power2.inOut' } : {}) });
       },
       show() {
-        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); cImgs.forEach((im, i) => im.src = SA(`${cheer.file}_${i}`)); loaded = true; }
+        if (!loaded) { imgs.forEach((im, i) => im.src = SA(`${file}_${i}`)); cImgs.forEach((im, i) => im.src = SA(`${cheer.file}_${i}`)); if (sImg) sImg.src = SA(idle.scratch.file); loaded = true; }
+        idleT0 = clock();
         A.place(false);
         if (shown < 0) frame(0);
         if (!A.on) { A.on = true; gsap.to(box, { opacity: 1, duration: .25 }); }
       },
       hide() { if (A.on) { A.on = false; gsap.to(box, { opacity: 0, duration: .25 }); } A.quiet(true); },
       talk() {
-        if (quietCall) { quietCall.kill(); quietCall = null; } if (talking) return;
+        if (quietCall) { quietCall.kill(); quietCall = null; } scratch(false); if (talking) return;
+        if (idle && shown < 0) frame(0);
         t0 = clock() - (mode === 'pp' ? Math.max(0, shown) : (stopAt != null ? intro : 0)) / fps; talking = true; stopAt = null;
       },
       quiet(now) {
@@ -124,7 +144,7 @@
         const stop = () => { quietCall = null; if (talking) { talking = false; stopAt = clock(); from = Math.max(0, shown); } };
         if (now) stop(); else quietCall = gsap.delayedCall(.45, stop);
       },
-      reset() { cheerT0 = null; cFrame(-1); if (cheerDone) { cheerDone(); cheerDone = null; } talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
+      reset() { cheerT0 = null; cFrame(-1); scratch(false); if (cheerDone) { cheerDone(); cheerDone = null; } talking = false; stopAt = null; if (quietCall) quietCall.kill(); quietCall = null; A.on = false; gsap.set(box, { opacity: 0 }); if (loaded) frame(0); },
       /* one-shot cheer; resolves when it has played (then the talk loop / rest frame shows again) */
       cheer() {
         if (!cheer || !A.on) return Promise.resolve();
@@ -144,9 +164,9 @@
           else frame(f < intro ? f : intro + (f - intro) % (outro - intro));
         } else if (stopAt != null) {
           const s = (clock() - stopAt) * fps;
-          if (mode === 'pp') { const k = from - Math.floor(s * 3); if (k <= 0) { stopAt = null; frame(0); } else frame(k); }   // glide back to rest
+          if (mode === 'pp') { const k = from - Math.floor(s * 3); if (k <= 0) { stopAt = null; frame(0); idleT0 = clock(); } else frame(k); }   // glide back to rest
           else { const k = outro + Math.floor(s); if (k >= n) { stopAt = null; frame(n - 1); } else frame(k); }               // hands back together
-        }
+        } else if (idle && A.on && cheerT0 == null) idleTick();
       }
     };
     return A;
@@ -154,7 +174,8 @@
   const CAST = {
     pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 } }),
     manju: Actor('manju', { file: 'manju_talk', n: 36, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),
-    guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 10.5, mode: 'pp', h: 584, lift: -8 })
+    guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 10.5, mode: 'pp', h: 584, lift: -8,
+      idle: { work: [0, 1, 28, 29, 30, 31, 32, 31, 30, 29, 28, 1], listen: [17, 17, 17, 18], scratch: { file: 'guddu_scratch', h: 570, dy: 7, dx: -5 } } })
   };
   gsap.ticker.add(() => Object.values(CAST).forEach(a => a.tick()));
 
@@ -237,5 +258,5 @@
     }
   };
 
-  window.HUD = HUD; window.COACH = Coach;
+  window.HUD = HUD; window.COACH = Coach; Coach.CAST = CAST;   // (read-only access for QA scripts)
 })();

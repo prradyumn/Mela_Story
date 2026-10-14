@@ -34,7 +34,7 @@
 
   async function gudiyaBleat() {
     const G = GUDIYA;
-    await G.enter(1703, 800, 180);
+    await G.enter(1480, 735, 170);   // between the bill and Baba, just above the slates (Baba stands at the stall now)
     await G.bleat();
     gsap.delayedCall(1.4, async () => { await G.trotTo(2150, 800, 180); G.hide(); });
   }
@@ -59,13 +59,13 @@
         else if (strikes === 2) { Bill.chip('yellow', L.r); Minus.glow(); await fb(L.hint); }
         else {
           q.choices.forEach((v, j) => Slates.state(j, j === right ? 'glow' : 'faded'));
-          const h = Slates.handAt(right); Hand.show(h.x, h.y);
+          { const r = GFX.stageRect($('#bill3')); GFX.ghostNumber('≈ ' + ST.rs(L.ans) + ' left', r.x + r.w / 2, r.y + r.h + 34, { size: 40 }); }   // on the bill for a few seconds (no hand)
           await fb(L.nudge);
         }
         if (!done) { Slates.enable(onPick); if (strikes < 3) Slates.state(k, ''); armIdle(); }
       }
       async function correct() {
-        SND.stopVo(); Hand.hide();
+        SND.stopVo(); Hand.hide(); if (!teach) Baba.exit();   // Baba steps back out before Aaru runs to the stall
         q.choices.forEach((v, j) => Slates.state(j, j === right ? 'correct' : 'faded')); Slates.tick(right);
         GFX.ring(Slates.S[right]); GFX.focus(false); { const c = Bill.centre(); GFX.flash(c.x, c.y); }
         SND.sfx('bell'); SND.sfx('ding');
@@ -107,12 +107,14 @@
     Sun.to(i + 1);
     await wait(1);
     Aaru.run(2150).then(() => Aaru.hide());
+    await wait(1.4);   // reading time: the paid bill (price, ≈ amount, PAID) stays ~2.5 s before it flies off (feedback Oct 2026)
     await Bill.away();
   }
 
   /* ---------- camera on the speaker: while only Baba or Guddu speaks (both stand on the right), the scene pushes in (×1.18) and pans toward him (he stays put, the money
      board stays in view on the left; the right edge never shows); it eases back when his line ends (user, Oct 2026) ---------- */
   let camTw = null;
+  let asking = false;   // Baba's question is playing: no camera push (the bill + slates stay put)
   function speakerCam(on) {
     if (camTw) camTw.kill();
     camTw = gsap.to('#l3', on ? { scale: 1.18, x: -30, transformOrigin: '1700px 760px', duration: 1, ease: 'sine.inOut' }
@@ -136,16 +138,20 @@
   }
 
   /* ---------- how-to ---------- */
+  let mapAt = 0;
   async function howto() {
     for (const line of D.howto) {
       await beat(line, async () => {
         if (line.show === 'baba') { glowAlong(line, [[.32, () => { Cart.glow(); Panel.glow(); }]]); await Baba.enter(); }
         if (line.show === 'less') { await Minus.show(); Coins.hopOff(4); }
-        if (line.show === 'map') { await Map.on(); }
+        if (line.show === 'map') { mapAt = gsap.globalTimeline.time(); await Map.on(); }
       });
       if (line.show === 'baba') Baba.exit();
       if (line.show === 'less') Minus.hide();
-      if (line.show === 'map') await Map.off(skipping);
+      if (line.show === 'map') {   // reading time (feedback Oct 2026: the map's numbered stalls vanished before they could be read): ≥ 5.5 s on screen
+        if (!skipping) await wait(Math.max(0, 6.5 - (gsap.globalTimeline.time() - mapAt)));
+        await Map.off(skipping);
+      }
       if (skipping) return;
     }
   }
@@ -190,7 +196,10 @@
     const b = D.bills[i], n = i + 1, L = D.qLines(b, n);
     await Cam.push(CAM(i));                                       // PUSH
     Bill.show(i, b.price); await Bill.drop();                     // DROP — one new thing at a time
+    await Baba.enter();                                           // feedback Oct 2026: Baba comes to the stall and asks; Pari helps (hints, OK lines)
+    asking = true;
     const ask = COACH.say(L.ask);                                 // ASK — the bill glows on its price, the cart panel on the money
+    ask.then(() => { asking = false; });
     glowAlong(L.ask, [[.12, () => Bill.glow()], [.45, () => { Panel.glow(); Cart.glow(); }]]);
     await wait(.4); await Minus.show(); await Slates.show(b.choices);
     SND.setCurrent(L.ask);
@@ -253,7 +262,7 @@
   }
   async function run({ startAt = 0, skipIntro = false } = {}) {
     window.L3_ACTIVE = true;
-    COACH.voiceOnly = true; COACH.onTalk = (who, on) => { if (who === 'pari') return Pari.talk(on); Waves.off(); if (who === 'baba') { Baba.talk(on); speakerCam(on); } if (who === 'guddu') { Guddu.talk(on); speakerCam(on); } };
+    COACH.voiceOnly = true; COACH.onTalk = (who, on) => { if (who === 'pari') return Pari.talk(on); Waves.off(); if (who === 'baba') { Baba.talk(on); if (!asking) speakerCam(on); } if (who === 'guddu') { Guddu.talk(on); speakerCam(on); } };
     reset();
     SND.preload(D.allLines().map(l => l.id));
     HUD.setLit(startAt); HUD.lit = startAt;

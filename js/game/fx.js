@@ -220,22 +220,18 @@
   }
 
   /* answers wait for the VO: dimmed + not tappable until `ready` resolves, then they pop (feedback Oct 2026) */
-  /* a tap on an answer that is still locked (Pari is talking) wiggles it and pops a little "listen" sign above it, so the
-     child knows why nothing happened (QA Oct 2026: it felt broken). Capture phase: the game's own handlers never see it. */
-  let lastListen = 0;
-  document.addEventListener('pointerdown', e => {
-    // locked answers take no pointer events, so hit-test by position against the answers still waiting for the voice
-    const el = [...document.querySelectorAll('#game .vowait')].find(n => { const r = n.getBoundingClientRect(); return r.width && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
-    if (!el) return;
-    e.stopImmediatePropagation(); e.preventDefault();
-    const now = performance.now(); if (now - lastListen < 450) return; lastListen = now;
-    try { el.animate([{ translate: '0 0' }, { translate: '-9px 0' }, { translate: '8px 0' }, { translate: '-5px 0' }, { translate: '0 0' }], { duration: 360, easing: 'ease-out', composite: 'add' }); } catch (x) { }
-    const r = stageRect(el), b = mk(null, 'glisten', '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#3a220f"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#e8870e" stroke-width="2.2" stroke-linecap="round"/></svg>');
-    b.style.left = (r.x + r.w / 2 - 38) + 'px'; b.style.top = (r.y - 86) + 'px'; $('#gFx').appendChild(b);
-    gsap.timeline({ onComplete: () => b.remove() }).fromTo(b, { scale: .4, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: 'back.out(2.5)' })
-      .to(b, { y: -10, duration: .5, ease: 'sine.inOut' }).to(b, { opacity: 0, duration: .3 });
-    SND.sfx('tick', .3, 1.4);
-  }, true);
+  /* (a "listen" speaker sign used to pop up on a tap while the answers were locked — removed, feedback Oct 2026: it confused
+     testers. Locked answers just stay dimmed and breathe gently until Pari's line is over.) */
+  /* final wrong try (feedback Oct 2026: "instead of the ghost hand, show the number appearing and disappearing on the bill"):
+     the right number is written at (x, y) on the stage, stays ~3.5 s, then fades. Resolves when it has gone. */
+  function ghostNumber(text, x, y, { hold = 3.5, size = 52 } = {}) {
+    const g = mk(null, 'gghost', text); g.style.left = x + 'px'; g.style.top = y + 'px'; g.style.fontSize = size + 'px'; $('#game').appendChild(g);   // on top of every level layer (#l2 / #l3 are their own stacking contexts)
+    SND.sfx('scribble', .35);
+    return gsap.timeline({ onComplete: () => g.remove() })
+      .fromTo(g, { clipPath: 'inset(0 100% 0 0)', opacity: 1 }, { clipPath: 'inset(0 0% 0 0)', duration: .55, ease: 'power1.inOut' })
+      .to(g, { scale: 1.06, duration: .45, yoyo: true, repeat: 3, ease: 'sine.inOut' })
+      .to(g, { opacity: 0, duration: .5, ease: 'sine.in' }, `+=${Math.max(0, hold - 1.8)}`).then();
+  }
   function lockFor(els, ready, go) {
     els = [...els]; els.forEach(e => e.classList.add('vowait'));
     Promise.resolve(ready).then(() => {
@@ -250,5 +246,5 @@
 
   /* how-to "Look at the sun too": the sun glows and bobs */
   function sunHint() { gsap.fromTo(SUN1, { scale: 1 }, { scale: 1.22, duration: .4, yoyo: true, repeat: 3, ease: 'sine.inOut', transformOrigin: '50% 50%' }); }
-  window.GFX = { sunAt, sunHint, lockFor, level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
+  window.GFX = { sunAt, sunHint, lockFor, ghostNumber, level: 1, grade: setGrade, focus: setFocus, flash: doFlash, press, ring, ringAt, stars, ambient, calm, twinkle, hopTrail, petal, stageRect, reset };
 })();

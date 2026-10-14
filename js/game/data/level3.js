@@ -73,7 +73,7 @@ window.LEVEL3 = {
     const haveTxt = n === 1 ? rs(have) : 'about ' + rs(have);
     return {
       ans, have, r,
-      ask:   { who: 'pari', vo: `L3_q${n}`,       text: `The ${b.who} wants ${rs(b.price)}. We have ${haveTxt}. About how much money is left?` },
+      ask:   { who: 'baba', vo: `L3_q${n}`,   /* feedback Oct 2026: Baba asks, Pari helps */       text: `The ${b.who} wants ${rs(b.price)}. We have ${haveTxt}. About how much money is left?` },
       ok:    { who: 'pari', vo: `L3_q${n}_ok`,    text: n === 7 ? `Yes! About ${rs(ans)} is left. We paid everyone!` : `Yes! About ${rs(ans)} is left.` },   // feedback: "One more stall lights up!" came before the stall lit — cut from q1–q6 (VO trimmed, originals in _source/game_vo_masters/_with_stall_line/)
       oops:  D.oops,
       hint:  { who: 'pari', vo: `L3_q${n}_hint`,  text: `Hint: ${rs(b.price)} is about ${fmt(r)}. Now take ${fmt(r)} away from ${fmt(have)}.` },
