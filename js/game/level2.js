@@ -198,7 +198,7 @@
     const warmed = warm(['office_desk_l2.webp', 'bill_paper.webp', 'stamp_tool.webp', 'stamp_tool_pressed.webp', 'stamp_mark.webp', 'ink_pad.webp', 'bill_pile.webp', 'checked_basket.webp'].map(GA));
     await banner(); await warmed;
     HUD.show(); GFX.ambient(2);              // dust drifting in the window light
-    COACH.present('guddu');                      // Guddu Bhaiya is at his desk for the whole level
+    COACH.gudduIn = false; COACH.dismiss('guddu');   // Pari has the centre of the desk; Guddu Bhaiya comes in only for his line (feedback Oct 2026)
     gsap.set(['#sunPanel', '#gChip', '#mariPlate', '#glowMari'], { autoAlpha: 0 });   // L2: no sun, chip or marigolds — characters + bill get the room
     if (!skipIntro) {
       skipBtn(true);
@@ -208,7 +208,7 @@
     }
     for (let i = startAt; i < 7; i++) await billRound(D.bills[i], i);
     const res = await complete();
-    window.L2_ACTIVE = false; COACH.pariSpot = 'stand'; gsap.set(['#l2', '#gudiya', '#bleat'], { clearProps: 'zIndex' }); gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });
+    window.L2_ACTIVE = false; COACH.gudduIn = false; COACH.pariSpot = 'stand'; gsap.set(['#l2', '#gudiya', '#bleat'], { clearProps: 'zIndex' }); gsap.set(['#sunPanel', '#gChip', '#mariPlate'], { autoAlpha: 1 });
     return res;
   }
   window.LEVEL2_RUN = run;

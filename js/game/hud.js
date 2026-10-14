@@ -81,13 +81,14 @@
   const SA = n => (window.IMG && IMG[n] && IMG[n].src) || (window.EMBED && EMBED[n]) || `assets/story/${n}.webp`;
   const SPOTS = {   // x, y = feet on stage · s = scale · side = which side the bubble sits · bubble = fixed bubble spot (desk)
     pari:  { front: { x: 150,  y: 1050, s: 1, side: 'L' }, back: { x: 122, y: 1046, s: .72, side: 'L', tail: 'D', bubble: { left: 28, bottom: 420, width: 400 } },
-             desk: { x: 190, y: 1151, s: 1.5, side: 'L', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } },   // L2: big, behind the desk
+             desk: { x: 190, y: 1151, s: 1.5, side: 'L', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } },     // L2 while Guddu speaks: aside
+             deskC: { x: 770, y: 1151, s: 1.5, side: 'L', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } },   // L2: centre stage (feedback Oct 2026)
     manju: { front: { x: 1715, y: 958, s: .95, side: 'R' }, back: { x: 1800, y: 1046, s: .72, side: 'R', tail: 'D', bubble: { right: 28, bottom: 420, width: 400 } },
              desk: { x: 1772, y: 778, s: 1, side: 'R', clip: 534 } },
     guddu: { front: { x: 1745, y: 1050, s: 1, side: 'R' }, back: { x: 1772, y: 770, s: .8, side: 'R' },
              desk: { x: 815, y: 1193, s: 1.45, side: 'L', tail: 'R', clip: 862, bubble: { left: 300, bottom: 548, width: 420 } } }
   };
-  const spotOf = key => SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
+  const spotOf = key => (key === 'pari' && Coach.pariSpot === 'desk' && !Coach.gudduIn && SPOTS.pari.deskC) || SPOTS[key][Coach.pariSpot === 'desk' ? 'desk' : Coach.depth] || SPOTS[key].front;
   function Actor(key, { file, n, fps, mode, intro = 0, outro = n, h, lift = 0, flip = false, cheer = null, idle = null }) {
     const box = $('#' + key + 'Coach'), clock = () => gsap.globalTimeline.time();
     const imgs = [...Array(n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = h + 'px'; im.style.bottom = lift + 'px';
@@ -174,8 +175,7 @@
   const CAST = {
     pari:  Actor('pari',  { file: 'pari_explain', n: 36, fps: 12, mode: 'iol', intro: 5, outro: 31, h: 486, cheer: { file: 'pari_cheer', n: 36, fps: 15, h: 484.7 } }),
     manju: Actor('manju', { file: 'manju_talk', n: 36, fps: 10.5, mode: 'pp', h: 525, lift: -4, flip: true }),
-    guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 10.5, mode: 'pp', h: 584, lift: -8,
-      idle: { work: [0, 1, 28, 29, 30, 31, 32, 31, 30, 29, 28, 1], listen: [17, 17, 17, 18], scratch: { file: 'guddu_scratch', h: 570, dy: 7, dx: -5 } } })
+    guddu: Actor('guddu', { file: 'guddu_talk', n: 36, fps: 12, mode: 'pp', h: 584, lift: -8 })   // L2: comes in only for his line (no idle swap — it glitched)
   };
   gsap.ticker.add(() => Object.values(CAST).forEach(a => a.tick()));
 
@@ -211,6 +211,20 @@
     },
     /* Put a coach on stage before they speak (e.g. Guddu at his desk for all of L2) / take one off (Manju after the teach) */
     present(key) { Coach.show(); if (CAST[key]) CAST[key].show(); },
+    /* L2 (feedback Oct 2026): Pari owns the centre of the desk; Guddu Bhaiya slides in only for his own line, says it, slides out and
+       Pari glides back to the centre. duo(true) = Pari steps aside + Guddu in; duo(false) = Guddu out + Pari back. */
+    gudduIn: false,
+    duo(on) {
+      const g = CAST.guddu, box = $('#gudduCoach');
+      if (on === Coach.gudduIn) return Promise.resolve();
+      Coach.gudduIn = on;
+      if (on) {   // Pari steps aside first, then Guddu slides in (they never overlap)
+        CAST.pari.place(true); g.show(); gsap.set(box, { x: 140, opacity: 0 });
+        return gsap.to(box, { x: 0, opacity: 1, duration: .5, delay: .45, ease: 'power2.out', overwrite: true }).then();
+      }
+      g.quiet(true);   // Guddu slides out first, then Pari glides back to the centre
+      return gsap.to(box, { x: 140, opacity: 0, duration: .4, ease: 'power2.in', overwrite: true }).then(() => { g.hide(); gsap.set(box, { x: 0 }); CAST.pari.place(true); });
+    },
     /* Pari claps + fist-pumps (correct answers); no-op when she isn't the full-body coach on stage */
     cheer() { return CAST.pari.cheer(); },
     dismiss(key) { if (CAST[key]) CAST[key].hide(); if (who && who.startsWith(key + '@')) who = null; },
@@ -221,6 +235,9 @@
     /* L3: voice only — no bubble, no avatar, no full-body coach. The level draws its own talk waves via onTalk(who, on). */
     voiceOnly: false, onTalk: null,
     say(line, { append } = {}) {
+      if ((line.who === 'guddu') && Coach.pariSpot === 'desk' && !Coach.gudduIn) {
+        return Coach.duo(true).then(() => Coach.say(line, { append })).then(r => { Coach.duo(false); return r; });
+      }
       if (Coach.voiceOnly) {
         SND.setCurrent(line); const my = ++sayN, who = line.who || 'pari';
         if (Coach.onTalk) Coach.onTalk(who, true, line);
