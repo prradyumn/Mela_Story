@@ -67,5 +67,8 @@
   }
   function toast(msg) { const t = $('#gToast'); t.textContent = msg; gsap.fromTo(t, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .3 }); gsap.to(t, { opacity: 0, delay: 2.4, duration: .4 }); }
 
-  window.ST = { $, stage, fmt, rs, NL, vx, wait, readTime, sparks, dust, confetti, flyImg, toast };
+  /* phone vibration on answers (Oct 2026): a short buzz for a correct answer, a softer double tap for a wrong one. Android/Chrome only —
+     iPhones and desktops have no navigator.vibrate, so nothing happens there. Never while the game is paused. */
+  function buzz(kind) { try { if (navigator.vibrate && !window.GAME_PAUSED) navigator.vibrate(kind === 'ok' ? 45 : [18, 70, 18]); } catch (e) { } }
+  window.ST = { $, stage, fmt, rs, NL, vx, wait, readTime, sparks, dust, confetti, flyImg, toast, buzz };
 })();

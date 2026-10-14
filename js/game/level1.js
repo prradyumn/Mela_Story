@@ -34,9 +34,9 @@
         if (done) return;
         if (idleCall) idleCall.kill();
         ['L', 'R'].forEach(s => Btns.B[s].classList.remove('pulse'));
-        if (side === correctSide) { done = true; Btns.disable(); await correct(); resolve(strikes); return; }
+        if (side === correctSide) { done = true; ST.buzz('ok'); Btns.disable(); await correct(); resolve(strikes); return; }
 
-        strikes++;
+        strikes++; ST.buzz('wrong');
         Btns.disable();
         Btns.state(side, 'wrong'); Btns.wiggle(side); SND.sfx('boing');
         gsap.delayedCall(.75, () => { if (!done && strikes < 3) Btns.state(side, ''); });

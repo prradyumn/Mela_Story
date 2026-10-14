@@ -38,8 +38,8 @@
       };
       async function onPick(i) {
         if (done) return; if (idleCall) idleCall.kill();
-        if (i === right) { done = true; Stamps.disable(); await correct(); resolve(strikes); return; }
-        strikes++; Stamps.disable();
+        if (i === right) { done = true; ST.buzz('ok'); Stamps.disable(); await correct(); resolve(strikes); return; }
+        strikes++; ST.buzz('wrong'); Stamps.disable();
         Stamps.state(i, 'wrong'); Stamps.wiggle(i); SND.sfx('boing');
         gsap.delayedCall(.8, () => { if (!done && strikes < 3) Stamps.state(i, ''); });
         const fb = l => COACH.say(l);   // answer again once the feedback line is over

@@ -19,6 +19,10 @@ const TXT = {
   n4: 'The Sarpanch gives you a gold badge.',
 };
 const inr = v => '₹' + Math.round(v).toString().replace(/(\d)(?=(\d\d)+\d$)/g, '$1,');
+/* slow camera drift (Oct 2026): a barely noticeable push-in so the still story scenes feel filmed, not flat. It runs on #shaker (the
+   parent of #world), so it never fights a scene's own camera moves or exit zooms on #world; newScene() resets it. Off per scene: just
+   don't call it. */
+function drift(d = 18, to = 1.03) { gsap.fromTo('#shaker', { scale: 1 }, { scale: to, duration: d, ease: 'sine.inOut', transformOrigin: '50% 60%' }); }
 function warmTint(s, a) { return el('div', 'tint', s, null, { background: 'linear-gradient(180deg,rgba(255,120,30,.55),rgba(255,170,60,.25) 55%,rgba(120,40,0,.25))', mixBlendMode: 'multiply', opacity: a }); }
 function goButton(parent, label, x, y) {
   const b = el('div', 'btn', parent, label, { left: x + 'px', top: y + 'px' });
@@ -224,7 +228,7 @@ async function hookB() {
 // ---------------- HOOK C (row 3b): Aaru's wild guess ----------------
 async function hookC() {
   SCN = 'hookC'; hudState({ sun: .12, sunVis: true });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_02_chaupal', { left: '0px' });
   warmTint(s, .5);
   const aaru = char(s, 'aaru', 430, 'run', { ground: 1045 });
@@ -290,7 +294,7 @@ async function hookD() {
 // ---------------- HOOK E (row 3d): off to the bazaar ----------------
 async function hookE() {
   SCN = 'hookE'; hudState({ sun: .12, sunVis: true });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_02_chaupal', { left: '0px' });
   warmTint(s, .5);
   const aaru = char(s, 'aaru', 430, 'shout', { ground: 1045 });
@@ -367,7 +371,7 @@ async function level(n) {
 // ---------------- BRIDGE 1 (row 5) ----------------
 async function bridge1() {
   SCN = 'bridge1'; hudState({ sun: .35, sunVis: true, hud: true, chip: '', flowers: 7 });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_03_bazaar', { left: -(2593 - 1920) + 'px' });
   warmTint(s, .35);
   const pari = char(s, 'pari', 520, 'happy', { ground: 1045 });
@@ -392,7 +396,7 @@ async function bridge1() {
 // ---------------- BRIDGE 2 (row 7) ----------------
 async function bridge2() {
   SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '', flowers: 7 });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_04_office', { left: '0px' });
   const guddu = officeGuddu(s, 'write');   // 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
   officeFG(s);
@@ -444,7 +448,7 @@ async function endA() {
 // ---------------- ENDING B (row 9b): the answer ----------------
 async function endB() {
   SCN = 'endB'; hudState({ sunVis: false });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
   const pari = char(s, 'pari', 400, 'happy', { ground: 1045, scale: .95 });
   const guddu = char(s, 'guddu', 1450, 'proud', { ground: 1045, scale: .95, flip: true });
@@ -467,7 +471,7 @@ async function endB() {
 // ---------------- ENDING C (row 9c): jalebi + the badge ----------------
 async function endC() {
   SCN = 'endC'; hudState({ sunVis: false });
-  const s = newScene();
+  const s = newScene(); drift();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
   const aaru = char(s, 'aaru', 760, 'jump', { ground: 1045 });
   const goat = char(s, 'gudiya', 1120, 'idle', { ground: 1050 });

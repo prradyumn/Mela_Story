@@ -120,6 +120,7 @@ const skipBtn = $('#skip');
 function newScene() {
   world.innerHTML = ''; ui.innerHTML = ''; P.length = 0;
   gsap.killTweensOf(world); gsap.set(world, { x: 0, y: 0, scale: 1, filter: 'none' });
+  gsap.killTweensOf('#shaker', 'scale'); gsap.set('#shaker', { scale: 1 });   // camera drift (drift()) resets with every scene
   IDLE.forEach(t => t.kill()); IDLE.length = 0;
   return el('div', 'scene', world);
 }
@@ -170,7 +171,7 @@ const CH = {
     acts: { talk: { file: 'guddu_talk', n: 36, h: 650.2, fps: 10.5, mode: 'pp', lift: -6 } },
     // idle loop (user's ludo sheet, Oct 2026): while he rests in 'write' he keeps writing — 36 frames, mouth shut, sized so his body matches
     // guddu_write exactly (head, belt, feet); _source/guddu_sprites/write → assets/story/guddu_writeloop_0–35 (710 px tall, q76)
-    idle: { pose: 'write', file: 'guddu_writeloop', n: 36, h: 644.9, fps: 14.7, lift: 0 } },
+    idle: { pose: 'write', file: 'guddu_writeloop', n: 36, h: 644.9, fps: 14.7, lift: 0, sound: { sfx: 'scribble', gain: .07 } } },
   manju: { name: 'Manju Mausi', h: 580, color: '#c93b76', poses: ['teach'], acts: { talk: { file: 'manju_talk', n: 36, h: 585, fps: 10.5, mode: 'pp', lift: -3 } } },
   gudiya: { name: 'Gudiya', h: 250, color: '#b5361d', poses: ['idle', 'hop'], cycles: { trot: { file: 'gudiya_trot', n: 4, h: 229.2, speed: 300, fps: 8, lift: 3 } } },
 };
@@ -248,14 +249,25 @@ const actClock = () => gsap.globalTimeline.time();
 const IDLERS = new Set();
 gsap.ticker.add(() => {
   IDLERS.forEach(o => {
-    if (!o.wrap.isConnected) { IDLERS.delete(o); return; }
+    if (!o.wrap.isConnected) { idleSound(o, false); IDLERS.delete(o); return; }   // stop his pencil sound with the scene
     const d = o.c.idle, F = o.frames.__idle, still = o.imgs[d.pose];
     const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
     const on = o.pose === d.pose && !o.act && !o.moving && ready;
     if (on) { if (o.idleK !== k) { if (o.idleK != null) F[o.idleK].style.opacity = 0; F[k].style.opacity = 1; o.idleK = k; } if (still) still.style.visibility = 'hidden'; }
     else if (o.idleK != null) { F[o.idleK].style.opacity = 0; o.idleK = null; if (still) still.style.visibility = ''; }
+    idleSound(o, on && d.sound);
   });
 });
+/* a very soft pencil scratch under the writing loop (Oct 2026); silent while any voice is playing, gone with the scene */
+function idleSound(o, want) {
+  const t = AC ? AC.currentTime : 0, voicing = voiceNow && live.has(voiceNow);
+  if (!o.wrap.isConnected || SKIPPING) want = false;
+  if (want && !o.scr && AC && BUF['sfx_' + want.sfx]) { o.scr = play('sfx_' + want.sfx, { loop: true, gain: 0 }); o.scrOn = null; }
+  if (!o.scr) return;
+  const target = want && !voicing ? want.gain : 0;
+  if (o.scrOn !== target) { o.scrOn = target; o.scr.g.gain.cancelScheduledValues(t); o.scr.g.gain.setValueAtTime(o.scr.g.gain.value, t); o.scr.g.gain.linearRampToValueAtTime(target, t + .35); }
+  if (!o.wrap.isConnected) { try { o.scr.s.stop(t + .4); } catch (e) { } o.scr = null; }
+}
 function actOn(o, name, end = null) {
   const a = o.c.acts && o.c.acts[name]; if (!a || o.moving) return;
   if (o.act && o.act.name === name && o.act.stopAt == null) return;      // already explaining: keep going
@@ -607,3 +619,24 @@ function dust(tl, s, t, x, y, n = 5) {
     tl.fromTo(d, { opacity: .8, scale: .3, x: 0, y: 0 }, { opacity: 0, scale: 1.6 + Math.random(), x: -60 - Math.random() * 80, y: -30 - Math.random() * 30, duration: .9, ease: 'power2.out', immediateRender: false }, t + i * .18); }
 }
 function shake(tl, t, amp = 12) { tl.fromTo(shaker, { x: 0 }, { x: amp, duration: .05, yoyo: true, repeat: 7, ease: 'none', immediateRender: false }, t); tl.set(shaker, { x: 0 }, t + .42); }
+
+/* ---------- tap a character for a small reaction (story scenes only, Oct 2026) ----------
+   The character images take no pointer events and #ui covers the world, so a tap anywhere on the stage is hit-tested against the
+   characters' visible images. Pari: a little hop + pop; Aaru: a bigger bouncy hop; Gudiya: a hop + bleat. Never during a game level
+   (#game shown), on buttons / signs / Skip / the pause menu, while paused, or more than once per second per character. */
+(() => {
+  const REACT = { pari: { h: 26, sfx: ['pop', .5, 1.2] }, aaru: { h: 46, sfx: ['boing', .55, 1.1] }, gudiya: { h: 50, sfx: ['goat', .9, 1] } };
+  stage.addEventListener('pointerdown', e => {
+    if (window.GAME_PAUSED || e.target.closest('.btn, .signhit, #skip, #ctl, #pauseOv, #loader, #qa, #game:not(.hidden), .card button')) return;
+    const g = document.getElementById('game'); if (g && !g.classList.contains('hidden')) return;
+    const hits = [...world.querySelectorAll('.char')].map(w => w._o).filter(o => o && REACT[o.key] && !o.moving).filter(o => {
+      return [...o.body.querySelectorAll('img')].some(i => { if (+getComputedStyle(i).opacity < .5 || i.style.visibility === 'hidden') return false; const r = i.getBoundingClientRect(); return e.clientX >= r.left + r.width * .2 && e.clientX <= r.right - r.width * .2 && e.clientY >= r.top && e.clientY <= r.bottom; });
+    });
+    const o = hits.sort((a, b) => (+b.wrap.style.zIndex || 0) - (+a.wrap.style.zIndex || 0))[0]; if (!o) return;
+    if (gsap.getTweensOf(o.body).some(t => t.isActive() && 'y' in t.vars)) return;   // already jumping (a story jump or a tap): leave it
+    const now = performance.now(); if (o._tapAt && now - o._tapAt < 1000) return; o._tapAt = now;
+    const R = REACT[o.key]; sfx(...R.sfx);
+    gsap.timeline().to(o.body, { y: -R.h, duration: .26, ease: 'power2.out' }).to(o.body, { y: 0, duration: .3, ease: 'power2.in' })
+      .to(o.body, { y: -R.h * .25, duration: .12, ease: 'power1.out' }).to(o.body, { y: 0, duration: .12, ease: 'power1.in' });
+  });
+})();
