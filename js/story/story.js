@@ -415,7 +415,7 @@ async function bridge2() {
   tl.call(() => sfx('sparkle', .5), null, 1.9);
   tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
-  const go = sign(s, 'Go to the Mela Ground ➜', 1500, 330, 54, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile
+  const go = sign(s, 'Go to the Mela Ground ➜', 1480, 290, 48, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
   await playTL(tl);

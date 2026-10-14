@@ -490,7 +490,7 @@ function narrate(tl, t, id, text, { gap = .4 } = {}) {
 // hanging wooden sign
 function sign(parent, html, x, y, size = 56, name = 'sign') {
   const s = reg(el('div', 'sign', parent, null, { left: x + 'px', top: y + 'px' }), name);
-  const b = el('div', 'board', s, html, { fontSize: size + 'px' });
+  const b = el('div', 'board', s, html.replace('➜', '<b class="arr">➜</b>'), { fontSize: size + 'px' });   // the arrow in saffron
   const r1 = el('div', 'rope', s, null, { left: '40px' }), r2 = el('div', 'rope', s, null, { right: '40px' });
   gsap.set(s, { xPercent: -50, y: -700, rotate: 0 });
   return s;

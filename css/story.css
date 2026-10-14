@@ -36,8 +36,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 .signhit{position:absolute;cursor:pointer;pointer-events:auto;z-index:30;border-radius:28px}
 .signhand{position:absolute;width:150px;height:150px;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(40,20,5,.35))}
 .signhit span{position:absolute;left:50%;bottom:-58px;transform:translateX(-50%);padding:8px 22px 10px;border-radius:24px;background:#fffaf0;border:4px solid #5a3212;font:800 30px/1 Baloo;color:#3a220f;white-space:nowrap;box-shadow:0 5px 0 rgba(58,34,15,.3)}
-.sign .board.tapme{box-shadow:0 16px 0 rgba(58,34,15,.25),inset 0 0 0 5px rgba(255,220,160,.35),0 0 34px 10px rgba(255,214,90,.85)}
-.sign .board{position:relative;padding:22px 46px 26px;background:linear-gradient(#c98a4a,#a8672f);border:6px solid #5a3212;border-radius:20px;box-shadow:0 16px 0 rgba(58,34,15,.25),inset 0 0 0 5px rgba(255,220,160,.35);color:#fff7e3;text-align:center;font-family:Baloo;font-weight:800;text-shadow:0 4px 0 rgba(58,34,15,.5)}
+.sign .board.tapme{box-shadow:inset 0 0 0 7px #f7a531,inset 0 0 0 10px rgba(255,250,236,.9),0 14px 0 rgba(70,30,6,.45),0 24px 36px rgba(20,8,0,.45),0 0 0 6px rgba(255,255,255,.85),0 0 44px 14px rgba(255,196,70,.9)}
+.sign .board{position:relative;padding:22px 50px 26px;background:linear-gradient(#fffdf6,#fff1d2);border:7px solid #5a2608;border-radius:24px;box-shadow:inset 0 0 0 7px #f7a531,inset 0 0 0 10px rgba(255,250,236,.9),0 14px 0 rgba(70,30,6,.45),0 24px 36px rgba(20,8,0,.45);color:#4a1f05;text-align:center;font-family:Baloo;font-weight:800;text-shadow:0 2px 0 rgba(255,255,255,.8)}   /* cream + saffron rim + dark text: reads on every background (UI feedback Oct 2026) */
 .card{position:absolute;padding:26px 44px;background:#fffaf0;border:6px solid #3a220f;border-radius:28px;box-shadow:0 14px 0 rgba(58,34,15,.22);text-align:center;font-family:Baloo;font-weight:800;color:#3a220f}
 /* HUD */
 #hud{pointer-events:none}
@@ -57,21 +57,37 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #wipe .pat{position:absolute;inset:0;background-image:radial-gradient(circle at 20px 20px,rgba(255,220,120,.55) 9px,transparent 10px);background-size:56px 56px}
 /* cover page (Gemini key art in the story's style, _source/cover) = the loading screen; the Start button appears when ready */
 #loader{position:absolute;inset:0;z-index:80;overflow:hidden;background:#3b2a5c;cursor:default}
-#loader .cover{position:absolute;inset:0;background:url(../assets/story/cover.webp) center/cover no-repeat;transform:scale(1.04);animation:coverDrift 14s ease-in-out infinite alternate}
-#loader .cover::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(38,20,62,.55),rgba(38,20,62,.12) 34%,rgba(38,20,62,0) 52%,rgba(30,12,4,0) 78%,rgba(30,12,4,.28))}
-@keyframes coverDrift{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.08) translate(-10px,-6px)}}
-#loader .ctitle{position:absolute;left:0;right:0;top:60px;text-align:center}
-#loader .kicker{display:inline-block;padding:8px 26px 6px;border-radius:30px;background:rgba(255,246,223,.92);border:4px solid #5a2d0c;font:800 26px/1 Baloo;letter-spacing:.18em;text-transform:uppercase;color:#b5361d;box-shadow:0 6px 0 rgba(58,34,15,.3)}
-#loader h1{margin:14px 0 6px;font-family:Baloo;font-weight:800;font-size:132px;line-height:.92;color:#fff4d6;-webkit-text-stroke:7px #5a2d0c;paint-order:stroke fill;text-shadow:0 8px 0 #5a2d0c,0 14px 22px rgba(30,10,40,.55),0 0 40px rgba(255,190,80,.55);letter-spacing:.01em}
-#loader .sub{display:inline-block;margin-top:10px;font:600 32px/1 Poppins;color:#fff8e8;text-shadow:0 2px 0 rgba(58,34,15,.7),0 0 12px rgba(30,10,40,.6)}
-#loader .bar{position:absolute;left:660px;top:930px;width:600px;height:22px;border:5px solid #5a2d0c;border-radius:20px;background:rgba(255,246,223,.9);overflow:hidden;box-shadow:0 5px 0 rgba(58,34,15,.3)}
-#loader .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,#e8870e 0 18px,#f7b733 18px 36px);transition:width .2s}
-#loader p{position:absolute;left:0;right:0;top:880px;text-align:center;font:700 32px/1 Fredoka;color:#fff8e8;text-shadow:0 2px 0 rgba(58,34,15,.8)}
-/* ready: #lp becomes the big Start button (same wooden-saffron art as the story buttons), centred on the setting sun */
-#loader p.ready{left:50%;right:auto;top:430px;height:160px;padding:0 120px 28px;display:flex;align-items:center;transform:translateX(-50%);cursor:pointer;
-  background:url(../assets/story/btn_l.webp) left center/auto 100% no-repeat,url(../assets/story/btn_r.webp) right center/auto 100% no-repeat,url(../assets/story/btn_m.webp) center/calc(100% - 180px) 100% no-repeat;
-  font:800 66px/1 Baloo;letter-spacing:.04em;color:#fffaf0;text-shadow:0 4px 0 rgba(74,40,16,.55),0 0 10px rgba(122,58,10,.35);filter:drop-shadow(0 16px 18px rgba(30,10,30,.45)) drop-shadow(0 0 30px rgba(255,200,90,.55))}
-#loader p.ready:active{filter:brightness(.93) drop-shadow(0 6px 8px rgba(40,20,5,.35))}
+/* COVER (Oct 2026 redesign, user: "light theme, Pari + title focused, round play button, no text"): the sunny Mela ground, softly blurred under a
+   warm light veil · Pari alone, big, on the right (her namaste art, breathing) · the title as the centrepiece · a round saffron play button */
+#loader .cover{position:absolute;inset:-30px;background:url(../assets/story/bg_05_mela.webp) center 62%/cover no-repeat;filter:blur(5px) saturate(.72) brightness(1.08) hue-rotate(-8deg);animation:coverDrift 16s ease-in-out infinite alternate}
+#loader .cover::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 42% 36%,rgba(255,255,255,.72),rgba(250,252,255,.38) 55%,rgba(240,246,255,.1) 100%),linear-gradient(rgba(214,234,255,.55),rgba(236,244,255,.18) 45%,rgba(255,255,255,0) 70%,rgba(40,50,80,.12))}   /* cool, light morning veil (user: "too yellowish") */
+@keyframes coverDrift{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.06) translate(-14px,-6px)}}
+#loader .cpari{position:absolute;left:1300px;top:150px;width:580px;height:900px;background:url(../assets/story/pari_happy.webp) center bottom/contain no-repeat;filter:drop-shadow(0 22px 26px rgba(90,45,12,.35));transform-origin:50% 100%;animation:pariBreath 3.2s ease-in-out infinite}
+#loader .cpari::after{content:'';position:absolute;left:18%;right:18%;bottom:-6px;height:44px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(90,45,12,.32),rgba(90,45,12,0) 70%);z-index:-1}
+@keyframes pariBreath{50%{transform:scaleY(1.012) scaleX(.996)}}
+#loader .ctitle{position:absolute;left:120px;width:1180px;top:150px;text-align:center}
+#loader .csun{display:none;position:absolute;left:50%;top:150px;width:520px;height:520px;margin-left:-260px;border-radius:50%;background:radial-gradient(circle,rgba(255,206,92,.55),rgba(255,170,60,.22) 42%,rgba(255,170,60,0) 70%);animation:sunGlow 4s ease-in-out infinite}
+@keyframes sunGlow{50%{transform:scale(1.08);opacity:.85}}
+#loader h1{position:relative;margin:0;font-family:Baloo;font-weight:800;line-height:.9;letter-spacing:.005em}
+/* layered title: brown outline + 3D drop (::before, behind) · cream rim (the span's own text, cream with a cream stroke) · saffron gradient
+   fill on top (::after, background-clipped to the text). Separate layers so the font's overlapping contours never show as lines. */
+#loader h1 span{display:block;position:relative;z-index:0;color:#fff3d6;-webkit-text-stroke:12px #fff3d6}
+#loader h1 span::before,#loader h1 span::after{content:attr(data-t);position:absolute;left:0;right:0;top:0;-webkit-text-stroke:0}
+#loader h1 span::before{z-index:-1;color:#5a2608;-webkit-text-stroke:28px #5a2608;text-shadow:0 12px 0 #5a2608,0 26px 26px rgba(90,40,10,.4)}
+#loader h1 span::after{z-index:1;background:linear-gradient(180deg,#ffe07a 0%,#f9ad35 46%,#e2621a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#loader h1 .l1{font-size:150px}
+#loader h1 .l2{font-size:178px;margin-top:6px}
+#loader .bar{position:absolute;left:560px;top:820px;width:500px;height:20px;border:5px solid #1d3f8c;border-radius:20px;background:rgba(255,250,236,.95);overflow:hidden;box-shadow:0 5px 0 rgba(90,40,10,.25)}
+#loader .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,#2f63c9 0 18px,#5b8cf0 18px 36px);transition:width .2s}
+#loader p{position:absolute;left:120px;width:1180px;top:870px;text-align:center;font:700 30px/1 Fredoka;color:#1d3f8c}
+/* ready: #lp becomes a round saffron play button (no text — the label is for screen readers only) */
+#loader p.ready{left:700px;width:220px;height:220px;top:690px;padding:0;border-radius:50%;cursor:pointer;font-size:0;color:transparent;
+  background:radial-gradient(circle at 38% 30%,#6fa2ff,#2f63c9 55%,#1d3f8c 100%);border:9px solid #ffffff;   /* Pari's blue: contrasts with the warm Mela + the saffron title */
+  box-shadow:0 0 0 7px #16306b,0 16px 0 7px rgba(22,48,107,.35),0 24px 40px rgba(22,48,107,.35),0 0 50px 12px rgba(120,170,255,.45)}
+#loader p.ready::before{content:'';position:absolute;left:50%;top:50%;margin:-46px 0 0 -28px;border-style:solid;border-width:46px 0 46px 76px;border-color:transparent transparent transparent #fffaf0;filter:drop-shadow(0 4px 0 rgba(16,32,80,.4))}
+#loader p.ready::after{content:'';position:absolute;inset:-26px;border-radius:50%;border:6px solid rgba(110,160,255,.75);animation:playRing 1.6s ease-out infinite}
+@keyframes playRing{from{transform:scale(.85);opacity:1}to{transform:scale(1.25);opacity:0}}
+#loader p.ready:active{transform:scale(.94)}
 #loader.ready{cursor:pointer}
 .ost-big{font-family:Baloo;font-weight:800;color:#fff7e3;text-shadow:0 6px 0 #5a3212,0 0 30px rgba(255,190,80,.6)}
 /* a key takeaway on a cream pill (readable on any background) */
@@ -83,3 +99,5 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 .dust{position:absolute;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(210,170,110,.8),rgba(210,170,110,0) 70%);pointer-events:none}
 .spot{position:absolute;inset:0;background:rgba(30,15,5,.5);z-index:8;pointer-events:none}
 #fade{position:absolute;inset:0;z-index:59;background:#1d1208;opacity:0;pointer-events:none}
+.sign .board .arr{color:#e2621a;font-weight:800;margin-left:6px}
+.sign .board{white-space:nowrap}
