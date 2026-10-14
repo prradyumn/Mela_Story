@@ -314,12 +314,12 @@
 #game #duster3{position:absolute;left:603px;top:600px;width:190px;height:142px;opacity:0;pointer-events:none}
 #game #minus3{position:absolute;left:862px;top:640px;width:68px;height:68px;border-radius:50%;background:#c0392b;border:5px solid #fff3d6;box-shadow:0 5px 0 rgba(58,34,15,.3);transform:scale(0)}
 #game #minus3 span{position:absolute;left:14px;top:24px;width:30px;height:10px;border-radius:5px;background:#fff}
-#game .slate3{position:absolute;top:785px;width:200px;height:275px;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 8px 6px rgba(20,10,30,.35))}
+#game .slate3{position:absolute;top:846px;width:200px;height:192px;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 8px 6px rgba(20,10,30,.35))}
 #game .slate3.hidden{display:none}
 #game .slate3.locked{pointer-events:none}
-#game .slate3 .art{position:absolute;left:0;top:0;width:200px;height:275px}
-#game .slate3 .about{position:absolute;left:0;top:62px;width:200px;text-align:center;font:800 19px/26px Baloo;letter-spacing:.16em;color:#f3d27a;pointer-events:none}
-#game .slate3 .val{position:absolute;left:6px;top:96px;width:188px;height:36px;text-align:center;font:700 32px/36px Fredoka;color:#fffdf5;white-space:nowrap;pointer-events:none}
+#game .slate3 .art{position:absolute;left:0;top:0;width:200px;height:192px}   /* takhti_short: the board's middle removed, frame undistorted */
+#game .slate3 .about{position:absolute;left:0;top:52px;width:200px;text-align:center;font:800 19px/26px Baloo;letter-spacing:.16em;color:#f3d27a;pointer-events:none}
+#game .slate3 .val{position:absolute;left:6px;top:80px;width:188px;height:46px;text-align:center;font:700 38px/46px Fredoka;color:#fffdf5;white-space:nowrap;pointer-events:none}
 #game .slate3 .tick{position:absolute;left:154px;top:8px;width:46px;height:46px;border-radius:50%;background:#3b8a46;border:3px solid #fff;transform:scale(0)}
 #game .slate3 .tick svg{position:absolute;left:8px;top:8px;width:24px;height:24px}
 #game .slate3.wrong{filter:drop-shadow(0 0 16px rgba(224,48,30,.95))}
@@ -332,7 +332,7 @@
 /* Guddu Bhaiya (L3 teach): stands at the right, behind the slates, with his notebook */
 #game #guddu3{position:absolute;left:1585px;top:470px;width:231px;height:560px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #guddu3 img{position:absolute;left:0;bottom:-8px;height:571px;opacity:0}
-#game #baba3{position:absolute;left:1600px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
+#game #baba3{position:absolute;left:1570px;top:440px;width:241px;height:600px;opacity:0;transform:scaleX(-1);transform-origin:50% 100%}
 #game #baba3 img{position:absolute;left:0;bottom:0;height:604px;opacity:0}
 #game #aaru3{position:absolute;left:0;top:0;width:0;height:0;display:none}
 #game #l3 .ashadow{position:absolute;width:180px;height:32px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,12,4,.5),rgba(30,12,4,0));opacity:0;pointer-events:none}

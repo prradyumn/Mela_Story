@@ -3,7 +3,7 @@
    light burst, wheel) · Pari · cart · "−" · slates · Aaru + potli · duster/coins · fireworks · complete card. */
 (function () {
   const D = window.LEVEL3, A = n => GA('l3/' + n);
-  const slate = i => `<div class="slate3 hidden" data-i="${i}"><img class="art" src="${A('takhti.webp')}" alt=""><div class="about">ABOUT</div><div class="val"></div><i class="tick"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>`;
+  const slate = i => `<div class="slate3 hidden" data-i="${i}"><img class="art" src="${A('takhti_short.webp')}" alt=""><div class="about">ABOUT</div><div class="val"></div><i class="tick"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>`;
   const lit = D.boxes.map(([x0, x1], i) => { const top = D.hooks[i][1] < 480 ? 150 : 290;
     return `<div class="lit3" data-i="${i}" style="left:${x0}px;top:${top}px;width:${x1 - x0}px;height:${756 - top}px"><img src="${A('mela_lane_lit.webp')}" alt="" style="left:${-x0}px;top:${-top}px"></div>`; }).join('');
   const signs = D.signs.map(([t, y], i) => `<div class="sign3" style="left:${D.hooks[i][0] - 200}px;top:${y}px">${t}</div>`).join('');

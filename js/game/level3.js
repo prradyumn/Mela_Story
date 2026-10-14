@@ -43,8 +43,8 @@
   /* question camera (user, Oct 2026): a slow push-in toward the bill, board and slates while the child thinks; zooms back out on the right
      answer so the payment and the stall lighting up read wide. Pari stands beside the cart breathing meanwhile (no frozen frame). */
   function qCam(on) {
-    gsap.to('#l3', on ? { scale: 1.05, x: 0, transformOrigin: '960px 700px', duration: 7, ease: 'sine.inOut', overwrite: 'auto' }
-                      : { scale: 1, x: 0, transformOrigin: '960px 700px', duration: .9, ease: 'power2.inOut', overwrite: 'auto' });
+    gsap.to('#l3', on ? { scale: 1.04, x: 0, transformOrigin: '1150px 820px', duration: 7, ease: 'sine.inOut', overwrite: 'auto' }   // centred on the bill + slates: nobody pushed to the edge
+                      : { scale: 1, x: 0, transformOrigin: '1150px 820px', duration: .9, ease: 'power2.inOut', overwrite: 'auto' });
   }
   function play(q, L, { teach = false, i = 0, ready = null } = {}) {   // ready = the question's VO: answers locked until it is over
     Pari.stand(true); qCam(true);

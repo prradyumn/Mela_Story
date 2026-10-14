@@ -173,7 +173,9 @@
   const Slates = {
     S,
     async show(vals) {
-      S.forEach((s, i) => { s.className = 'slate3 locked'; s.querySelector('.val').textContent = rs(vals[i]); gsap.set(s, { clearProps: 'all' }); s.style.left = (930 + i * 230) + 'px'; gsap.set(s.querySelector('.tick'), { scale: 0 }); });
+      /* centred under the bill (composition, Oct 2026): bill → choices read straight down; kept clear of Baba on the right */
+      const bc = B.classList.contains('hidden') ? 1180 : Bill.centre().x; Slates.x0 = Math.max(560, Math.min(1310, Math.round(bc - 100 - 230)));
+      S.forEach((s, i) => { s.className = 'slate3 locked'; s.querySelector('.val').textContent = rs(vals[i]); gsap.set(s, { clearProps: 'all' }); s.style.left = (Slates.x0 + i * 230) + 'px'; gsap.set(s.querySelector('.tick'), { scale: 0 }); });
       SND.sfx('rise', .35);
       await gsap.fromTo(S, { y: 320, opacity: 0 }, { y: 0, opacity: 1, duration: .5, stagger: .12, ease: 'back.out(1.5)' });
     },
@@ -185,7 +187,8 @@
     tick(i) { return gsap.to(S[i].querySelector('.tick'), { scale: 1, duration: .3, ease: 'back.out(3)' }); },
     /* SC.Hand.show(x, y) puts the fingertip at (x + 141, y + 16): land it on the slate, just above its number (centre x, y 862)
        — the hand comes from above, so pointing lower would cover the number (it used to tap the slate's bottom frame) */
-    handAt(i) { return { x: 1030 + i * 230 - 141, y: 800 - 16 }; },   // fingertip on the slate's top frame (it covered ABOUT)
+    x0: 930,
+    handAt(i) { return { x: Slates.x0 + 100 + i * 230 - 141, y: 858 - 16 }; },   // fingertip on the slate's top frame (it covered ABOUT)
     async hide() { await gsap.to(S, { y: 320, opacity: 0, duration: .35, stagger: .05, ease: 'power2.in' }); S.forEach(s => s.className = 'slate3 hidden'); }
   };
 
