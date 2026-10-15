@@ -9,3 +9,5 @@ _source/gemini_pari_backup/
 /CLAUDE.md
 /README.md
 /sprite-max-px-frames-*
+.vercel
+.env*
