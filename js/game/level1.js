@@ -3,6 +3,12 @@
    10 s inactivity line plays once · correct = bell + green button + stamp + marigold + sun step,
    then 2 s and the next shop slides in. */
 (function () {
+/* QA bug 17 (Oct 2026): wrong answers don't hold the child up. The level-wide "Oops! Try again…" line is said in full only the first time
+   in the level (later: the goat's bleat + the boing only), and the answers come back ~1 s after a wrong tap while the feedback line
+   carries on — the next tap simply cuts it. */
+const OOPS_SAID = new Set();
+const fbOnce = l => { if (!l || OOPS_SAID.has(l.vo)) return null; OOPS_SAID.add(l.vo); return l; };
+const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : Promise.resolve(), ST.wait(1.1)])]);   // ≥ .9 s so the red 'wrong' flash reads
   const { $, NL, vx, rs, fmt, wait, sparks, confetti } = ST;
   const { Tag, Line, Marker, Btns, Cart, Rule, Hand, bgShift } = SC;
   const D = window.LEVEL1;
@@ -40,8 +46,8 @@
         Btns.disable();
         Btns.state(side, 'wrong'); Btns.wiggle(side); SND.sfx('boing');
         gsap.delayedCall(.75, () => { if (!done && strikes < 3) Btns.state(side, ''); });
-        const fb = l => COACH.say(l);   // the child can answer again once Pari's feedback line is over
-        if (strikes === 1) { GUDIYA.bleat(); await fb(L.oops); }
+        const fb = fbQuick;   // the child can answer again ~1 s into Pari's feedback line (QA bug 17)
+        if (strikes === 1) { GUDIYA.bleat(); await fb(fbOnce(L.oops)); }
         else if (strikes === 2) { Tag.digit(true); Rule.show(D.rule, q.price); await fb(L.hint); }
         else {
           Btns.state(wrongSide, 'faded'); Btns.state(correctSide, 'glow');
@@ -65,17 +71,18 @@
         const hops = Math.max(2, Math.ceil(Math.abs(L.ans - q.price) / 125));
         await GUDIYA.hopTo(ax + (correctSide === 'L' ? 6 : -6), ON_BAR.y, hops);
         Marker.green(ax, ON_BAR.y - ON_BAR.h - 4, L.ans);
-        GUDIYA.cheer();
+        const cheered = GUDIYA.cheer();
         // tag flips to the stamp, the cart collects the item
-        await Tag.stamp(L.ans);
+        await Tag.stamp(L.ans); await cheered;   // QA bug 19: her happy bounce is over before the line goes
         if (!teach) {
           // the cart moment: the line clears, the cart rolls to the centre, the item drops in, Gudiya jumps for joy
           const from = Tag.iconCentre();
           COACH.hideBubble();                                      // the cart rolls in under where the bubble sits (Pari's line was up for 3+ s)
-          await Promise.all([Btns.hide(), Marker.hideAll(), Line.hide(), Rule.hide()]);
-          await Cart.moment(GA(`ic_${q.icon}.webp`), from);
           const side = -1;                                         // Gudiya on the cart's left: it leaves to the right
-          await GUDIYA.leapTo(Cart.CEN.x + side * 350, 792, 190);
+          // QA bug 19: she jumps down off the number line to the ground AS it goes (she used to keep standing / bouncing in mid-air
+          // where the line had been for 1–2 s, until after the cart had rolled in)
+          await Promise.all([Btns.hide(), Marker.hideAll(), Line.hide(), Rule.hide(), GUDIYA.leapTo(Cart.CEN.x + side * 350, 792, 190)]);
+          await Cart.moment(GA(`ic_${q.icon}.webp`), from);
           GUDIYA.face(side < 0);                                   // looking at the cart
           ST.sparks(Cart.CEN.x + side * 350, 640, 14, 90); await GUDIYA.joy();
           // the cart goes back to its corner while a marigold lights up and the sun takes one step
@@ -157,7 +164,7 @@
         Rule.hide(); await Btns.show(T.lo, T.hi);
         if ($('#gudiya').classList.contains('hidden')) GUDIYA.enter(CORNER.x, CORNER.y, CORNER.h);
         Btns.state('R', 'glow');
-        const h = Btns.handAt('R'); Hand.show(h.x, h.y);       // show, don't tell: the hand demonstrates the tap
+        const h = Btns.handAt('R'); Promise.resolve(said).then(() => { if (!skipping) Hand.show(h.x, h.y); });   // show, don't tell: the hand demonstrates the tap — only once the buttons can be tapped (QA bug 15)
         await play({ ...T, word: 'sweets', n: 0 }, L, { teach: true, ready: said });
         return;
       }
@@ -219,7 +226,7 @@
 
   /* ---------- reset (the story can loop: "Play again" runs the level again) ---------- */
   function reset() {
-    skipping = false; result.stars = [];
+    skipping = false; result.stars = []; OOPS_SAID.clear();
     ['#tagRig', '#numline', '#marker', '#markerGreen', '#gudiya', '#doneOv', '#coach', '#btnSkip'].forEach(s => $(s).classList.add('hidden'));
     ['#btnL', '#btnR'].forEach(s => { $(s).className = 'gbtn hidden'; gsap.set(s, { clearProps: 'all' }); });
     gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); gsap.set('#cart', { x: 0 });
@@ -237,7 +244,7 @@
     await gsap.fromTo('#titleCard', { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .55, ease: 'back.out(1.7)' });
     gsap.from('#titleIcons img', { y: 30, opacity: 0, duration: .35, stagger: .06, ease: 'back.out(2)' });
     SND.sfx('rise');
-    await wait(2.2);
+    await wait(4);   // QA bug 14: the level card stays long enough to read (was 2.2 s)
     await gsap.to(ov, { opacity: 0, duration: .35 }); ov.classList.add('hidden');
   }
 

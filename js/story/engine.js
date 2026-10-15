@@ -71,7 +71,9 @@ async function loadAll(onProg) {
   later.forEach(n => { IMG[n].src = imgURL(n); });
 }
 /* warm(): make sure these images are decoded before they first appear (IMG names or URLs). Resolves when done. */
-function warm(list) { return Promise.all(list.map(n => { const im = typeof n === 'string' ? (IMG[n] || Object.assign(new Image(), { src: n })) : n; return im && im.decode ? im.decode().catch(() => { }) : null; })); }
+/* QA bug 26: never wait more than 3 s for it — on a slow network / slow device a decode that never settles used to leave the screen
+   frozen (the story or a level waits on warm() before it goes on). The pictures still finish loading in the background. */
+function warm(list, maxS = 3) { const all = Promise.all(list.map(n => { const im = typeof n === 'string' ? (IMG[n] || Object.assign(new Image(), { src: n })) : n; return im && im.decode ? im.decode().catch(() => { }) : null; })); return Promise.race([all, new Promise(r => setTimeout(r, maxS * 1000))]); }
 window.warm = warm;
 // ---------- audio unlock (Safari / iPad / embedded previews need this inside a real tap) ----------
 let AUDIO_UNLOCKED = false; window.EDIT_PAUSED = false;
@@ -289,7 +291,7 @@ gsap.ticker.add(() => {
 /* a very soft pencil scratch under the writing loop (Oct 2026); silent while any voice is playing, gone with the scene */
 function idleSound(o, want) {
   const t = AC ? AC.currentTime : 0, voicing = voiceNow && live.has(voiceNow);
-  if (!o.wrap.isConnected || SKIPPING) want = false;
+  if (!o.wrap.isConnected || SKIPPING || o.mute) want = false;   // o.mute: no pencil sound on this screen (bridge2, QA bug 22)
   if (want && !o.scr && AC && BUF['sfx_' + want.sfx]) { o.scr = play('sfx_' + want.sfx, { loop: true, gain: 0 }); o.scrOn = null; }
   if (!o.scr) return;
   const target = want && !voicing ? want.gain : 0;
@@ -301,7 +303,7 @@ function actOn(o, name, end = null) {
   if (o.act && o.act.name === name && o.act.stopAt == null) return;      // already explaining: keep going
   if (o.act) o.frames[o.act.name].forEach(i => i.style.opacity = 0);
   Object.values(o.imgs).forEach(i => { gsap.killTweensOf(i); i.style.opacity = 0; });
-  o.act = { name, a, t0: actClock(), stopAt: null, end, shown: -1 }; ACTORS.add(o);
+  o.act = { name, a, t0: actClock(), el: 0, last: actClock(), loud: actClock(), stopAt: null, end, shown: -1 }; ACTORS.add(o);
 }
 function actDone(o) {
   if (!o.act) return; const { name, end } = o.act;
@@ -312,13 +314,20 @@ gsap.ticker.add(() => {
   ACTORS.forEach(o => {
     if (!o.wrap.isConnected) { ACTORS.delete(o); return; }
     const A = o.act, a = A.a; let k;
+    /* lip-sync (QA bug 8, Oct 2026): the talking loop only advances while the voice is actually sounding. In the pauses between
+       words / phrases (read from the voice analyser) the frame holds, so the mouth stops with the voice instead of running on a
+       fixed clock. With no analyser / audio locked it runs freely as before. The intro always plays. */
+    const now = actClock(), dt = Math.max(0, now - A.last); A.last = now;
+    const lv = voiceLevel(), gated = lv >= 0 && voiceNow && live.has(voiceNow);
+    if (lv > .02) A.loud = now;
+    if (!gated || now - A.loud < .14 || A.el < (a.intro || 0) / a.fps) A.el += dt;
     if (a.mode === 'once') { k = Math.floor((actClock() - A.t0) * a.fps); if (k >= a.n) { actDone(o); return; } }   // plays through once, then the end pose
     else if (a.mode === 'pp') {
       if (A.stopAt != null) { if (A.from == null) A.from = Math.max(0, A.shown); k = A.from - Math.floor((actClock() - A.stopAt) * a.fps * 3); if (k <= 0) { actDone(o); return; } }  // glide back to frame 0
-      else { const f = Math.floor((actClock() - A.t0) * a.fps), P = 2 * (a.n - 1), m = f % P; k = m < a.n ? m : P - m; }
+      else { const f = Math.floor(A.el * a.fps), P = 2 * (a.n - 1), m = f % P; k = m < a.n ? m : P - m; }
     } else {
       if (A.stopAt != null) k = a.outro + Math.floor((actClock() - A.stopAt) * a.fps);   // outro, then settle
-      else { const f = Math.floor((actClock() - A.t0) * a.fps); k = f < a.intro ? f : a.intro + (f - a.intro) % (a.outro - a.intro); }
+      else { const f = Math.floor(A.el * a.fps); k = f < a.intro ? f : a.intro + (f - a.intro) % (a.outro - a.intro); }
       if (k >= a.n) { actDone(o); return; }
     }
     if (k !== A.shown) { o.frames[A.name].forEach((i, j) => i.style.opacity = j === k ? 1 : 0); A.shown = k; }
@@ -506,20 +515,27 @@ function signGate(tl, t, s) {
     const bw = r.width / k, bh = r.height / k;
     const hit = el('div', 'signhit', ui, '', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: bw + 40 + 'px', height: bh + 40 + 'px' });
     // the game's hint hand taps the sign (its fingertip is at 75,120 of the 150-px image): on the board, right of centre
-    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 75) + 'px', top: (20 + bh * .72 - 120) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';   // on the arrow end, clear of the words
+    /* QA Oct 2026 (bugs 9/12/20): the hand points the SAME way as the sign's arrow (➜, to the right) — it is the game's down-pointing
+       hint hand turned a quarter turn, sitting just under the arrow end of the board (clear of the words), its fingertip (75,120 of the 150-px image → 120,75
+       once turned) under the arrow, and it nudges along the arrow (left → right), not up and down. */
+    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 120) + 'px', top: (20 + bh + 14 - 75) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';
     board.classList.add('tapme');
-    const pulse = gsap.to(board, { scale: 1.04, duration: .55, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-    gsap.set(hand, { opacity: 0 });
-    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { y: -30, scale: 1 }, { y: 0, duration: .35, ease: 'power2.in' })
-      .to(hand, { scale: .9, duration: .12, yoyo: true, repeat: 1 }).to(hand, { y: -30, duration: .35, ease: 'power2.out' }).to({}, { duration: .25 });
-    const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); gsap.to(board, { scale: 1, duration: .15 }); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop'); tl.play(); };
+    const pulse = gsap.to(board, { scale: 1.015, duration: 1.1, yoyo: true, repeat: -1, ease: 'sine.inOut' });   // a calm "breathing" glow (it used to shake: ×1.04 every .55 s)
+    gsap.set(hand, { opacity: 0, rotation: -90 });
+    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { x: -26 }, { x: 0, duration: .4, ease: 'power2.out' })
+      .to(hand, { scale: .92, duration: .12, yoyo: true, repeat: 1 }).to(hand, { x: -26, duration: .4, ease: 'power2.inOut' }).to({}, { duration: .3 });
+    /* bugs 11/13: the tapped sign leaves AT ONCE (it used to hang there until the next screen came in) */
+    const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop');
+      gsap.killTweensOf(s); gsap.killTweensOf(board); gsap.to(board, { scale: .92, duration: .1 }); gsap.to(s, { y: -760, rotate: 0, duration: .45, delay: .08, ease: 'back.in(1.3)' }); tl.play(); };
     hit.addEventListener('click', go, { once: true });
     tl.eventCallback('onUpdate', () => { if (tl.progress() >= 1 && hit.isConnected) { hit.remove(); pulse.kill(); tap.kill(); } });   // Skip
   }, null, t);
 }
+/* QA Oct 2026 (bugs 9/10/12/20: "the card shakes excessively"): one soft drop with a small settle and a single gentle sway, instead of a
+   bounce.out drop followed by a 2.2 s elastic wobble */
 function dropSign(tl, t, s) {
-  tl.to(s, { y: 0, duration: .9, ease: 'bounce.out' }, t);
-  tl.fromTo(s, { rotate: -5 }, { rotate: 0, duration: 2.2, ease: 'elastic.out(1,0.3)', immediateRender: false }, t + .6);
+  tl.to(s, { y: 0, duration: .75, ease: 'back.out(1.15)' }, t);
+  tl.fromTo(s, { rotate: -1.5 }, { rotate: 0, duration: .9, ease: 'sine.out', immediateRender: false }, t + .5);
   tl.call(() => sfx('stamp', .7), null, t + .45);
 }
 // ---------- HUD ----------

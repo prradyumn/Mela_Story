@@ -240,7 +240,7 @@
 
 /* ================= Level 3 · Mela Ground · Pari's money cart (Figma ★ L3 · Clean build v3, DEV SPEC 137:343) =================
    #l3 is its own stacking context (z 5): Gudiya (18), the hand (46), the HUD (30) and fx (55) stay above it. */
-#game #l3{position:absolute;inset:0;z-index:5;overflow:hidden}
+#game #l3{position:absolute;inset:0;z-index:5;overflow:hidden;will-change:transform}   /* QA bug 24: the question push-in / speaker camera scale this layer every frame — keep it on the compositor (no re-raster of the whole lane per frame) */
 #game #l3.hidden{display:none}
 #game #sky3{position:absolute;left:0;top:0;width:1920px;height:1080px}
 /* a setting sun: deeper orange-red, soft halo (feedback: it was too bright to be setting); Sun.to() reddens it further */
@@ -304,8 +304,8 @@
 #game #cart3 .board{position:absolute;left:464px;top:94px;width:340px;height:212px;scale:1.1;transform-origin:0 0}   /* ×1.1 (was ×1.3: too much on screen, UI feedback Oct 2026) — same bottom edge + centre */
 #game #cart3 .board::before{content:'';position:absolute;left:-90px;right:-90px;top:-70px;bottom:-60px;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(255,208,110,.42),rgba(255,190,80,.14) 60%,rgba(255,190,80,0))}
 #game #cart3 .board img{position:absolute;left:0;top:0;width:340px;height:212px}
-#game #cart3 .plabel{position:absolute;left:0;top:57px;width:340px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#ffd970;text-shadow:0 1px 0 rgba(0,0,0,.35)}
-#game #cart3 .pval{position:absolute;left:14px;top:78px;width:312px;height:60px;text-align:center;font:700 46px/60px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
+#game #cart3 .plabel{position:absolute;left:0;top:69px;width:340px;height:24px;text-align:center;font:800 18px/24px Baloo;letter-spacing:.22em;color:#ffd970;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+#game #cart3 .pval{position:absolute;left:28px;top:89px;width:283px;height:60px;text-align:center;font:700 46px/60px Fredoka;color:#fffdf5;white-space:nowrap;text-shadow:0 0 6px rgba(255,255,255,.35)}
 #game #cart3 .smears i{position:absolute;width:230px;height:30px;border-radius:15px;background:rgba(240,236,224,.38);opacity:0}
 #game #cart3 .smears i:nth-child(1){left:50px;top:80px}#game #cart3 .smears i:nth-child(2){left:58px;top:100px}#game #cart3 .smears i:nth-child(3){left:66px;top:120px}
 #game #cart3 .bag{position:absolute;left:440px;top:232px;width:92px;height:101px;filter:drop-shadow(3px 5px 4px rgba(30,12,4,.4))}
@@ -418,7 +418,10 @@
 #game #done3Cta{top:762px}
 
 /* QA Oct 2026 (less clutter): answers breathe gently while Pari talks; a tap then pops a "listen" sign (fx.js) */
-#game .gbtn.vowait,#game .stamp2.vowait,#game .slate3.vowait{animation:gbreathe 1.8s ease-in-out infinite}
+/* QA bug 16 (Oct 2026): locked / disabled answers do not move at all — no breathing while Pari talks, no press-down, no hover lift */
+#game .gbtn.vowait,#game .stamp2.vowait,#game .slate3.vowait{animation:none}
+#game .gbtn.locked:active,#game .gbtn.faded:active,#game .round-btn.locked:active{transform:none}
+#game .gbtn.locked,#game .stamp2.locked,#game .slate3.locked{cursor:default}
 @keyframes gbreathe{50%{scale:1.035}}
 #game .glisten{position:absolute;width:76px;height:76px;border-radius:50%;background:#fffaf0;border:4px solid #e8870e;box-shadow:0 6px 14px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;z-index:60;pointer-events:none}
 #game .glisten svg{width:44px;height:44px}

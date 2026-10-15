@@ -113,7 +113,20 @@
     if (e.key === 'p' || e.key === 'P' || (e.key === ' ' && ctl.classList.contains('on'))) { e.preventDefault(); setPause(!PAUSED); }
     else if (e.key === 'Escape' && PAUSED) setPause(false);
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
+  /* QA bug 3 (Oct 2026): pause AT ONCE when the game loses focus. visibilitychange alone came late or never when the player switched
+     to another window (the tab stays "visible" until the OS reports the window covered, often seconds later), so the game kept
+     playing. Now: tab hidden, window blurred (another app / window / the address bar), page hidden or frozen → pause immediately.
+     On the cover (before the pause button exists) the sound is simply suspended and comes back with the page. */
+  let coverSuspended = false;
+  const away = () => {
+    if (ctl.classList.contains('on')) { setPause(true); return; }
+    const a = ac(); if (a && a.state === 'running') { try { a.suspend(); coverSuspended = true; } catch (e) { } }
+  };
+  const back2 = () => { if (coverSuspended && !PAUSED) { coverSuspended = false; const a = ac(); try { a && a.resume(); } catch (e) { } } };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) away(); else back2(); });
+  addEventListener('blur', () => { if (!document.hasFocus()) away(); });
+  addEventListener('focus', back2);
+  addEventListener('pagehide', away); document.addEventListener('freeze', away);
   const port = matchMedia('(orientation: portrait) and (pointer: coarse)');
   (port.addEventListener ? port.addEventListener('change', e => e.matches && setPause(true)) : port.addListener(e => e.matches && setPause(true)));
 

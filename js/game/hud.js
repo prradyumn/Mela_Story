@@ -93,7 +93,7 @@
     const box = $('#' + key + 'Coach'), clock = () => gsap.globalTimeline.time();
     const imgs = [...Array(n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = h + 'px'; im.style.bottom = lift + 'px';
       if (flip) im.style.transform = 'translateX(-50%) scaleX(-1)'; box.appendChild(im); return im; });
-    let loaded = false, talking = false, t0 = 0, stopAt = null, from = 0, shown = -1, quietCall = null;
+    let loaded = false, talking = false, t0 = 0, stopAt = null, from = 0, shown = -1, quietCall = null, el = 0, last = 0, loud = 0;
     // optional one-shot cheer frames (Pari: claps, then a fist-pump) layered in the same box; while it plays the talk loop is hidden
     const cImgs = cheer ? [...Array(cheer.n)].map(() => { const im = document.createElement('img'); im.alt = ''; im.style.height = cheer.h + 'px'; im.style.bottom = lift + 'px'; box.appendChild(im); return im; }) : [];
     let cheerT0 = null, cShown = -1, cheerDone = null;
@@ -148,7 +148,7 @@
       talk() {
         if (quietCall) { quietCall.kill(); quietCall = null; } scratch(false); if (rK != null) { restOff(); frame(mode === 'pp' ? 0 : n - 1); } if (talking) return;
         if (idle && shown < 0) frame(0);
-        t0 = clock() - (mode === 'pp' ? Math.max(0, shown) : (stopAt != null ? intro : 0)) / fps; talking = true; stopAt = null;
+        t0 = clock() - (mode === 'pp' ? Math.max(0, shown) : (stopAt != null ? intro : 0)) / fps; el = clock() - t0; last = clock(); loud = clock(); talking = true; stopAt = null;
       },
       quiet(now) {
         if (quietCall) quietCall.kill();
@@ -170,7 +170,12 @@
           if (cheerDone) { cheerDone(); cheerDone = null; }
         }
         if (talking) {
-          const f = Math.floor((clock() - t0) * fps);
+          /* lip-sync (QA bug 8): the talking loop advances only while the voice is sounding; in the pauses between words it holds */
+          const now = clock(), dt = Math.max(0, now - last); last = now;
+          const lv = typeof voiceLevel === 'function' ? voiceLevel() : -1, gated = lv >= 0 && typeof voiceNow !== 'undefined' && voiceNow && live.has(voiceNow);
+          if (lv > .02) loud = now;
+          if (!gated || now - loud < .14 || (mode !== 'pp' && el < intro / fps)) el += dt;
+          const f = Math.floor(el * fps);
           if (mode === 'pp') { const P = 2 * (n - 1), m = f % P; frame(m < n ? m : P - m); }
           else frame(f < intro ? f : intro + (f - intro) % (outro - intro));
         } else if (stopAt != null) {

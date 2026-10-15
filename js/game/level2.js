@@ -4,6 +4,12 @@
    Correct: blue ≈ chips → stamp dips in the ink → THUMP on the bill → red "About ₹…" mark → marigold + sun →
    the bill crumples into the CHECKED basket → next bill. */
 (function () {
+/* QA bug 17 (Oct 2026): wrong answers don't hold the child up. The level-wide "Oops! Try again…" line is said in full only the first time
+   in the level (later: the goat's bleat + the boing only), and the answers come back ~1 s after a wrong tap while the feedback line
+   carries on — the next tap simply cuts it. */
+const OOPS_SAID = new Set();
+const fbOnce = l => { if (!l || OOPS_SAID.has(l.vo)) return null; OOPS_SAID.add(l.vo); return l; };
+const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : Promise.resolve(), ST.wait(1.1)])]);   // ≥ .9 s so the red 'wrong' flash reads
   const { $, wait, sparks, confetti } = ST;
   const { Bill, Stamps, Pile, Basket } = L2SC;
   const D = window.LEVEL2;
@@ -42,8 +48,8 @@
         strikes++; ST.buzz('wrong'); Stamps.disable();
         Stamps.state(i, 'wrong'); Stamps.wiggle(i); SND.sfx('boing');
         gsap.delayedCall(.8, () => { if (!done && strikes < 3) Stamps.state(i, ''); });
-        const fb = l => COACH.say(l);   // answer again once the feedback line is over
-        if (strikes === 1) { gudiyaBleat(); await fb(L.oops); }
+        const fb = fbQuick;   // answer again ~1 s into the feedback line (QA bug 17)
+        if (strikes === 1) { gudiyaBleat(); await fb(fbOnce(L.oops)); }
         else if (strikes === 2) { Bill.chips('yellow'); await fb(L.hint); }
         else {
           b.choices.forEach((v, k) => Stamps.state(k, k === right ? 'glow' : 'faded'));
@@ -91,7 +97,7 @@
     await gsap.fromTo(c, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .55, ease: 'back.out(1.7)' });
     gsap.from('#titleIcons img', { y: 30, opacity: 0, duration: .35, stagger: .08, ease: 'back.out(2)' });
     SND.sfx('rise');
-    await wait(2.2);
+    await wait(4);   // QA bug 14: the level card stays long enough to read (was 2.2 s)
     await gsap.to(ov, { opacity: 0, duration: .35 }); ov.classList.add('hidden');
   }
 
@@ -119,7 +125,7 @@
         skipBtn(false); const said = COACH.say(line);
         await Stamps.show(T.choices);
         const right = T.choices.indexOf(T.answer); Stamps.state(right, 'glow');
-        const h = Stamps.handAt(right); Hand.show(h.x, h.y);
+        const h = Stamps.handAt(right); Promise.resolve(said).then(() => { if (!skipping) Hand.show(h.x, h.y); });   // QA bug 15: the hand only once the stamps are enabled (not on the locked 'About' stamps)
         await play(T, L, { teach: true, ready: said });
         await Promise.all([Stamps.hide(), Bill.crumpleTo(false)]);
         return;
@@ -176,7 +182,7 @@
 
   /* ---------- reset + run ---------- */
   function reset() {
-    skipping = false; result.stars = [];
+    skipping = false; result.stars = []; OOPS_SAID.clear();
     $('#l2').classList.remove('hidden'); $('#done2').classList.add('hidden'); $('#done2Cta').classList.remove('pulse');
     GFX.reset(); Bill.hide(); $('#pack2').innerHTML = '';
     /* #l2 is its own stacking context (will-change), so everything on the desk (stamps, bill, basket, the complete card) is one

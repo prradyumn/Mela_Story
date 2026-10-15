@@ -47,8 +47,11 @@
         pending = finish;
         const after = s => { timer = gsap.delayedCall(s, finish); };
         if (!id) { after(fallbackSec); return; }
+        /* QA bug 26: a voice file that is still downloading on a slow network must not hold the game — after 2.5 s the line moves on
+           by its reading time (the file keeps loading in the background for next time) */
+        let gaveUp = false; const slow = gsap.delayedCall(2.5, () => { if (finished || BUF[id]) return; gaveUp = true; after(Math.max(.5, fallbackSec - 2.5)); });
         load(id).then(ok => {
-          if (finished) return;
+          slow.kill(); if (finished || gaveUp) return;
           if (ok && !SKIPPING) { voice(id); after(DUR[id] + .05); }
           else after(fallbackSec);
         });

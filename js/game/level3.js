@@ -5,6 +5,12 @@
    → PAY (Aaru, coins into the potli, the duster rewrites the panel) → LIGHT (PAID, the stall lights up, marigold, sun).
    No speech bubbles in L3: COACH.voiceOnly, the speaker gets talk waves. Running total uses the ROUNDED value. */
 (function () {
+/* QA bug 17 (Oct 2026): wrong answers don't hold the child up. The level-wide "Oops! Try again…" line is said in full only the first time
+   in the level (later: the goat's bleat + the boing only), and the answers come back ~1 s after a wrong tap while the feedback line
+   carries on — the next tap simply cuts it. */
+const OOPS_SAID = new Set();
+const fbOnce = l => { if (!l || OOPS_SAID.has(l.vo)) return null; OOPS_SAID.add(l.vo); return l; };
+const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : Promise.resolve(), ST.wait(1.1)])]);   // ≥ .9 s so the red 'wrong' flash reads
   const { $, wait, confetti } = ST;
   const { Guddu, Cam, Pari, Waves, Cart, Panel, Minus, Bill, Slates, Aaru, Coins, Stall, Sun, Fw, Wheel, Map, Baba } = L3SC;
   const D = window.LEVEL3, Hand = SC.Hand;
@@ -61,8 +67,8 @@
         strikes++; ST.buzz('wrong'); Slates.disable();
         Slates.state(k, 'wrong'); Slates.wiggle(k); SND.sfx('boing');
         gsap.delayedCall(.8, () => { if (!done && strikes < 3) Slates.state(k, ''); });
-        const fb = l => COACH.say(l);   // answer again once the feedback line is over
-        if (strikes === 1) { gudiyaBleat(); await fb(L.oops); }
+        const fb = fbQuick;   // answer again ~1 s into the feedback line (QA bug 17)
+        if (strikes === 1) { gudiyaBleat(); await fb(fbOnce(L.oops)); }
         else if (strikes === 2) { Bill.chip('yellow', L.r); Minus.glow(); await fb(L.hint); }
         else {
           q.choices.forEach((v, j) => Slates.state(j, j === right ? 'glow' : 'faded'));
@@ -141,7 +147,7 @@
     await gsap.fromTo(c, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .55, ease: 'back.out(1.7)' });
     gsap.from('#titleIcons img', { y: 30, opacity: 0, duration: .35, stagger: .08, ease: 'back.out(2)' });
     SND.sfx('rise');
-    await wait(2.2);
+    await wait(4);   // QA bug 14: the level card stays long enough to read (was 2.2 s)
     await gsap.to(ov, { opacity: 0, duration: .35 }); ov.classList.add('hidden');
   }
 
@@ -174,7 +180,7 @@
         skipBtn(false); const asked = COACH.say(line);
         await Minus.show(); await Slates.show(T.choices);
         const right = T.choices.indexOf(T.answer); Slates.state(right, 'glow');
-        const h = Slates.handAt(right); Hand.show(h.x, h.y);
+        const h = Slates.handAt(right); Promise.resolve(asked).then(() => { if (!skipping) Hand.show(h.x, h.y); });   // QA bug 15: the hand only once the slates are enabled
         await play(T, L, { teach: true, ready: asked });
         // Guddu: "Umm... it's 1,61,240 to be exact. But your number is so close. Good job!"
         await COACH.say(T.exact); await wait(.3);
@@ -255,7 +261,7 @@
 
   /* ---------- reset + run ---------- */
   function reset() {
-    skipping = false; result.stars = []; GFX.reset(); GFX.ambient(3);   // L3 life = the bulbs of lit stalls twinkle (Stall → GFX.twinkle)
+    skipping = false; result.stars = []; OOPS_SAID.clear(); GFX.reset(); GFX.ambient(3);   // L3 life = the bulbs of lit stalls twinkle (Stall → GFX.twinkle)
     // anything Level 1 / Level 2 left behind
     ['#coach', '#btnSkip', '#gudiya', '#doneOv', '#tagRig', '#numline', '#marker', '#markerGreen', '#titleOv', '#l2'].forEach(s => $(s).classList.add('hidden'));
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';

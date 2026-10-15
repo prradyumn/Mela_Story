@@ -48,6 +48,23 @@ function officeGuddu(s, pose) {
   return g;
 }
 // ---------------- TITLE ----------------
+/* the gate painting (bg_01_gate, 1918×1080 at stage height): its sun sits at ~(1725, 170) = 90% 15.7%; the arched board's middle line
+   runs from ~(700, 200) up to ~(1057, 155) and back down to ~(1415, 200) */
+const SUN_AT = '89.9% 15.7%';
+function sunRays(parent, a = .22) {
+  return el('div', 'tint', parent, null, { background: `repeating-conic-gradient(from 0deg at ${SUN_AT}, rgba(255,240,180,${a}) 0 7deg, transparent 7deg 16deg)`, mixBlendMode: 'screen' });
+}
+/* "Welcome to Apnapur" painted along the arch of the gate board (QA bug 5: straight text on a curved board). An SVG text on a
+   gentle arc (its baseline 30 px lower at the ends than in the middle, like the board's planks), in the painting's coordinates. */
+function welcomeBoard(parent, op = 1) {
+  const wrap = el('div', '', parent, `<svg width="1920" height="1080" viewBox="0 0 1920 1080" style="position:absolute;left:0;top:0;overflow:visible">
+    <defs><path id="welArc" d="M 687 231 Q 1057 141 1427 231"/></defs>
+    <text font-family="Baloo" font-weight="800" font-size="66" fill="#5a2d0c" text-anchor="middle" letter-spacing="0.6"
+      style="paint-order:stroke;stroke:rgba(255,220,160,.45);stroke-width:2px;filter:drop-shadow(0 2px 0 rgba(255,220,160,.55)) drop-shadow(0 -1px 0 rgba(0,0,0,.3))">
+      <textPath href="#welArc" startOffset="50%">Welcome to Apnapur</textPath></text></svg>`,
+    { position: 'absolute', left: 0, top: 0, width: '1920px', height: '1080px', pointerEvents: 'none', opacity: op });
+  return wrap;
+}
 
 // ---------- flow helpers ----------
 let NEXT_IN = 'iris';          // how the next screen should be revealed
@@ -66,12 +83,13 @@ async function title() {
   const s = newScene();
   const bg = bgImg(s, 'bg_01_gate', { left: '0px' });
   gsap.fromTo(bg, { scale: 1.12, transformOrigin: '50% 40%' }, { scale: 1.0, duration: 9, ease: 'sine.out' });
-  // sun rays
-  const rays = el('div', 'tint', s, null, { background: 'repeating-conic-gradient(from 0deg at 88% 8%, rgba(255,240,180,.22) 0 7deg, transparent 7deg 16deg)', mixBlendMode: 'screen' });
-  gsap.to(rays, { rotate: 6, transformOrigin: '88% 8%', duration: 8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-  // welcome text painted on the gate board
-  const wel = reg(el('div', '', s, 'Welcome to Apnapur', { position: 'absolute', left: '1072px', top: '212px', transform: 'translate(-50%,-50%)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '66px', color: '#5a2d0c', textShadow: '0 2px 0 rgba(255,220,160,.6), 0 -1px 0 rgba(0,0,0,.35)', whiteSpace: 'nowrap', letterSpacing: '.01em' }), 'welcome');
-  gsap.fromTo(wel, { opacity: 0, scale: .7 }, { opacity: .92, scale: 1, duration: 1, delay: .6, ease: 'back.out(2)' });
+  // sun rays: they fan out from the painted sun (QA bug 7: they came from 88% 8%, above and left of it). Inside the background, so
+  // they stay on the sun while it zooms.
+  const rays = sunRays(bg, .22);
+  gsap.to(rays, { rotate: 6, transformOrigin: SUN_AT, duration: 8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+  // welcome text painted on the gate board, bent along the board's arch (QA bug 5); also inside the background so it zooms with the board
+  const wel = reg(welcomeBoard(bg), 'welcomeArc');   // new id: the old straight text's editor offset (dy −50) no longer applies
+  gsap.fromTo(wel, { opacity: 0, scale: .7, transformOrigin: '1057px 175px' }, { opacity: .92, scale: 1, duration: 1, delay: .6, ease: 'back.out(2)' });
   const goat = char(s, 'gudiya', 1580, 'idle', { ground: 1050, scale: 1.05 });
   const tl = gsap.timeline();
   move(tl, 1.1, goat, 'trot', 420, 0, null, { ease: 'sine.out', end: 'idle', enter: true });
@@ -87,14 +105,14 @@ async function title() {
   const aaru = char(s, 'aaru', 540, 'shout', { ground: 1055 });
   move(tl, .3, pari, 'walk', -520, 0, null, { ease: 'sine.out', end: 'happy', enter: true });
   move(tl, .6, aaru, 'run', -760, 0, null, { ease: 'sine.out', end: 'shout', enter: true });
-  tl.call(() => voice('t0'), null, 1.3);
   jump(tl, 2.9, aaru, 45, 1);   // once he has run in
-  // no second Play button: the cover's Start began the game. The welcome plays (t0), then the story moves on by itself.
+  // no second Play button: the cover's Start began the game. The title voice (t0) now plays ON THE COVER (QA bug 4, see main()),
+  // so this screen is the welcome only: the characters arrive, then the story moves on by itself.
   birds(s, 5, 90);
   petals(50);
   const iv = setInterval(() => petals(6), 1500);
   playMusic('m_title', { gain: .9 });
-  await wait(Math.max(5, 1.3 + (DUR.t0 || 3) + 1.6));
+  await wait(5);
   clearInterval(iv); tl.kill();
   await irisOut(50, 80);
   NEXT_IN = 'iris';
@@ -138,9 +156,8 @@ async function hookA() {
     if (prev) tl.set(prev.wrap, { opacity: 0 }, at + .2); prev = sh; };
   // 1 "It’s Mela day in Apnapur!" push through the gate from the title screen
   const g = shot(s, 'bg_01_gate'); prev = g;
-  const wl = LAYOUT.items['title.welcome'] || {};
-  el('div', '', g.cam, 'Welcome to Apnapur', { position: 'absolute', left: (1072 + (wl.dx || 0)) + 'px', top: (212 + (wl.dy || 0)) + 'px', transform: 'translate(-50%,-50%)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '66px', color: '#5a2d0c', opacity: .92, textShadow: '0 2px 0 rgba(255,220,160,.6), 0 -1px 0 rgba(0,0,0,.35)', whiteSpace: 'nowrap' });
-  el('div', 'tint', g.wrap, null, { background: 'repeating-conic-gradient(from 0deg at 88% 8%, rgba(255,240,180,.2) 0 7deg, transparent 7deg 16deg)', mixBlendMode: 'screen' });
+  welcomeBoard(g.cam.firstChild, .92);   // the same arched lettering as the title screen, on the board in the painting
+  sunRays(g.cam.firstChild, .2);        // rays from the painted sun (they move with the camera)
   birds(g.wrap, 3, 120);
   for (let i = 0; i < 14; i++) { const pe = el('div', '', g.wrap, null, { position: 'absolute', left: (Math.random() * W) + 'px', top: '-30px', width: '14px', height: '9px', borderRadius: '50%', background: ['#f7b733', '#e8870e', '#ff9f1c'][i % 3] });
     tl.fromTo(pe, { y: Math.random() * 300 }, { y: 700 + Math.random() * 400, x: 60 + Math.random() * 120, rotate: 540, duration: 3.6, ease: 'none' }, 0); }
@@ -305,6 +322,8 @@ async function hookE() {
   let u = say(tl, s, .4, 'p3', pari, T('p3'), { p: 'point' });
   pose(tl, u - .6, aaru, 'jump'); tl.call(() => { sfx('boing', .8); setPose(goat, 'hop'); }, null, u - .6);
   jump(tl, u - .6, aaru, 70, 2);
+  pose(tl, u + .95, aaru, 'shout', { hop: false });   // QA bug 18: after his two jumps he stands still (resting in 'jump' ran the toe-hop loop all the time)
+  tl.call(() => setPose(goat, 'idle'), null, u + .95);
   const go = sign(s, 'Go to the bazaar ➜', 960, 430, 58, 'gosign');
   dropSign(tl, u - .1, go);
   signGate(tl, u + 1, go);   // the child taps the sign to go
@@ -375,13 +394,13 @@ async function bridge1() {
   bgImg(s, 'bg_03_bazaar', { left: -(2593 - 1920) + 'px' });
   warmTint(s, .35);
   const pari = char(s, 'pari', 520, 'happy', { ground: 1045 });
-  const aaru = char(s, 'aaru', 1380, 'jump', { ground: 1045, flip: true });
+  const aaru = char(s, 'aaru', 1380, 'shout', { ground: 1045, flip: true });   // QA bug 18: rests in 'shout' (still), not 'jump' (toe-hop loop)
   playMusic('m_village_long', { gain: .85, offset: 40 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   tl.fromTo(flowerEls, { scale: 1 }, { scale: 1.35, duration: .25, yoyo: true, repeat: 1, stagger: .08 }, .3);
   tl.call(() => sfx('sparkle', .8), null, .3);
-  jump(tl, .5, aaru, 75, 2);
+  pose(tl, .45, aaru, 'jump', { hop: false }); jump(tl, .5, aaru, 75, 2); pose(tl, 2.05, aaru, 'shout', { hop: false });   // the jump pose only while he jumps
   tl.call(() => sfx('boing', .8), null, .5);
   let t = say(tl, s, 2.1, 'r2', aaru, T('r2'));
   cheer(tl, 2.4, pari, 'happy');                                   // Pari claps and fist-pumps while Aaru cheers
@@ -398,7 +417,7 @@ async function bridge2() {
   SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '', flowers: 7 });
   const s = newScene(); drift();
   bgImg(s, 'bg_04_office', { left: '0px' });
-  const guddu = officeGuddu(s, 'write');   // 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
+  const guddu = officeGuddu(s, 'write'); guddu.mute = true;   // QA bug 22: no pencil-scratch loop under this screen ('an additional unwanted sound'). 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
   officeFG(s);
   const pari = char(s, 'pari', 720, 'idle', { ground: 1052, scale: .92, z: 8 });
   warmTint(s, .45).style.zIndex = 9;
@@ -415,7 +434,7 @@ async function bridge2() {
   tl.call(() => sfx('sparkle', .5), null, 1.9);
   tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
-  const go = sign(s, 'Go to the Mela Ground ➜', 1480, 290, 48, 'gosign'); go.style.zIndex = 11; dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile
+  const go = sign(s, 'Go to the Mela Ground ➜', 1480, 300, 40, 'gosign'); go.style.zIndex = 11; go.querySelector('.board').style.padding = '16px 38px 20px';   dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile   // QA bug 21: smaller sign (was 48 px, oversized). 
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
   tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
   await playTL(tl);
@@ -527,7 +546,14 @@ async function badge() {
   tl.play(0);
   await waitClick(again);
   clearInterval(again._iv);
+  again.style.pointerEvents = 'none';
   await irisOut(50, 50); NEXT_IN = 'iris';
+  /* QA bug 26 (Play again froze on a slow network): start the new round from a clean slate — no paused clock, no voice or particles
+     left over from the ending, the game layer closed — so nothing from the finished round can hold up the title screen */
+  try { stopVoices(); } catch (e) { }
+  P.length = 0; window.GAME_PAUSED = false; window.EDIT_PAUSED = false; if (gsap.globalTimeline.paused()) gsap.globalTimeline.resume();
+  try { if (AC && AC.state !== 'running') AC.resume(); } catch (e) { }
+  const g = document.getElementById('game'); if (g) g.classList.add('hidden'); window.GAME_HANDBACK = null; window.GAME_RESULT = {};
 }
 
 
@@ -544,16 +570,29 @@ async function main() {
   const lp = $('#lp'), bar = $('#loader .bar i');
   await loadAll(p => bar.style.width = (p * 100).toFixed(0) + '%');
   await document.fonts.load('600 32px Poppins'); await document.fonts.ready;
-  // the cover's Start button (the tap unlocks audio); the whole cover is tappable too
+  const q = new URLSearchParams(location.search);
+  let i = Math.max(0, FLOW.findIndex(f => f[0] === (q.get('from') || q.get('scene'))));
+  /* QA bug 2 (jerky first screens): decode the opening's pictures — title + opening montage backgrounds and the characters' poses
+     and walk/run frames — while the cover is up, so nothing is decoded in the middle of the first transitions */
+  const firstPics = ['bg_01_gate', 'bg_02_chaupal', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'gudiya_idle', 'gudiya_hop', 'pari_happy', 'pari_idle', 'pari_point', 'aaru_shout', 'aaru_run', 'aaru_jump', 'baba_idle', 'guddu_write', 'guddu_scratch',
+    ...IMAGES.filter(n => /^(pari_walk|aaru_run|gudiya_trot)_\d+$/.test(n)), ...IMAGES.filter(n => /_m$/.test(n))];
+  if (i === 0) await Promise.race([warm(firstPics), wait(4)]);
+  // the cover's Start button (the tap unlocks audio). QA bug 1: ONLY the button starts the game (taps elsewhere on the cover did too)
   gsap.to('#loader .bar', { opacity: 0, duration: .3 });
   lp.textContent = 'Start ▶'; lp.classList.add('ready'); $('#loader').classList.add('ready');
   gsap.fromTo(lp, { scale: 0 }, { scale: 1, duration: .6, ease: 'back.out(2.4)', onComplete: () => gsap.to(lp, { scale: 1.06, duration: .75, yoyo: true, repeat: -1, ease: 'sine.inOut' }) });
-  await new Promise(r => $('#loader').addEventListener('click', () => { unlockAudio(); r(); }, { once: true }));
+  /* QA bug 4: the game title (t0, "The Mela Before Sunset") is spoken on the COVER. Browsers only allow sound after a tap, so it plays
+     as soon as the cover appears when sound is already allowed, otherwise right on the Start tap while the cover is still showing
+     (the cover stays up until the title has been said, then the welcome screen opens). Not after a Back / QA reload (?from=…). */
+  let t0Said = false;
+  const sayTitle = () => { if (t0Said || i !== 0 || !AC || AC.state !== 'running') return false; t0Said = true; voice('t0'); return true; };
+  sayTitle(); $('#loader').addEventListener('pointerdown', () => setTimeout(sayTitle, 150));   // a tap on the cover itself unlocks sound: say the title then
+  await new Promise(r => lp.addEventListener('click', e => { e.stopPropagation(); unlockAudio(); r(); }, { once: true }));
+  gsap.killTweensOf(lp); gsap.to(lp, { scale: .9, duration: .12 });
   try { play('sfx_cycle_bell', { gain: 1 }); } catch (e) { }   // storyboard: cycle bell on Start
   try { await AC.resume(); } catch (e) { }
+  if (i === 0 && !t0Said) { await wait(.35); if (sayTitle()) await wait((DUR.t0 || 1.6) + .3); }
   gsap.to('#loader', { opacity: 0, duration: .5, onComplete: () => $('#loader').remove() });
-  const q = new URLSearchParams(location.search);
-  let i = Math.max(0, FLOW.findIndex(f => f[0] === (q.get('from') || q.get('scene'))));
   if (i > 0) { gsap.set(wipe, { clipPath: 'circle(150% at 50% 50%)' }); NEXT_IN = 'iris'; if (FLOW[i][0].startsWith('level') || FLOW[i][0].startsWith('bridge')) playMusic(FLOW[i][0].startsWith('level') ? 'm_hurry' : 'm_village_long'); else if (FLOW[i][0].startsWith('end') || FLOW[i][0] === 'badge') playMusic('m_festive'); else playMusic('m_village_long'); }
   const once = q.has('scene');
   while (true) {
