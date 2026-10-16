@@ -23,6 +23,40 @@ const inr = v => '₹' + Math.round(v).toString().replace(/(\d)(?=(\d\d)+\d$)/g,
    parent of #world), so it never fights a scene's own camera moves or exit zooms on #world; newScene() resets it. Off per scene: just
    don't call it. */
 function drift(d = 18, to = 1.03) { gsap.fromTo('#shaker', { scale: 1 }, { scale: to, duration: d, ease: 'sine.inOut', transformOrigin: '50% 60%' }); }
+/* speaker focus (Oct 2026, "one face, one voice"): in the two-person dialogue scenes the camera eases toward whoever speaks (×1.1 on
+   the scene layer, feet kept in frame, the image edge never shows), a soft pool of light sits on the speaker so the listener stands
+   in the shade (no filter on the characters: animated filters cost frames) and the background goes soft (a pre-blurred copy
+   bg_*_soft cross-fades in: opacity only, cheap on low-end laptops). It replaces drift() in those scenes. on(tl, t, who) moves to a
+   speaker; off(tl, t) goes back to the wide shot. spot(tl, t, sign) is the "Go to …" moment: wide and still again (so the sign and
+   its tap target never move), the light moves onto the sign and the rest stays soft and shaded until clear(tl, t) after the tap.
+   cam: false keeps a scene's own camera (hookA) and only moves the light + softens the background. */
+function speakerFocus(s, bg, name, { zoom = 1.1, z = 10, cam = true } = {}) {
+  const soft = el('div', 'bg', null, null, { left: bg.style.left, width: bg.style.width, backgroundImage: `url(${IMG[name + '_soft'].src})`, opacity: 0 });
+  bg.after(soft);
+  const pool = el('div', '', s, null, { position: 'absolute', left: 0, top: 0, width: 2 * W + 'px', height: 2 * H + 'px', zIndex: z, pointerEvents: 'none', opacity: 0,
+    background: 'radial-gradient(circle at 50% 50%, rgba(40,18,4,0) 0, rgba(40,18,4,0) 360px, rgba(40,18,4,.36) 1000px)' });
+  gsap.set(s, { transformOrigin: '0 0' });
+  const D = 1.3, cl = (v, lo) => Math.min(-14, Math.max(lo + 14, v));   // 14 px spare on both sides: a screen shake() never shows the edge
+  return {
+    on(tl, t, who) {
+      const fx = who.x, fy = who.ground - who.h * .6;
+      if (cam) tl.to(s, { scale: zoom, x: cl(W / 2 - fx * zoom, W - W * zoom), y: H - H * zoom, duration: D, ease: 'sine.inOut' }, t);
+      tl.to(soft, { opacity: 1, duration: .8 }, t);
+      tl.to(pool, { opacity: 1, x: fx - W, y: fy - H, duration: D, ease: 'sine.inOut' }, t);
+    },
+    off(tl, t) {
+      if (cam) tl.to(s, { scale: 1, x: 0, y: 0, duration: 1, ease: 'sine.inOut' }, t);
+      tl.to([soft, pool], { opacity: 0, duration: .8 }, t);
+    },
+    spot(tl, t, sg) {
+      sg.style.zIndex = Math.max(z + 1, +sg.style.zIndex || 0);   // the sign above the shade
+      if (cam) tl.to(s, { scale: 1, x: 0, y: 0, duration: 1, ease: 'sine.inOut' }, t);
+      tl.to(soft, { opacity: 1, duration: .8 }, t);
+      tl.to(pool, { opacity: 1, x: parseFloat(sg.style.left) - W, y: parseFloat(sg.style.top) + 70 - H, duration: 1, ease: 'sine.inOut' }, t);
+    },
+    clear(tl, t) { tl.to([soft, pool], { opacity: 0, duration: .5 }, t); },
+  };
+}
 function warmTint(s, a) { return el('div', 'tint', s, null, { background: 'linear-gradient(180deg,rgba(255,120,30,.55),rgba(255,170,60,.25) 55%,rgba(120,40,0,.25))', mixBlendMode: 'multiply', opacity: a }); }
 function goButton(parent, label, x, y) {
   const b = el('div', 'btn', parent, label, { left: x + 'px', top: y + 'px' });
@@ -108,12 +142,10 @@ async function title() {
   jump(tl, 2.9, aaru, 45, 1);   // once he has run in
   // no second Play button: the cover's Start began the game. The title voice (t0) now plays ON THE COVER (QA bug 4, see main()),
   // so this screen is the welcome only: the characters arrive, then the story moves on by itself.
-  birds(s, 5, 90);
-  petals(50);
-  const iv = setInterval(() => petals(6), 1500);
+  tl.call(() => petals(36), null, .9);   // one burst as they arrive (minimal pass Oct 2026: no birds, no endless petals)
   playMusic('m_title', { gain: .9 });
   await wait(5);
-  clearInterval(iv); tl.kill();
+  tl.kill();
   await irisOut(50, 80);
   NEXT_IN = 'iris';
 }
@@ -138,10 +170,10 @@ function camMove(tl, sh, t, dur, a, b, ease = 'sine.inOut') {
 async function hookA() {
   SCN = 'hookA'; hudState({ sun: 0, sunVis: false });
   const s = newScene();
-  bgImg(s, 'bg_02_chaupal', { left: '0px' });
-  birds(s, 4, 60);
+  const bg = bgImg(s, 'bg_02_chaupal', { left: '0px' });   // minimal pass: no birds over the chaupal
   const baba = char(s, 'baba', 420, 'idle', { ground: 1040 });
   const guddu = char(s, 'guddu', 1480, 'write', { ground: 1040, flip: true });
+  const F = speakerFocus(s, bg, 'bg_02_chaupal', { cam: false });   // hookA keeps its own push toward each speaker (on #world)
   const grade = warmTint(s, 0);
   await warm(['bg_01_gate', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'bg_02_chaupal']);   // no decode hitch at the cuts
   playMusic('m_village_long', { gain: .85, fade: 1.5 });
@@ -201,8 +233,10 @@ async function hookA() {
   let t = voiceOver(tl, V - .1, 'n1');   // voice only: the pictures carry the story, no narration text
   tl.to(ost, { y: -800, duration: .7, ease: 'back.in(1.4)' }, t - .2);
   tl.to(world, { scale: 1.12, x: 90, duration: 3.5, ease: 'sine.inOut' }, t);
+  F.on(tl, t, baba);
   t = say(tl, s, t + .3, 'b1', baba, T('b1'), { act: 'talk', end: 'idle' });
   tl.to(world, { x: -110, scale: 1.13, duration: 2.5, ease: 'sine.inOut' }, t - .4);
+  F.on(tl, t - .4, guddu);
   // Guddu is muddled: scratching his head while each number pops out of it as he says it (g1 word times from Whisper;
   // the voice starts .05s after the bubble). On "Let me write it all down!" they drop into his notebook and he writes.
   pose(tl, t, guddu, 'scratch');
@@ -213,6 +247,7 @@ async function hookA() {
   pose(tl, vs + 7.25, guddu, 'write');
   tl.call(() => sfx('scribble', .7), null, vs + 7.3);
   tl.to(world, { x: 0, scale: 1, duration: .6, ease: 'power2.inOut' }, gEnd + .3);
+  F.off(tl, gEnd + .3);
   await playTL(tl);
   await irisOut(50, 50); NEXT_IN = 'iris';
 }
@@ -238,19 +273,21 @@ async function hookB() {
     tl.call(() => sfx('paper', .4), null, 1.5 + i * .7);
   }
   const u = voiceOver(tl, .6, 'n2');
+  tl.to(sunEl, { opacity: 0, duration: .6 }, u - .3);   // minimal pass: the tracker shows only while the sun moves (hookA–B, bridges, endA)
   tl.set({}, {}, u + .3);
   await playTL(tl);
   await cutTo();
 }
 // ---------------- HOOK C (row 3b): Aaru's wild guess ----------------
 async function hookC() {
-  SCN = 'hookC'; hudState({ sun: .12, sunVis: true });
-  const s = newScene(); drift();
-  bgImg(s, 'bg_02_chaupal', { left: '0px' });
+  SCN = 'hookC'; hudState({ sun: .12, sunVis: false });
+  const s = newScene();
+  const bg = bgImg(s, 'bg_02_chaupal', { left: '0px' });
   warmTint(s, .5);
   const aaru = char(s, 'aaru', 430, 'run', { ground: 1045 });
   const goat = char(s, 'gudiya', 700, 'hop', { ground: 1050 });
   const pari = char(s, 'pari', 1500, 'idle', { ground: 1040, flip: true });
+  const F = speakerFocus(s, bg, 'bg_02_chaupal');
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   // run in from the left
@@ -260,16 +297,18 @@ async function hookC() {
   dust(tl, s, .4, 150, 1000, 6);
   let u = 2.35;   // Aaru has arrived
   // left of centre (clear of Pari's bubble on the right) on a dark pill, so it reads against the marigold garlands
-  const burst = reg(el('div', '', s, '₹10,00,00,000 ?!', { position: 'absolute', left: '640px', top: '128px', padding: '4px 40px 10px', borderRadius: '70px', background: 'rgba(70,22,4,.78)', border: '5px solid #ffd83a', boxShadow: '0 10px 24px rgba(40,10,0,.45)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '100px', lineHeight: 1.1, color: '#ffd83a', WebkitTextStroke: '5px #5a1d05', paintOrder: 'stroke fill', textShadow: '6px 6px 0 #5a1d05', whiteSpace: 'nowrap', zIndex: 12 }), 'burst');
+  const burst = reg(el('div', '', ui, '₹10,00,00,000 ?!', { position: 'absolute', left: '640px', top: '128px', padding: '4px 40px 10px', borderRadius: '70px', background: 'rgba(70,22,4,.78)', border: '5px solid #ffd83a', boxShadow: '0 10px 24px rgba(40,10,0,.45)', fontFamily: 'Baloo', fontWeight: 800, fontSize: '100px', lineHeight: 1.1, color: '#ffd83a', WebkitTextStroke: '5px #5a1d05', paintOrder: 'stroke fill', textShadow: '6px 6px 0 #5a1d05', whiteSpace: 'nowrap', zIndex: 12 }), 'burst');
   gsap.set(burst, { scale: 0, rotate: -8, xPercent: -50 });
+  F.on(tl, u - .3, aaru);
   const rEnd = say(tl, s, u, 'r1', aaru, T('r1'), { p: 'shout' });
   tl.to(burst, { scale: 1, duration: .4, ease: 'back.out(3)' }, u + (DUR.r1 || 2) * .6);
   shake(tl, u + (DUR.r1 || 2) * .6, 10);
   tl.call(() => sfx('pop', 1), null, u + (DUR.r1 || 2) * .6);
   u = rEnd;
-  const X = reg(el('div', '', s, '✕', { position: 'absolute', left: '640px', top: '30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '260px', color: '#e0301e', textShadow: '0 6px 0 #6a0f06', zIndex: 13 }), 'cross');
+  const X = reg(el('div', '', ui, '✕', { position: 'absolute', left: '640px', top: '30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '260px', color: '#e0301e', textShadow: '0 6px 0 #6a0f06', zIndex: 13 }), 'cross');
   gsap.set(X, { scale: 3, opacity: 0, xPercent: -50 });
   const p1s = u;
+  F.on(tl, u - .2, pari);
   u = say(tl, s, u, 'p1', pari, T('p1'), { p: 'point' });
   tl.to(X, { scale: 1, opacity: 1, duration: .3, ease: 'power4.in' }, p1s + (DUR.p1 || 3) * .35);
   tl.call(() => sfx('stamp', 1), null, p1s + (DUR.p1 || 3) * .35 + .28);
@@ -280,7 +319,7 @@ async function hookC() {
 }
 // ---------------- HOOK D (row 3c): Pari explains estimation (close-up) ----------------
 async function hookD() {
-  SCN = 'hookD'; hudState({ sun: .12, sunVis: true });
+  SCN = 'hookD'; hudState({ sun: .12, sunVis: false });
   const s = newScene();
   bgImg(s, 'bg_02_chaupal', { left: '0px', filter: 'blur(4px) brightness(.92)', transform: 'scale(1.3)', transformOrigin: '75% 60%' });
   warmTint(s, .5);
@@ -310,28 +349,29 @@ async function hookD() {
 }
 // ---------------- HOOK E (row 3d): off to the bazaar ----------------
 async function hookE() {
-  SCN = 'hookE'; hudState({ sun: .12, sunVis: true });
-  const s = newScene(); drift();
-  bgImg(s, 'bg_02_chaupal', { left: '0px' });
+  SCN = 'hookE'; hudState({ sun: .12, sunVis: false });
+  const s = newScene();
+  const bg = bgImg(s, 'bg_02_chaupal', { left: '0px' });
   warmTint(s, .5);
-  const aaru = char(s, 'aaru', 430, 'shout', { ground: 1045 });
-  const goat = char(s, 'gudiya', 700, 'idle', { ground: 1050 });
+  const aaru = char(s, 'aaru', 430, 'shout', { ground: 1045 });   // minimal pass (Oct 2026): Gudiya is not in this shot (she had no part in it)
   const pari = char(s, 'pari', 1500, 'point', { ground: 1040, flip: true });
+  const F = speakerFocus(s, bg, 'bg_02_chaupal');
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
+  F.on(tl, .1, pari);
   let u = say(tl, s, .4, 'p3', pari, T('p3'), { p: 'point' });
-  pose(tl, u - .6, aaru, 'jump'); tl.call(() => { sfx('boing', .8); setPose(goat, 'hop'); }, null, u - .6);
+  F.off(tl, u - .8);   // wide again for Aaru's jumps
+  pose(tl, u - .6, aaru, 'jump'); tl.call(() => sfx('boing', .8), null, u - .6);
   jump(tl, u - .6, aaru, 70, 2);
   pose(tl, u + .95, aaru, 'shout', { hop: false });   // QA bug 18: after his two jumps he stands still (resting in 'jump' ran the toe-hop loop all the time)
-  tl.call(() => setPose(goat, 'idle'), null, u + .95);
   const go = sign(s, 'Go to the bazaar ➜', 960, 430, 58, 'gosign');
-  dropSign(tl, u - .1, go);
+  dropSign(tl, u - .1, go); F.spot(tl, u - .1, go);
   signGate(tl, u + 1, go);   // the child taps the sign to go
+  F.clear(tl, u + 1.05);
   const e = u + 1.1;   // once Aaru's two jumps have landed (and the sign was tapped)
   move(tl, e, aaru, 'run', 0, 650, null, { ease: 'sine.in' });
   move(tl, e + .1, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
-  move(tl, e + .15, goat, 'trot', 0, 520, null, { ease: 'sine.in' });
-  tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, e + 1.1);
+  tl.set({}, {}, e + 1.3);   // minimal pass: they set off, then the iris closes (no zoom-and-blur rush before it)
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
@@ -389,34 +429,38 @@ async function level(n) {
 
 // ---------------- BRIDGE 1 (row 5) ----------------
 async function bridge1() {
-  SCN = 'bridge1'; hudState({ sun: .35, sunVis: true, hud: true, chip: '', flowers: 7 });
-  const s = newScene(); drift();
-  bgImg(s, 'bg_03_bazaar', { left: -(2593 - 1920) + 'px' });
+  SCN = 'bridge1'; hudState({ sun: .12, sunVis: true, hud: true, chip: '', flowers: 7 });
+  const s = newScene();
+  const bg = bgImg(s, 'bg_03_bazaar', { left: -(2593 - 1920) + 'px' });
   warmTint(s, .35);
   const pari = char(s, 'pari', 520, 'happy', { ground: 1045 });
   const aaru = char(s, 'aaru', 1380, 'shout', { ground: 1045, flip: true });   // QA bug 18: rests in 'shout' (still), not 'jump' (toe-hop loop)
+  const F = speakerFocus(s, bg, 'bg_03_bazaar');
   playMusic('m_village_long', { gain: .85, offset: 40 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   tl.fromTo(flowerEls, { scale: 1 }, { scale: 1.35, duration: .25, yoyo: true, repeat: 1, stagger: .08 }, .3);
   tl.call(() => sfx('sparkle', .8), null, .3);
+  sunTo(tl, .3, .35, 1.6); tl.to([flowers, sunEl], { opacity: 0, duration: .6 }, 2.8);   // minimal pass: the level's time passing + 7 flowers, then a clear sky for the talk
   pose(tl, .45, aaru, 'jump', { hop: false }); jump(tl, .5, aaru, 75, 2); pose(tl, 2.05, aaru, 'shout', { hop: false });   // the jump pose only while he jumps
   tl.call(() => sfx('boing', .8), null, .5);
+  F.on(tl, 1.8, aaru);
   let t = say(tl, s, 2.1, 'r2', aaru, T('r2'));
   cheer(tl, 2.4, pari, 'happy');                                   // Pari claps and fist-pumps while Aaru cheers
+  F.on(tl, t - .2, pari);
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
-  const go = sign(s, 'Go to the office ➜', 960, 300, 58, 'gosign'); /* high enough that Pari walks under it (QA) */ dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);
+  const go = sign(s, 'Go to the office ➜', 960, 300, 58, 'gosign'); /* high enough that Pari walks under it (QA) */ dropSign(tl, t - .3, go); F.spot(tl, t - .8, go); t += 1.2; signGate(tl, t - .35, go); F.clear(tl, t - .3);
   move(tl, t - .3, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
   move(tl, t - .2, aaru, 'run', 0, 600, null, { ease: 'sine.in' });
-  tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .8);
+  tl.set({}, {}, t + 1);   // no zoom-and-blur rush before the iris
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
 // ---------------- BRIDGE 2 (row 7) ----------------
 async function bridge2() {
-  SCN = 'bridge2'; hudState({ sun: .6, sunVis: true, hud: true, chip: '', flowers: 7 });
-  const s = newScene(); drift();
-  bgImg(s, 'bg_04_office', { left: '0px' });
+  SCN = 'bridge2'; hudState({ sun: .35, sunVis: true, hud: true, chip: '', flowers: 7 });
+  const s = newScene();
+  const bg = bgImg(s, 'bg_04_office', { left: '0px' });
   const guddu = officeGuddu(s, 'write'); guddu.mute = true;   // QA bug 22: no pencil-scratch loop under this screen ('an additional unwanted sound'). 'write' = his talking frame 0 (mouth shut): 'surprised' has an open mouth and looked like he was talking over Pari
   officeFG(s);
   const pari = char(s, 'pari', 720, 'idle', { ground: 1052, scale: .92, z: 8 });
@@ -425,18 +469,21 @@ async function bridge2() {
   const pile = reg(el('div', '', s, '', { position: 'absolute', left: '800px', top: '520px', width: '220px', height: '160px', zIndex: 7 }), 'donepile');   // on the counter between Pari and Guddu (Pari's p5 bubble opens over the left side)
   for (let i = 0; i < 7; i++) el('div', '', pile, '', { position: 'absolute', left: (i % 2) * 6 + 'px', bottom: i * 10 + 'px', width: '200px', height: '120px', background: '#fffdf4', border: '3px solid #8a6a4a', borderRadius: '6px', transform: `rotate(${(i % 3 - 1) * 3}deg)`, backgroundImage: 'repeating-linear-gradient(#fffdf4 0 14px,#c9d6ee 14px 16px)' });
   el('div', '', pile, 'DONE ✓', { position: 'absolute', left: '40px', top: '-30px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '34px', color: '#fff', background: '#3b8a46', padding: '2px 16px', borderRadius: '12px', border: '4px solid #1f4d27' });
+  const F = speakerFocus(s, bg, 'bg_04_office');
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   tl.from(pile.children, { y: -400, opacity: 0, duration: .45, stagger: .12, ease: 'bounce.out' }, .3);
   tl.call(() => sfx('paper', .7), null, .3);
-  tl.to(world, { scale: 1.08, x: -80, duration: 1.2, ease: 'power2.inOut' }, 1.4);
+  tl.fromTo(flowerEls, { scale: 1 }, { scale: 1.35, duration: .25, yoyo: true, repeat: 1, stagger: .08 }, .3);
+  sunTo(tl, .3, .6, 1.6); tl.to([flowers, sunEl], { opacity: 0, duration: .6 }, 2.6);   // minimal pass: as bridge1
+  F.on(tl, 1.4, guddu);   // (replaces the old whole-world push toward him)
   let t = say(tl, s, 1.8, 'g2', guddu, T('g2'), { act: 'talk', end: 'write' });
   tl.call(() => sfx('sparkle', .5), null, 1.9);
-  tl.to(world, { scale: 1, x: 0, duration: 1, ease: 'power2.inOut' }, t - .3);
+  F.on(tl, t - .3, pari);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
-  const go = sign(s, 'Go to the Mela Ground ➜', 1480, 300, 40, 'gosign'); go.style.zIndex = 11; go.querySelector('.board').style.padding = '16px 38px 20px';   dropSign(tl, t - .3, go); t += 1.2; signGate(tl, t - .35, go);   // over the window wall, toward the door: clear of Guddu + the DONE pile   // QA bug 21: smaller sign (was 48 px, oversized). 
+  const go = sign(s, 'Go to the Mela Ground ➜', 1480, 300, 40, 'gosign'); go.style.zIndex = 11; go.querySelector('.board').style.padding = '16px 38px 20px';   dropSign(tl, t - .3, go); F.spot(tl, t - .8, go); t += 1.2; signGate(tl, t - .35, go); F.clear(tl, t - .3);   // over the window wall, toward the door: clear of Guddu + the DONE pile   // QA bug 21: smaller sign (was 48 px, oversized). 
   move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
-  tl.to(world, { x: -300, scale: 1.35, filter: 'blur(6px)', duration: .7, ease: 'power3.in' }, t + .9);
+  tl.set({}, {}, t + 1);   // no zoom-and-blur rush before the iris
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
@@ -467,19 +514,21 @@ async function endA() {
 // ---------------- ENDING B (row 9b): the answer ----------------
 async function endB() {
   SCN = 'endB'; hudState({ sunVis: false });
-  const s = newScene(); drift();
-  bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
+  const s = newScene();
+  const bg = bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
   const pari = char(s, 'pari', 400, 'happy', { ground: 1045, scale: .95 });
-  const guddu = char(s, 'guddu', 1450, 'proud', { ground: 1045, scale: .95, flip: true });
-  const baba = char(s, 'baba', 1740, 'idle', { ground: 1045, scale: .9, flip: true });
+  const guddu = char(s, 'guddu', 1450, 'proud', { ground: 1045, scale: .95, flip: true });   // minimal pass (Oct 2026): Baba (silent here) left the shot
+  const F = speakerFocus(s, bg, 'bg_05_mela_dusk');
   const eq = reg(el('div', 'ost-pill', s, '₹83,165 <span style="color:#e8870e">≈</span> ₹84,000', { position: 'absolute', left: '900px', top: '820px', fontSize: '76px', whiteSpace: 'nowrap', zIndex: 12 }), 'approx');
   gsap.set(eq, { xPercent: -50, scale: 0 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   for (let k = 0; k < 3; k++) tl.call(() => firework(560 + k * 300 + Math.random() * 120, 110 + Math.random() * 90, ['#ffd83a', '#ff6ea8', '#6ee7ff'][k]), null, .3 + k * 1.4);
+  F.on(tl, .2, guddu);
   let t = say(tl, s, .5, 'g3', guddu, T('g3'), { act: 'talk', end: 'proud' });
   tl.to(eq, { scale: 1, duration: .6, ease: 'back.out(2.4)' }, t - .6);
   tl.call(() => sfx('ding', .8), null, t - .5);
+  F.on(tl, t - .2, pari);
   t = say(tl, s, t, 'p6', pari, T('p6'), { act: 'explain', end: 'happy' });
   tl.to(eq, { scale: 1.12, duration: .3, yoyo: true, repeat: 1 }, t - 1);
   tl.call(() => sfx('sparkle', .8), null, t - 1);
