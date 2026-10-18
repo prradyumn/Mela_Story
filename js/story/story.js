@@ -124,25 +124,10 @@ async function title() {
   // welcome text painted on the gate board, bent along the board's arch (QA bug 5); also inside the background so it zooms with the board
   const wel = reg(welcomeBoard(bg), 'welcomeArc');   // new id: the old straight text's editor offset (dy −50) no longer applies
   gsap.fromTo(wel, { opacity: 0, scale: .7, transformOrigin: '1057px 175px' }, { opacity: .92, scale: 1, duration: 1, delay: .6, ease: 'back.out(2)' });
-  const goat = char(s, 'gudiya', 1580, 'idle', { ground: 1050, scale: 1.05 });
+  // minimal pass (Oct 2026, user: "the characters coming in is not needed, just show the scenery"): the gate, its arch and the sun
+  // only; the characters first appear in the story itself
   const tl = gsap.timeline();
-  move(tl, 1.1, goat, 'trot', 420, 0, null, { ease: 'sine.out', end: 'idle', enter: true });
-  tl.call(() => { setPose(goat, 'hop'); sfx('boing', .6); }, null, 2.75);
-  tl.call(() => setPose(goat, 'idle'), null, 3.5);
-  jump(tl, 2.75, goat, 55, 1, .34);
-  gsap.to(goat.body, { rotate: 4, duration: 1.3, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 3 });
-  goat.wrap.style.cursor = 'pointer'; goat.wrap.style.pointerEvents = 'auto'; goat.body.style.pointerEvents = 'auto';
-  goat.wrap.querySelectorAll('img').forEach(i => i.style.pointerEvents = 'auto');
-  goat.wrap.addEventListener('click', () => { sfx('goat', 1); gsap.timeline().to(goat.body, { y: -50, duration: .3, ease: 'power2.out' }).to(goat.body, { y: 0, duration: .34, ease: 'power2.in' }); });
-  // Pari and Aaru welcome us at the gate (left), Gudiya is on the right; the title is spoken (t0), not shown on a card
-  const pari = char(s, 'pari', 300, 'happy', { ground: 1045 });
-  const aaru = char(s, 'aaru', 540, 'shout', { ground: 1055 });
-  move(tl, .3, pari, 'walk', -520, 0, null, { ease: 'sine.out', end: 'happy', enter: true });
-  move(tl, .6, aaru, 'run', -760, 0, null, { ease: 'sine.out', end: 'shout', enter: true });
-  jump(tl, 2.9, aaru, 45, 1);   // once he has run in
-  // no second Play button: the cover's Start began the game. The title voice (t0) now plays ON THE COVER (QA bug 4, see main()),
-  // so this screen is the welcome only: the characters arrive, then the story moves on by itself.
-  tl.call(() => petals(36), null, .9);   // one burst as they arrive (minimal pass Oct 2026: no birds, no endless petals)
+  tl.call(() => petals(36), null, .9);   // one burst of petals (no birds, no endless petals)
   playMusic('m_title', { gain: .9 });
   await wait(5);
   tl.kill();
@@ -167,6 +152,29 @@ function camMove(tl, sh, t, dur, a, b, ease = 'sine.inOut') {
   apply(); tl.to(p, { ...b, duration: dur, ease, onUpdate: apply }, t);
 }
 
+/* the Level 3 finale's giant wheel as a montage shot (user, Oct 2026: "show the actual moving giant wheel we use in the ending"):
+   the same art and geometry as #wheel3 (scene3.js): dusk sky, the lit lane seen from the finale camera (3840) with its baked
+   wheel clipped away, the stand, and the cabin-free rotor turning about its hub with the 8 cabins hanging upright from the knobs.
+   Returns a shot() for camMove; spin(tl, t, dur, deg) turns it inside the timeline (so pause / Skip hold). */
+function wheelShot(parent, z = 15) {
+  const L = n => GA('l3/' + n), HUB = { x: 376.5, y: 364.5 }, KR = 327;
+  const wrap = el('div', '', parent, null, { position: 'absolute', left: 0, top: 0, width: W + 'px', height: H + 'px', overflow: 'hidden', zIndex: z, pointerEvents: 'none' });
+  const cam = el('div', '', wrap, null, { position: 'absolute', left: 0, top: 0, width: W + 'px', height: H + 'px', transformOrigin: '0 0' });
+  const img = (n, css, par = cam) => { const i = el('img', '', par, null, Object.assign({ position: 'absolute', left: 0, top: 0 }, css)); i.src = L(n); i.alt = ''; return i; };
+  img('sky_dusk.webp', { width: W + 'px', height: H + 'px' });
+  img('mela_lane_lit.webp', { left: '-3840px', width: '5760px', height: '1080px', clipPath: 'polygon(0 0, 4960px 0, 4960px 756px, 5760px 756px, 5760px 1080px, 0 1080px)' });
+  // the stall names Level 3 writes on the boards (.sign3), for the two stalls in this view
+  const D = window.LEVEL3; if (D) [5, 6].forEach(i => el('div', '', cam, D.signs[i][0], { position: 'absolute', left: (D.hooks[i][0] - 200 - 3840) + 'px', top: D.signs[i][1] + 'px', width: '400px', height: '54px', textAlign: 'center', font: '800 34px/56px Baloo', letterSpacing: '.12em', color: '#5a2d0c', opacity: .92 }));
+  const wh = el('div', '', cam, null, { position: 'absolute', left: '1120px', top: '49px', width: '750px', height: '750px' });
+  img('wheel_stand.webp', { width: '750px', height: '750px' }, wh);
+  const rot = img('wheel_frame.webp', { width: '750px', height: '750px', transformOrigin: `${HUB.x}px ${HUB.y}px`, willChange: 'transform' }, wh);
+  const cabs = [...Array(8)].map((_, k) => el('i', '', wh, null, { position: 'absolute', left: 0, top: 0, width: '124px', height: '168px', background: `url(${L('wheel_cabins.webp')}) ${-k * 124}px 0/992px 168px no-repeat`, transformOrigin: '59.2px 0', willChange: 'transform' }));
+  const place = () => { const a = gsap.getProperty(rot, 'rotation') || 0;
+    cabs.forEach((c, k) => { const th = (k * 45 - 90 + a) * Math.PI / 180; gsap.set(c, { x: HUB.x + KR * Math.cos(th) - 59.2, y: HUB.y + KR * Math.sin(th), scale: .82, rotation: 2.5 * Math.sin(a / 18 + k) }); }); };
+  place();
+  return { wrap, cam, bw: W, spin(tl, t, dur, deg) { tl.fromTo(rot, { rotation: 0 }, { rotation: deg, duration: dur, ease: 'none', onUpdate: place, immediateRender: false }, t); } };
+}
+
 async function hookA() {
   SCN = 'hookA'; hudState({ sun: 0, sunVis: false });
   const s = newScene();
@@ -175,7 +183,7 @@ async function hookA() {
   const guddu = char(s, 'guddu', 1480, 'write', { ground: 1040, flip: true });
   const F = speakerFocus(s, bg, 'bg_02_chaupal', { cam: false });   // hookA keeps its own push toward each speaker (on #world)
   const grade = warmTint(s, 0);
-  await warm(['bg_01_gate', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'bg_02_chaupal']);   // no decode hitch at the cuts
+  await warm(['bg_01_gate', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_02_chaupal', ...['sky_dusk', 'mela_lane_lit', 'wheel_stand', 'wheel_frame', 'wheel_cabins'].map(n => GA(`l3/${n}.webp`))]);   // no decode hitch at the cuts
   playMusic('m_village_long', { gain: .85, fade: 1.5 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 80), null, 0);
@@ -210,9 +218,10 @@ async function hookA() {
   // 3 "sweets" the bazaar's sweet stall, from a dedicated close-up painting (bg_ins_sweets, 4K, repainted from bg_03_bazaar)
   const w = shot(s, 'bg_ins_sweets'); xf(w, cut[1]);
   camMove(tl, w, cut[1] - .2, cut[2] - cut[1] + .6, { x: 1000, y: 560, s: 1.04 }, { x: 1080, y: 600, s: 1.14 });
-  // 4 "and a big giant wheel." start tight on the wheel and pull back and up to show how big it is
-  const m = shot(s, 'bg_05_mela'); xf(m, cut[2]);
-  camMove(tl, m, cut[2] - .2, cut[3] - cut[2] + .5, { x: 1390, y: 520, s: 2.2 }, { x: 1330, y: 430, s: 1.3 }, 'power2.out');
+  // 4 "and a big giant wheel." the Level 3 finale's wheel, turning: start close on the hub and pull back to show how big it is
+  const m = wheelShot(s); xf(m, cut[2]);
+  m.spin(tl, cut[2] - .3, cut[3] - cut[2] + .6, 130);   // ~1 turn / 10 s, the finale's pace
+  camMove(tl, m, cut[2] - .2, cut[3] - cut[2] + .5, { x: 1496, y: 414, s: 1.35 }, { x: 1440, y: 430, s: 1.12 }, 'power2.out');   // ends with the whole wheel in frame
   // 5 "The Panchayat has ₹6,00,000…" the story begins: the montage fades to the chaupal, first faces
   tl.to(m.wrap, { opacity: 0, duration: .5, ease: 'sine.inOut' }, cut[3] - .2);
   tl.fromTo(world, { scale: 1.08 }, { scale: 1, duration: 6, ease: 'sine.out', immediateRender: false }, cut[3] - .2);
