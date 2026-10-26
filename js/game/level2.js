@@ -69,7 +69,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
         if (!teach) {
           HUD.lit++; HUD.setLit(HUD.lit);                              // count kept (the story gets 7 flowers); no marigold plate in L2
           HUD.sun(D.sun[0] + (D.sun[1] - D.sun[0]) * HUD.lit / 7, 1.4);   // no tracker: the light through the window warms instead
-          result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
+          result.stars.push('gold');   // QA bug 35: no star is taken away for retries
         }
         await okLine;
         await wait(teach ? .8 : 1.2);
@@ -162,7 +162,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
   /* ---------- complete ---------- */
   async function complete() {
     COACH.hideBubble(); HUD.chip(`${D.chip} · 7 of 7`); HUD.celebrate(); HUD.sun(D.sun[1]);
-    const gold = result.stars.filter(s => s === 'gold').length, nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    const gold = result.stars.filter(s => s === 'gold').length, nStars = 3;   // QA bug 35: the level reward never depends on retries
     /* no complete card (feedback Oct 2026, same as L1): bridge2's talk ends with the "Go to the Mela Ground" sign */
     SND.sfx('confetti'); confetti(90); await wait(1.8);
     if (window.GAME_LEVELS) return { stars: nStars, gold, perShop: result.stars.slice() };
@@ -170,7 +170,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
     const imgs = ov.querySelectorAll('#done2Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
     ov.querySelector('.balls').innerHTML = Basket.html(7, 460 / 250);   // the same letters, standing in the big basket
-    $('#done2Score').textContent = `${gold} of 7 on the first try`;
+    $('#done2Score').textContent = 'All 7 bills checked!';
     SND.sfx('confetti'); confetti(90);
     await gsap.fromTo('#done2Card', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
     await GFX.stars(imgs, nStars);

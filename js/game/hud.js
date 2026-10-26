@@ -180,7 +180,7 @@
           else frame(f < intro ? f : intro + (f - intro) % (outro - intro));
         } else if (stopAt != null) {
           const s = (clock() - stopAt) * fps;
-          if (mode === 'pp') { const k = from - Math.floor(s * 3); if (k <= 0) { stopAt = null; frame(0); idleT0 = clock(); } else frame(k); }   // glide back to rest
+          if (mode === 'pp') { const k = from - Math.floor(s * 16); if (k <= 0) { stopAt = null; frame(0); idleT0 = clock(); } else frame(k); }   // glide back to rest
           else { const k = outro + Math.floor(s); if (k >= n) { stopAt = null; frame(n - 1); } else frame(k); }               // hands back together
         } else if (idle && A.on && cheerT0 == null) idleTick();
         else if (rest && A.on && cheerT0 == null) restTick();

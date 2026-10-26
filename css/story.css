@@ -101,3 +101,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #fade{position:absolute;inset:0;z-index:59;background:#1d1208;opacity:0;pointer-events:none}
 .sign .board .arr{color:#e2621a;font-weight:800;margin-left:6px}
 .sign .board{white-space:nowrap}
+
+/* QA round 2 (bugs 9/12/20): the text sits exactly in the middle of the board (equal padding, flex-centred), and the waiting board
+   glows (shadow only), it does not move */
+.sign.go .board{display:flex;align-items:center;justify-content:center;gap:16px;padding:24px 56px 24px;line-height:1.1}
+.sign.go .board .arr{margin-left:0;line-height:1;display:block}
+@keyframes signGlow{0%,100%{box-shadow:inset 0 0 0 7px #f7a531,inset 0 0 0 10px rgba(255,250,236,.9),0 14px 0 rgba(70,30,6,.45),0 24px 36px rgba(20,8,0,.45),0 0 0 6px rgba(255,255,255,.85),0 0 30px 8px rgba(255,196,70,.7)}50%{box-shadow:inset 0 0 0 7px #f7a531,inset 0 0 0 10px rgba(255,250,236,.9),0 14px 0 rgba(70,30,6,.45),0 24px 36px rgba(20,8,0,.45),0 0 0 6px rgba(255,255,255,.85),0 0 52px 16px rgba(255,196,70,.95)}}
+.sign .board.tapme{animation:signGlow 1.8s ease-in-out infinite}

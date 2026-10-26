@@ -1,0 +1,19 @@
+/* Captions (narrator box + character dialogue box) and the language chips — js/lang.js */
+#cap{position:absolute;left:50%;bottom:46px;transform:translateX(-50%) translateY(18px);width:max-content;max-width:1280px;min-width:420px;z-index:58;pointer-events:none;opacity:0;transition:opacity .22s ease,transform .22s ease;
+  padding:30px 44px 24px;border-radius:30px;font-family:var(--capfont,'Poppins'),'Poppins',sans-serif;font-weight:600;color:#3a220f;text-align:center;box-shadow:0 12px 0 rgba(58,34,15,.28),0 22px 40px rgba(20,8,0,.35)}
+#cap.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#cap.top{bottom:auto;top:128px}
+#cap .cx{font-size:var(--capsize,36px);line-height:1.38;text-wrap:balance}
+#cap .ct{position:absolute;left:34px;top:-22px;padding:5px 20px 6px;border-radius:99px;font:800 24px/1.2 var(--capfont,'Baloo'),Baloo,sans-serif;letter-spacing:.04em;color:#fff;border:4px solid #fffaf0;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+#cap.cn{background:linear-gradient(#fff8e4,#f6e2b0);border:6px solid #8a5a2b}
+#cap.cn .ct{background:#8a5a2b}
+#cap.cc{background:#fffdf7;border:6px solid var(--c,#2f63c9)}
+#cap.cc .ct{background:var(--c,#2f63c9)}
+#cap.cw-pari{--c:#2f63c9}#cap.cw-aaru{--c:#e8870e}#cap.cw-baba{--c:#8a5a2b}#cap.cw-guddu{--c:#3b8a46}#cap.cw-manju{--c:#b5361d}
+.langbar{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.langbar .lc{font:700 30px/1 'Noto Sans Devanagari','Noto Sans Gujarati','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Oriya','Nirmala UI',Poppins,sans-serif;padding:14px 26px 15px;border-radius:99px;border:4px solid #7a4a1f;background:#fffaf0;color:#3a220f;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.langbar .lc:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.langbar .lc.on{background:#2f63c9;border-color:#fffaf0;color:#fff;box-shadow:0 6px 0 rgba(20,40,110,.5)}
+.langbar.lbcover{position:absolute;left:120px;width:1180px;bottom:54px}
+.langbar.lbpause{max-width:1500px;margin-top:6px}
+#pauseOv .langbar.lbpause .lc{font-size:34px}

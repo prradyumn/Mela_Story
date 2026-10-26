@@ -57,6 +57,8 @@ function speakerFocus(s, bg, name, { zoom = 1.1, z = 10, cam = true } = {}) {
     clear(tl, t) { tl.to([soft, pool], { opacity: 0, duration: .5 }, t); },
   };
 }
+/* a darker, wider contact shadow under a character's feet (QA bug 31: Baba and Guddu looked as if they floated) */
+function groundShadow(o) { const sh = o.body.querySelector('.shadow'); if (sh) Object.assign(sh.style, { width: '320px', height: '46px', bottom: '-18px', background: 'radial-gradient(ellipse at center,rgba(40,20,5,.62),rgba(40,20,5,.28) 45%,rgba(40,20,5,0) 72%)' }); }
 function warmTint(s, a) { return el('div', 'tint', s, null, { background: 'linear-gradient(180deg,rgba(255,120,30,.55),rgba(255,170,60,.25) 55%,rgba(120,40,0,.25))', mixBlendMode: 'multiply', opacity: a }); }
 function goButton(parent, label, x, y) {
   const b = el('div', 'btn', parent, label, { left: x + 'px', top: y + 'px' });
@@ -179,8 +181,9 @@ async function hookA() {
   SCN = 'hookA'; hudState({ sun: 0, sunVis: false });
   const s = newScene();
   const bg = bgImg(s, 'bg_02_chaupal', { left: '0px' });   // minimal pass: no birds over the chaupal
-  const baba = char(s, 'baba', 420, 'idle', { ground: 1040 });
+  const baba = char(s, 'baba', 560, 'idle', { ground: 1040 });   // QA bug 31: Baba stood on the painted stone at the bottom left: moved onto the open ground
   const guddu = char(s, 'guddu', 1480, 'write', { ground: 1040, flip: true });
+  [baba, guddu].forEach(o => groundShadow(o));   // QA bug 31: a firm contact shadow so they stand ON the ground
   const F = speakerFocus(s, bg, 'bg_02_chaupal', { cam: false });   // hookA keeps its own push toward each speaker (on #world)
   const grade = warmTint(s, 0);
   await warm(['bg_01_gate', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_02_chaupal', ...['sky_dusk', 'mela_lane_lit', 'wheel_stand', 'wheel_frame', 'wheel_cabins'].map(n => GA(`l3/${n}.webp`))]);   // no decode hitch at the cuts
@@ -234,7 +237,7 @@ async function hookA() {
   const c0 = cut[3] + .55, c1 = V + 10.77, steps = 12;
   for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
   tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
-  tl.fromTo(amt, { scale: 1 }, { scale: 1.16, duration: .18, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
+  tl.fromTo(amt, { scale: 1 }, { scale: 1.05, duration: .22, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
   // 6 "All items need to be bought before the sun goes down." the light warms and the sunset tracker appears on "sun"
   tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 14.70);
   tl.to(sunEl, { opacity: 1, duration: .6 }, V + 17.28); tl.call(() => sfx('rise', .6), null, V + 17.28);
@@ -266,7 +269,7 @@ async function hookB() {
   const s = newScene();
   bgImg(s, 'bg_02_chaupal', { left: '0px' });
   const tint = warmTint(s, 0.15);
-  const g = char(s, 'guddu', 960, 'write', { ground: 1040 });
+  const g = char(s, 'guddu', 960, 'write', { ground: 1040 }); groundShadow(g);
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 50), null, 0);
   tl.to(tint, { opacity: .5, duration: 8 }, 0);
@@ -289,6 +292,7 @@ async function hookB() {
 }
 // ---------------- HOOK C (row 3b): Aaru's wild guess ----------------
 async function hookC() {
+  if (window.GAME_PRELOAD) GAME_PRELOAD(1);   // Level 1's pictures download while the story plays (QA bugs 27/33/34)
   SCN = 'hookC'; hudState({ sun: .12, sunVis: false });
   const s = newScene();
   const bg = bgImg(s, 'bg_02_chaupal', { left: '0px' });
@@ -378,9 +382,8 @@ async function hookE() {
   signGate(tl, u + 1, go);   // the child taps the sign to go
   F.clear(tl, u + 1.05);
   const e = u + 1.1;   // once Aaru's two jumps have landed (and the sign was tapped)
-  move(tl, e, aaru, 'run', 0, 650, null, { ease: 'sine.in' });
-  move(tl, e + .1, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
-  tl.set({}, {}, e + 1.3);   // minimal pass: they set off, then the iris closes (no zoom-and-blur rush before it)
+  const ea = move(tl, e, aaru, 'run', 0, 1900, 1.7, { ease: 'sine.in' }), ep = move(tl, e + .1, pari, 'walk', 0, 800, 1.9, { ease: 'sine.in' });   // QA bug 32: off the screen, not back to the shouting pose
+  tl.set({}, {}, Math.max(ea, ep) + .1);
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
@@ -394,6 +397,9 @@ const LEVELS = {
 async function level(n) {
   SCN = 'level' + n; hudState({ sun: LEVELS[n].sun[0], sunVis: true, hud: true, chip: LEVELS[n].chip, flowers: 0 });
   const L = LEVELS[n]; const s = newScene();
+  /* QA bugs 27/33/34: with a real game the story's placeholder scene is never shown, and the level's pictures are downloaded and
+     decoded BEFORE the wipe opens, so the level appears once, complete (the wait happens under the closed wipe) */
+  if (window.GAME_LEVELS && window.GAME_LEVELS[n]) { s.style.visibility = 'hidden'; if (window.GAME_PRELOAD) await GAME_PRELOAD(n); }
   const bg = bgImg(s, L.bg, { left: '0px' });
   const lt = warmTint(s, .15 + n * .12); if (n === 2) lt.style.zIndex = 9;
   playMusic('m_hurry', { gain: .75 });
@@ -459,9 +465,8 @@ async function bridge1() {
   F.on(tl, t - .2, pari);
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
   const go = sign(s, 'Go to the office ➜', 960, 300, 58, 'gosign'); /* high enough that Pari walks under it (QA) */ dropSign(tl, t - .3, go); F.spot(tl, t - .8, go); t += 1.2; signGate(tl, t - .35, go); F.clear(tl, t - .3);
-  move(tl, t - .3, pari, 'walk', 0, 360, null, { ease: 'sine.in' });
-  move(tl, t - .2, aaru, 'run', 0, 600, null, { ease: 'sine.in' });
-  tl.set({}, {}, t + 1);   // no zoom-and-blur rush before the iris
+  const ep = move(tl, t - .3, pari, 'walk', 0, 1700, 2.1, { ease: 'sine.in' }), ea = move(tl, t - .2, aaru, 'run', 0, 700, 1.4, { ease: 'sine.in' });   // off the screen, no snap back
+  tl.set({}, {}, Math.max(ep, ea) + .1);
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
@@ -491,8 +496,8 @@ async function bridge2() {
   F.on(tl, t - .3, pari);
   t = say(tl, s, t, 'p5', pari, T('p5'), { act: 'explain', end: 'happy', side: 'R' });   // opens to the left, over the shelves: Guddu stays in view
   const go = sign(s, 'Go to the Mela Ground ➜', 1480, 300, 40, 'gosign'); go.style.zIndex = 11; go.querySelector('.board').style.padding = '16px 38px 20px';   dropSign(tl, t - .3, go); F.spot(tl, t - .8, go); t += 1.2; signGate(tl, t - .35, go); F.clear(tl, t - .3);   // over the window wall, toward the door: clear of Guddu + the DONE pile   // QA bug 21: smaller sign (was 48 px, oversized). 
-  move(tl, t - .3, pari, 'walk', 0, 400, null, { ease: 'sine.in' });
-  tl.set({}, {}, t + 1);   // no zoom-and-blur rush before the iris
+  const ep = move(tl, t - .3, pari, 'walk', 0, 1500, 2.1, { ease: 'sine.in' });   // off the screen, no snap back
+  tl.set({}, {}, ep + .1);
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
 }
@@ -550,13 +555,13 @@ async function endC() {
   SCN = 'endC'; hudState({ sunVis: false });
   const s = newScene(); drift();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px' });
-  const aaru = char(s, 'aaru', 760, 'jump', { ground: 1045 });
+  const aaru = char(s, 'aaru', 760, 'shout', { ground: 1045 });   // QA bug 18 (again on this screen): he rests in the still pose; 'jump' (and its toe-hop loop) only while he jumps
   const goat = char(s, 'gudiya', 1120, 'idle', { ground: 1050 });
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(), null, 0);
   const r3s = .4;
   let t = say(tl, s, r3s, 'r3', aaru, T('r3'));
-  jump(tl, r3s + (DUR.r3 || 3) + .1, aaru, 80, 2);
+  { const j0 = r3s + (DUR.r3 || 3) + .1; pose(tl, j0 - .05, aaru, 'jump', { hop: false }); jump(tl, j0, aaru, 80, 2); pose(tl, j0 + 1.9, aaru, 'shout', { hop: false }); }
   const rain = t - .2;   // after Aaru's bubble has gone, so the jalebis never cover his words
   tl.call(() => { sfx('boing', .8); jalebis(20); setPose(goat, 'hop'); sfx('goat', .9); }, null, rain);
   jump(tl, rain, goat, 60, 3, .3);
@@ -603,6 +608,8 @@ async function badge() {
   tl.call(() => { const iv = setInterval(() => confetti(40, 200 + Math.random() * 1520, 200), 2200); again._iv = iv; }, null, 3);
   tl.play(0);
   await waitClick(again);
+  location.replace(location.pathname);   // QA bug 26: back to the cover page (a clean start; no blank screen while the story reloads)
+  await new Promise(() => { });
   clearInterval(again._iv);
   again.style.pointerEvents = 'none';
   await irisOut(50, 50); NEXT_IN = 'iris';
@@ -624,6 +631,7 @@ const FLOW = [
   ['level1', () => level(1)], ['bridge1', bridge1], ['level2', () => level(2)], ['bridge2', bridge2], ['level3', () => level(3)],
   ['endA', endA], ['endB', endB], ['endC', endC], ['badge', badge]];
 window.FLOW = FLOW;
+const NEEDS = { hookC: /^(aaru_run|gudiya_trot)_/, hookE: /^pari_walk_/, bridge1: /^(bg_03_bazaar|pari_walk_|aaru_run_|amb_bazaar)/, level1: /^(bg_03_bazaar|manju_teach|m_hurry|amb_bazaar|sfx_hoof|sfx_cart)/, level2: /^(bg_04_office|office_fg|guddu_|amb_office)/, bridge2: /^(bg_04_office|office_fg|guddu_|pari_walk_|amb_office)/, level3: /^(amb_mela|sfx_cart)/, endA: /^(m_festive|amb_mela|sfx_wheel)$/, endB: /^guddu_proud$/ };
 async function main() {
   const lp = $('#lp'), bar = $('#loader .bar i');
   await loadAll(p => bar.style.width = (p * 100).toFixed(0) + '%');
@@ -633,7 +641,7 @@ async function main() {
   /* QA bug 2 (jerky first screens): decode the opening's pictures — title + opening montage backgrounds and the characters' poses
      and walk/run frames — while the cover is up, so nothing is decoded in the middle of the first transitions */
   const firstPics = ['bg_01_gate', 'bg_02_chaupal', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'gudiya_idle', 'gudiya_hop', 'pari_happy', 'pari_idle', 'pari_point', 'aaru_shout', 'aaru_run', 'aaru_jump', 'baba_idle', 'guddu_write', 'guddu_scratch',
-    ...IMAGES.filter(n => /^(pari_walk|aaru_run|gudiya_trot)_\d+$/.test(n)), ...IMAGES.filter(n => /_m$/.test(n))];
+    ...IMAGES.filter(n => /_m$/.test(n))];
   if (i === 0) await Promise.race([warm(firstPics), wait(4)]);
   // the cover's Start button (the tap unlocks audio). QA bug 1: ONLY the button starts the game (taps elsewhere on the cover did too)
   gsap.to('#loader .bar', { opacity: 0, duration: .3 });
@@ -644,7 +652,8 @@ async function main() {
      (the cover stays up until the title has been said, then the welcome screen opens). Not after a Back / QA reload (?from=…). */
   let t0Said = false;
   const sayTitle = () => { if (t0Said || i !== 0 || !AC || AC.state !== 'running') return false; t0Said = true; voice('t0'); return true; };
-  sayTitle(); $('#loader').addEventListener('pointerdown', () => setTimeout(sayTitle, 150));   // a tap on the cover itself unlocks sound: say the title then
+  const sayTitleSoon = async () => { if (t0Said || i !== 0) return; try { unlockAudio(); await AC.resume(); } catch (e) { } for (let k = 0; k < 20 && !(BUF.t0 && AC.state === 'running'); k++) await new Promise(r => setTimeout(r, 100)); sayTitle(); };   // QA bug 29: wait for the sound to really be running, then say it
+  sayTitle(); $('#loader').addEventListener('pointerdown', sayTitleSoon); addEventListener('keydown', sayTitleSoon, { once: true });
   await new Promise(r => lp.addEventListener('click', e => { e.stopPropagation(); unlockAudio(); r(); }, { once: true }));
   gsap.killTweensOf(lp); gsap.to(lp, { scale: .9, duration: .12 });
   try { play('sfx_cycle_bell', { gain: 1 }); } catch (e) { }   // storyboard: cycle bell on Start
@@ -656,6 +665,7 @@ async function main() {
   while (true) {
     window.CUR_SCREEN = FLOW[i][0]; if (window.onScreen) window.onScreen(FLOW[i][0]);
     setAmbience(AMB_OF[FLOW[i][0]] || null);   // the place's quiet ambience bed (Oct 2026)
+    if (NEEDS[FLOW[i][0]]) await needs(NEEDS[FLOW[i][0]]);   // files that load after the Start button (QA bug 30): wait for the ones this screen uses
     await FLOW[i][1]();
     if (once) return;
     i = (i + 1) % FLOW.length;

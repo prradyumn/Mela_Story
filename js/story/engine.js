@@ -47,6 +47,8 @@ const OGG = !!document.createElement('audio').canPlayType('audio/ogg; codecs="op
 const auURL = (n, ext = OGG ? 'ogg' : 'mp3') => SRC[n] || `assets/audio/${n}.${ext}`;
 let AC, master, musicBus, voiceBus, sfxBus;
 const MUSIC_LEVEL = 0.22, MUSIC_DUCK = 0.07;   // music bus: normal level, and while a voice speaks (Oct 2026: lowered again, −5 dB / −6 dB)
+const LATE = {};   // name → promise for what loads after the Start button is up
+window.needs = re => Promise.race([Promise.all(Object.keys(LATE).filter(n => re.test(n)).map(n => LATE[n])), new Promise(r => setTimeout(r, 20000))]);   // wait (max 20 s) for the late files a scene needs
 async function loadAll(onProg) {
   AC = new (window.AudioContext || window.webkitAudioContext)();
   master = AC.createGain(); master.connect(AC.destination);
@@ -57,19 +59,24 @@ async function loadAll(onProg) {
   sfxBus = AC.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
   // talking/explaining frames are first needed after the opening (hookC onwards, the games): they load in the background
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
-  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk)_\d+$/, now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n));
-  const total = now.length + AUDIO.length; let done = 0;
+  // (QA bug 30, first launch too slow) also later: the bazaar / office backgrounds, the walk / run / trot frames and the level music + ambience
+  // — about 3 MB that nothing needs in the first minute. window.needs(regex) waits for them before the scene that uses them.
+  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk|pari_walk|aaru_run|gudiya_trot)_\d+$|^(bg_03_bazaar|bg_04_office|office_fg|db[5-8]|parch|manju_teach|guddu_surprised|guddu_proud|bg_03_bazaar_soft|bg_04_office_soft)$/;
+  const AUDIO_LATER = ['m_hurry', 'm_festive', 'amb_bazaar', 'amb_office', 'amb_mela', 'sfx_wheel', 'sfx_hoof', 'sfx_cart'];
+  const now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n)), auNow = AUDIO.filter(n => !AUDIO_LATER.includes(n));
+  const total = now.length + auNow.length; let done = 0;
   const tick = () => onProg(++done / total);
   const pImg = now.map(n => new Promise(res => { const i = new Image(); i.onload = i.onerror = () => { IMG[n] = i; tick(); res(); }; i.src = imgURL(n); }));
   later.forEach(n => { IMG[n] = new Image(); });
   const decode = async url => { const r = await fetch(url); if (!r.ok) throw new Error(r.status + ' ' + url); const ab = await r.arrayBuffer(); return new Promise((ok, no) => AC.decodeAudioData(ab, ok, no)); };
-  const pAu = AUDIO.map(async n => {
+  const load1 = async n => {
     try { BUF[n] = await decode(auURL(n)).catch(e => { if (SRC[n] || !OGG) throw e; return decode(auURL(n, 'mp3')); }); DUR[n] = BUF[n].duration; }
     catch (e) { console.warn('audio', n, e); DUR[n] = 2; }
-    tick();
-  });
+  };
+  const pAu = auNow.map(async n => { await load1(n); tick(); });
   await Promise.all([...pImg, ...pAu]);
-  later.forEach(n => { IMG[n].src = imgURL(n); });
+  later.forEach(n => { LATE[n] = new Promise(r => { IMG[n].onload = IMG[n].onerror = r; }); IMG[n].src = imgURL(n); });
+  AUDIO_LATER.forEach(n => { LATE[n] = load1(n); });
 }
 /* warm(): make sure these images are decoded before they first appear (IMG names or URLs). Resolves when done. */
 /* QA bug 26: never wait more than 3 s for it — on a slow network / slow device a decode that never settles used to leave the screen
@@ -187,7 +194,7 @@ const CH = {
     // idle loop (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_toehop_*, 540 px): excited toe-hopping whenever
     // he rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
     // (A breathing loop for 'shout' was tried and removed on user feedback — he keeps his still shout pose.)
-    idles: [{ pose: 'jump', file: 'aaru_toehop', n: 36, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce
+    idles: [{ pose: 'jump', file: 'aaru_toehop', n: 35, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
@@ -278,7 +285,10 @@ gsap.ticker.add(() => {
     let sound = false;
     o.idleSets.forEach(S => {
       const d = S.d, F = S.F, still = o.imgs[d.pose];
-      const k = Math.floor(actClock() * d.fps) % d.n, ready = F[k].complete && F[k].naturalWidth > 0;
+      // a loop starts only when ALL its frames have loaded (they arrive in the background): with a frame-by-frame check the picture
+      // flipped between the loop and the still while the first seconds of frames were still downloading
+      if (!S.all) S.all = F.every(i => i.complete && i.naturalWidth > 0);
+      const k = Math.floor(actClock() * d.fps) % d.n, ready = S.all;
       const on = o.pose === d.pose && !o.act && !o.moving && !TALKERS.has(o) && !airborne && ready;   // never while talking (mouth on the still)
       const mo = o.mouths && o.mouths[d.pose];                                                        // the still's mouth overlay hides with it
       if (on) { if (S.k !== k) { if (S.k != null) F[S.k].style.opacity = 0; F[k].style.opacity = 1; S.k = k; } if (still) still.style.visibility = 'hidden'; if (mo) mo.style.visibility = 'hidden'; }
@@ -324,7 +334,7 @@ gsap.ticker.add(() => {
     if (!gated || now - A.loud < .14 || A.el < (a.intro || 0) / a.fps) A.el += dt;
     if (a.mode === 'once') { k = Math.floor((actClock() - A.t0) * a.fps); if (k >= a.n) { actDone(o); return; } }   // plays through once, then the end pose
     else if (a.mode === 'pp') {
-      if (A.stopAt != null) { if (A.from == null) A.from = Math.max(0, A.shown); k = A.from - Math.floor((actClock() - A.stopAt) * a.fps * 3); if (k <= 0) { actDone(o); return; } }  // glide back to frame 0
+      if (A.stopAt != null) { if (A.from == null) A.from = Math.max(0, A.shown); k = A.from - Math.floor((actClock() - A.stopAt) * a.fps * 16); if (k <= 0) { actDone(o); return; } }  // back to frame 0 at once (QA bug 8: the lips stop when the voice ends)
       else { const f = Math.floor(A.el * a.fps), P = 2 * (a.n - 1), m = f % P; k = m < a.n ? m : P - m; }
     } else {
       if (A.stopAt != null) k = a.outro + Math.floor((actClock() - A.stopAt) * a.fps);   // outro, then settle
@@ -499,7 +509,7 @@ function narrate(tl, t, id, text, { gap = .4 } = {}) {
 }
 // hanging wooden sign
 function sign(parent, html, x, y, size = 56, name = 'sign') {
-  const s = reg(el('div', 'sign', parent, null, { left: x + 'px', top: y + 'px' }), name);
+  const s = reg(el('div', html.includes('➜') ? 'sign go' : 'sign', parent, null, { left: x + 'px', top: y + 'px' }), name);
   const b = el('div', 'board', s, html.replace('➜', '<b class="arr">➜</b>'), { fontSize: size + 'px' });   // the arrow in saffron
   const r1 = el('div', 'rope', s, null, { left: '40px' }), r2 = el('div', 'rope', s, null, { right: '40px' });
   gsap.set(s, { xPercent: -50, y: -700, rotate: 0 });
@@ -519,12 +529,12 @@ function signGate(tl, t, s) {
     /* QA Oct 2026 (bugs 9/12/20): the hand points the SAME way as the sign's arrow (➜, to the right) — it is the game's down-pointing
        hint hand turned a quarter turn, sitting just under the arrow end of the board (clear of the words), its fingertip (75,120 of the 150-px image → 120,75
        once turned) under the arrow, and it nudges along the arrow (left → right), not up and down. */
-    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 120) + 'px', top: (20 + bh + 14 - 75) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';
+    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 120) + 'px', top: (20 + bh + 6 - 75) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';   // round 2: right under the arrow, its fingertip nearly touching the board, clear of the words
     board.classList.add('tapme');
-    const pulse = gsap.to(board, { scale: 1.015, duration: 1.1, yoyo: true, repeat: -1, ease: 'sine.inOut' });   // a calm "breathing" glow (it used to shake: ×1.04 every .55 s)
+    const pulse = { kill() { } };   // QA (round 2): the board does not move at all while it waits (the glow in CSS breathes instead)
     gsap.set(hand, { opacity: 0, rotation: -90 });
-    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { x: -26 }, { x: 0, duration: .4, ease: 'power2.out' })
-      .to(hand, { scale: .92, duration: .12, yoyo: true, repeat: 1 }).to(hand, { x: -26, duration: .4, ease: 'power2.inOut' }).to({}, { duration: .3 });
+    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { x: -16 }, { x: 0, duration: .45, ease: 'power2.out' })
+      .to(hand, { scale: .94, duration: .14, yoyo: true, repeat: 1 }).to(hand, { x: -16, duration: .45, ease: 'power2.inOut' }).to({}, { duration: .35 });
     /* bugs 11/13: the tapped sign leaves AT ONCE (it used to hang there until the next screen came in) */
     const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop');
       gsap.killTweensOf(s); gsap.killTweensOf(board); gsap.to(board, { scale: .92, duration: .1 }); gsap.to(s, { y: -760, rotate: 0, duration: .45, delay: .08, ease: 'back.in(1.3)' }); tl.play(); };
@@ -535,9 +545,8 @@ function signGate(tl, t, s) {
 /* QA Oct 2026 (bugs 9/10/12/20: "the card shakes excessively"): one soft drop with a small settle and a single gentle sway, instead of a
    bounce.out drop followed by a 2.2 s elastic wobble */
 function dropSign(tl, t, s) {
-  tl.to(s, { y: 0, duration: .75, ease: 'back.out(1.15)' }, t);
-  tl.fromTo(s, { rotate: -1.5 }, { rotate: 0, duration: .9, ease: 'sine.out', immediateRender: false }, t + .5);
-  tl.call(() => sfx('stamp', .7), null, t + .45);
+  tl.to(s, { y: 0, duration: .8, ease: 'power3.out' }, t);   // QA (round 2): one smooth drop, no overshoot, no sway at all
+  tl.call(() => sfx('stamp', .7), null, t + .6);
 }
 // ---------- HUD ----------
 const SUN = { p: 0 };

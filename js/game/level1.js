@@ -89,7 +89,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
           Cart.leave();                                            // the cart rolls on out to the right with the item
           const k = HUD.lit; await HUD.lightNext(Cart.CEN.x, Cart.CEN.y - 120);
           HUD.sun(D.sun[0] + (D.sun[1] - D.sun[0]) * (k + 1) / 7);
-          result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
+          result.stars.push('gold');   // QA bug 35: no star is taken away for retries: every finished shop is a gold star
         }
         await okLine;
         await wait(teach ? 1.2 : 2);   // storyboard: "After 2 seconds the next shop slides in"
@@ -204,14 +204,14 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
     HUD.celebrate(); HUD.sun(D.sun[1]);
     GUDIYA.hide();
     const gold = result.stars.filter(s => s === 'gold').length;
-    const nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    const nStars = 3;   // QA bug 35: the level reward never depends on the number of retries
     /* inside the story there is no complete card (feedback Oct 2026): bridge1's Pari–Aaru talk ends with the
        "Go to the office" sign the child taps, so the card's own "Go to the office" was a duplicate */
     if (embedded) { SND.sfx('confetti'); confetti(90); await wait(1.8); return { stars: nStars, gold, perShop: result.stars.slice() }; }
     const ov = $('#doneOv'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#doneStars img');
     imgs.forEach((im, i) => { im.src = i < nStars ? GA('ui_star_gold.webp') : GA('ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
-    $('#doneScore').textContent = `${gold} of 7 on the first try`;
+    $('#doneScore').textContent = 'All 7 shops done!';
     SND.sfx('confetti'); confetti(90);
     await gsap.fromTo('#doneCard', { scale: .5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'back.out(1.7)' });
     await GFX.stars(imgs, nStars);

@@ -89,7 +89,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
           await Panel.wipe(); await Panel.write(L.ans, true); await Bill.paid();
         } else {
           await pay(i, L);
-          result.stars.push(strikes === 0 ? 'gold' : strikes < 3 ? 'silver' : 'none');
+          result.stars.push('gold');   // QA bug 35: no star is taken away for retries
         }
         await okLine;
         await wait(.5);
@@ -234,7 +234,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
   /* ---------- complete ---------- */
   async function complete() {
     gsap.to('#gHud', { autoAlpha: 0, duration: .3 }); HUD.celebrate();
-    const gold = result.stars.filter(s => s === 'gold').length, nStars = gold >= 6 ? 3 : gold >= 4 ? 2 : 1;
+    const gold = result.stars.filter(s => s === 'gold').length, nStars = 3;   // QA bug 35: the level reward never depends on retries
     const ov = $('#done3'); ov.classList.remove('hidden');
     const imgs = ov.querySelectorAll('#done3Stars img');
     imgs.forEach((im, i) => { im.src = GA(i < nStars ? 'ui_star_gold.webp' : 'ui_star_silver.webp'); im.style.opacity = i < nStars ? 1 : .35; });
