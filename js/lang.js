@@ -1,6 +1,7 @@
 /* js/lang.js — languages + captions (Oct 2026, user: "language JSON files … toggle to switch … text inside the narrator box and the
    character dialogue box; voice only for Hindi and English").
    - lang/<code>.json = { meta, names, lines: { <voice id>: text } } for en, hi, gu, mr, ta, te, or. Edit the text there.
+   - English plays voice-only (no boxes); every other language shows the boxes.
    - The caption box follows the voice: every voice(id) call (story and all three levels) shows that line's text in the narrator box
      (t0, n1–n4, x1) or in the speaking character's dialogue box, for as long as the voice plays.
    - Language toggle: chips on the cover and in the pause menu; remembered (localStorage mela_lang); ?lang=hi picks one for a test.
@@ -48,7 +49,8 @@
   }
   function hide() { token++; cap.classList.remove('on'); shownId = null; }
   function show(id) {
-    if (!render(id)) { hide(); return; }
+    // English = the original voice-only story (no narrator / dialogue boxes, as designed); the boxes appear for the other languages
+    if (cur === 'en' || !render(id)) { hide(); return; }
     const my = ++token, d = (typeof DUR !== 'undefined' && DUR[id]) || 3.5;
     setTimeout(() => { if (token === my) { cap.classList.remove('on'); shownId = null; } }, (d + .3) * 1000);
   }
