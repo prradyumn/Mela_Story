@@ -59,7 +59,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1d1208;touch-action
 #loader{position:absolute;inset:0;z-index:80;overflow:hidden;background:#3b2a5c;cursor:default}
 /* COVER (Oct 2026 redesign, user: "light theme, Pari + title focused, round play button, no text"): the sunny Mela ground, softly blurred under a
    warm light veil · Pari alone, big, on the right (her namaste art, breathing) · the title as the centrepiece · a round saffron play button */
-#loader .cover{position:absolute;inset:-30px;background:url(../assets/story/bg_05_mela.webp) center 62%/cover no-repeat;filter:blur(5px) saturate(.72) brightness(1.08) hue-rotate(-8deg);animation:coverDrift 16s ease-in-out infinite alternate}
+#loader .cover{position:absolute;inset:-30px;background:url(../assets/story/cover_bg.webp) center 62%/cover no-repeat;animation:coverDrift 16s ease-in-out infinite alternate}
 #loader .cover::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 42% 36%,rgba(255,255,255,.72),rgba(250,252,255,.38) 55%,rgba(240,246,255,.1) 100%),linear-gradient(rgba(214,234,255,.55),rgba(236,244,255,.18) 45%,rgba(255,255,255,0) 70%,rgba(40,50,80,.12))}   /* cool, light morning veil (user: "too yellowish") */
 @keyframes coverDrift{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.06) translate(-14px,-6px)}}
 #loader .cpari{position:absolute;left:1300px;top:150px;width:580px;height:900px;background:url(../assets/story/pari_happy.webp) center bottom/contain no-repeat;filter:drop-shadow(0 22px 26px rgba(90,45,12,.35));transform-origin:50% 100%;animation:pariBreath 3.2s ease-in-out infinite}

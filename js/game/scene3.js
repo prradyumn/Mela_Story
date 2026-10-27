@@ -293,6 +293,10 @@
   /* ---------- stalls: dark → lit crossfade + light burst; sun ---------- */
   const LIT = [...document.querySelectorAll('#game .lit3')], BU = $('#burst3');
   const Stall = {
+    /* paint the lit-lane layers once, almost invisibly, while the level banner is up: the first time the browser has to draw the 5760 px lit
+       lane it decodes + uploads it (three ~400 ms frames right after the first payment); opacity 0 layers are never drawn, so it was
+       happening in the middle of play */
+    prime() { const off = LIT.filter(l => +gsap.getProperty(l, 'opacity') === 0); gsap.set(off, { opacity: .02 }); gsap.delayedCall(1.2, () => off.forEach(l => { if (+gsap.getProperty(l, 'opacity') === .02) gsap.set(l, { opacity: 0 }); })); },
     set(n) { LIT.forEach((l, i) => gsap.set(l, { opacity: i < n ? 1 : 0 })); GFX.twinkle(n); },
     async light(i) {
       const [hx, hy] = D.hooks[i];

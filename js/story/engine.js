@@ -61,7 +61,7 @@ async function loadAll(onProg) {
   // once everything else is in, so "Tap to begin" comes sooner. IMG[n] exists at once, so char() can use them any time.
   // (QA bug 30, first launch too slow) also later: the bazaar / office backgrounds, the walk / run / trot frames and the level music + ambience
   // — about 3 MB that nothing needs in the first minute. window.needs(regex) waits for them before the scene that uses them.
-  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk|pari_walk|aaru_run|gudiya_trot)_\d+$|^(bg_03_bazaar|bg_04_office|office_fg|db[5-8]|parch|manju_teach|guddu_surprised|guddu_proud|bg_03_bazaar_soft|bg_04_office_soft)$/;
+  const LATER = /^(pari_explain|pari_cheer|pari_breathe|aaru_toehop|manju_talk|guddu_talk|guddu_writeloop|baba_talk|pari_walk|aaru_run|gudiya_trot)_\d+$|^(bg_05_mela|bg_03_bazaar|bg_04_office|office_fg|db[5-8]|parch|manju_teach|guddu_surprised|guddu_proud|bg_03_bazaar_soft|bg_04_office_soft)$/;
   const AUDIO_LATER = ['m_hurry', 'm_festive', 'amb_bazaar', 'amb_office', 'amb_mela', 'sfx_wheel', 'sfx_hoof', 'sfx_cart'];
   const now = IMAGES.filter(n => !LATER.test(n)), later = IMAGES.filter(n => LATER.test(n)), auNow = AUDIO.filter(n => !AUDIO_LATER.includes(n));
   const total = now.length + auNow.length; let done = 0;
@@ -525,16 +525,9 @@ function signGate(tl, t, s) {
     const board = s.querySelector('.board'), st = document.getElementById('stage').getBoundingClientRect(), k = st.width / W, r = board.getBoundingClientRect();
     const bw = r.width / k, bh = r.height / k;
     const hit = el('div', 'signhit', ui, '', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: bw + 40 + 'px', height: bh + 40 + 'px' });
-    // the game's hint hand taps the sign (its fingertip is at 75,120 of the 150-px image): on the board, right of centre
-    /* QA Oct 2026 (bugs 9/12/20): the hand points the SAME way as the sign's arrow (➜, to the right) — it is the game's down-pointing
-       hint hand turned a quarter turn, sitting just under the arrow end of the board (clear of the words), its fingertip (75,120 of the 150-px image → 120,75
-       once turned) under the arrow, and it nudges along the arrow (left → right), not up and down. */
-    const hand = el('img', 'signhand', hit, null, { left: (20 + bw * .9 - 120) + 'px', top: (20 + bh + 6 - 75) + 'px' }); hand.src = GA('ui_hand.webp'); hand.alt = '';   // round 2: right under the arrow, its fingertip nearly touching the board, clear of the words
+    /* user (Oct 2026): no hand on the Go-to boards at all. The board just pulses (a soft, slow swell + the CSS glow) until it is tapped. */
     board.classList.add('tapme');
-    const pulse = { kill() { } };   // QA (round 2): the board does not move at all while it waits (the glow in CSS breathes instead)
-    gsap.set(hand, { opacity: 0, rotation: -90 });
-    const tap = gsap.timeline({ repeat: -1, delay: .5 }).set(hand, { opacity: 1 }).fromTo(hand, { x: -16 }, { x: 0, duration: .45, ease: 'power2.out' })
-      .to(hand, { scale: .94, duration: .14, yoyo: true, repeat: 1 }).to(hand, { x: -16, duration: .45, ease: 'power2.inOut' }).to({}, { duration: .35 });
+    const pulse = gsap.to(board, { scale: 1.045, duration: .85, yoyo: true, repeat: -1, ease: 'sine.inOut' }), tap = { kill() { } };
     /* bugs 11/13: the tapped sign leaves AT ONCE (it used to hang there until the next screen came in) */
     const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop');
       gsap.killTweensOf(s); gsap.killTweensOf(board); gsap.to(board, { scale: .92, duration: .1 }); gsap.to(s, { y: -760, rotate: 0, duration: .45, delay: .08, ease: 'back.in(1.3)' }); tl.play(); };

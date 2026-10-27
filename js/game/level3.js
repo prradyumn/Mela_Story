@@ -267,7 +267,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
     ['#btnL', '#btnR'].forEach(s => $(s).className = 'gbtn hidden'); gsap.set(['#cart', '#rule', '#hand', '#bleat'], { opacity: 0 }); $('#gFx').innerHTML = '';
     gsap.set('#gBg', { autoAlpha: 0 });
     // the L3 layer, clean
-    $('#l3').classList.remove('hidden'); gsap.set('#l3', { scale: 1, x: 0 }); gsap.set('#sun3', { y: 0 }); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
+    $('#l3').classList.remove('hidden'); gsap.set('#l3', { scale: 1, x: 0 }); L3SC.Stall.prime(); /* draw the lit lane once now (see Stall.prime) */ gsap.set('#sun3', { y: 0 }); $('#done3').classList.add('hidden'); $('#done3Cta').classList.remove('pulse');
     gsap.set('#done3Card', { clearProps: 'transform,opacity' }); gsap.set('#gHud', { autoAlpha: 1 });
     Wheel.reset(); Fw.clear(); Stall.set(0); Sun.set(0); Pari.reset(); Waves.off(); Baba.hide(); Guddu.hide(); Aaru.hide();
     $('#bill3').classList.add('hidden'); Slates.S.forEach(s => s.className = 'slate3 hidden'); gsap.set('#minus3', { scale: 0 });

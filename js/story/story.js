@@ -400,11 +400,13 @@ async function level(n) {
   /* QA bugs 27/33/34: with a real game the story's placeholder scene is never shown, and the level's pictures are downloaded and
      decoded BEFORE the wipe opens, so the level appears once, complete (the wait happens under the closed wipe) */
   if (window.GAME_LEVELS && window.GAME_LEVELS[n]) { s.style.visibility = 'hidden'; if (window.GAME_PRELOAD) await GAME_PRELOAD(n); }
-  const bg = bgImg(s, L.bg, { left: '0px' });
-  const lt = warmTint(s, .15 + n * .12); if (n === 2) lt.style.zIndex = 9;
+  const placeholder = !(window.GAME_LEVELS && window.GAME_LEVELS[n]);   // the demo scene below is only built when there is no real game (it was built, hidden, for nothing: ~1 s of work at a level's start)
+  const bg = placeholder ? bgImg(s, L.bg, { left: '0px' }) : null;
+  const lt = placeholder ? warmTint(s, .15 + n * .12) : null; if (lt && n === 2) lt.style.zIndex = 9;
   playMusic('m_hurry', { gain: .75 });
   chip.textContent = L.chip;
-  if (n === 1) {
+  if (!placeholder) { /* real game: nothing to build here */ }
+  else if (n === 1) {
     gsap.fromTo(bg, { x: 0 }, { x: -(2593 - 1920), duration: 14, ease: 'sine.inOut', yoyo: true, repeat: -1 });
     char(s, 'pari', 230, 'point', { ground: 1060, scale: .8 }); char(s, 'manju', 1720, 'teach', { ground: 1060, scale: .8, flip: true });
   } else if (n === 2) {
@@ -631,7 +633,7 @@ const FLOW = [
   ['level1', () => level(1)], ['bridge1', bridge1], ['level2', () => level(2)], ['bridge2', bridge2], ['level3', () => level(3)],
   ['endA', endA], ['endB', endB], ['endC', endC], ['badge', badge]];
 window.FLOW = FLOW;
-const NEEDS = { hookC: /^(aaru_run|gudiya_trot)_/, hookE: /^pari_walk_/, bridge1: /^(bg_03_bazaar|pari_walk_|aaru_run_|amb_bazaar)/, level1: /^(bg_03_bazaar|manju_teach|m_hurry|amb_bazaar|sfx_hoof|sfx_cart)/, level2: /^(bg_04_office|office_fg|guddu_|amb_office)/, bridge2: /^(bg_04_office|office_fg|guddu_|pari_walk_|amb_office)/, level3: /^(amb_mela|sfx_cart)/, endA: /^(m_festive|amb_mela|sfx_wheel)$/, endB: /^guddu_proud$/ };
+const NEEDS = { hookC: /^(aaru_run|gudiya_trot)_/, hookE: /^pari_walk_/, bridge1: /^(bg_03_bazaar|pari_walk_|aaru_run_|amb_bazaar)/, level1: /^(bg_03_bazaar|manju_teach|m_hurry|amb_bazaar|sfx_hoof|sfx_cart)/, level2: /^(bg_04_office|office_fg|guddu_|amb_office)/, bridge2: /^(bg_04_office|office_fg|guddu_|pari_walk_|amb_office)/, level3: /^(amb_mela|sfx_cart)/, endA: /^(bg_05_mela|m_festive|amb_mela|sfx_wheel)$/, endB: /^guddu_proud$/ };
 async function main() {
   const lp = $('#lp'), bar = $('#loader .bar i');
   await loadAll(p => bar.style.width = (p * 100).toFixed(0) + '%');
@@ -640,7 +642,7 @@ async function main() {
   let i = Math.max(0, FLOW.findIndex(f => f[0] === (q.get('from') || q.get('scene'))));
   /* QA bug 2 (jerky first screens): decode the opening's pictures — title + opening montage backgrounds and the characters' poses
      and walk/run frames — while the cover is up, so nothing is decoded in the middle of the first transitions */
-  const firstPics = ['bg_01_gate', 'bg_02_chaupal', 'bg_05_mela_dusk', 'bg_ins_sweets', 'bg_05_mela', 'gudiya_idle', 'gudiya_hop', 'pari_happy', 'pari_idle', 'pari_point', 'aaru_shout', 'aaru_run', 'aaru_jump', 'baba_idle', 'guddu_write', 'guddu_scratch',
+  const firstPics = ['bg_01_gate', 'bg_02_chaupal', 'bg_05_mela_dusk', 'bg_ins_sweets', 'gudiya_idle', 'gudiya_hop', 'pari_happy', 'pari_idle', 'pari_point', 'aaru_shout', 'aaru_run', 'aaru_jump', 'baba_idle', 'guddu_write', 'guddu_scratch',
     ...IMAGES.filter(n => /_m$/.test(n))];
   if (i === 0) await Promise.race([warm(firstPics), wait(4)]);
   // the cover's Start button (the tap unlocks audio). QA bug 1: ONLY the button starts the game (taps elsewhere on the cover did too)
