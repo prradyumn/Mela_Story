@@ -105,8 +105,10 @@ function welcomeBoard(parent, op = 1) {
 // ---------- flow helpers ----------
 let NEXT_IN = 'iris';          // how the next screen should be revealed
 const T = id => LAYOUT.text[id] || TXT[id];
-function reveal(x = 50, y = 50) { if (NEXT_IN === 'fade') { fadeIn(); gsap.set(wipe, { clipPath: 'circle(0% at 50% 50%)' }); } else { gsap.set(fade, { opacity: 0 }); irisIn(x, y); } }
-async function cutTo() { await fadeOut(.35); NEXT_IN = 'fade'; }   // same location, new shot
+function reveal(x = 50, y = 50) { if (NEXT_IN === 'fade') { fadeIn(.2); gsap.set(wipe, { clipPath: 'circle(0% at 50% 50%)' }); } else { gsap.set(fade, { opacity: 0 }); irisIn(x, y); } }
+/* user (Oct 2026): "a black screen glitch" between same-place shots. The dip to black was .35 s out + the time to build the next scene + .4 s in
+   (≈ 1 s on a slow device). Now .12 s out + .2 s in: a quick cut, not a black screen. */
+async function cutTo() { await fadeOut(.12); NEXT_IN = 'fade'; }   // same location, new shot
 function hudState({ sun = null, sunVis = null, hud = false, chip: c = '', flowers: f = 0 } = {}) {
   if (sun != null) { SUN.p = sun; sunPos(sun); }
   if (sunVis != null) gsap.to(sunEl, { opacity: sunVis ? 1 : 0, duration: .4 });
