@@ -454,3 +454,8 @@
 /* the L1 rule strip is only a label: it must never catch a tap (it is invisible in L2/L3 but sat over the middle of Level 3's first
    answer slate: tapping its exact centre did nothing) */
 #game #rule,#game #rule *{pointer-events:none}
+
+/* QA bug 24: L3 stall bulbs twinkle with a CSS animation (compositor thread); paused while a question is up (GFX.calm) */
+#game #tw3 i.twk{animation:tw3k 1s ease-in-out infinite alternate}
+#game #tw3.calm i.twk{animation-play-state:paused}
+@keyframes tw3k{from{opacity:.15}to{opacity:.95}}

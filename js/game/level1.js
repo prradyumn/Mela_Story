@@ -242,7 +242,7 @@ const fbQuick = l => Promise.all([ST.wait(.9), Promise.race([l ? COACH.say(l) : 
     $('#titleIcons').innerHTML = D.questions.map(q => `<img src="${GA(`ic_${q.icon}.webp`)}" alt="">`).join('');
     ov.classList.remove('hidden'); gsap.set(ov, { opacity: 1 });
     await gsap.fromTo('#titleCard', { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .55, ease: 'back.out(1.7)' });
-    gsap.from('#titleIcons img', { y: 30, opacity: 0, duration: .35, stagger: .06, ease: 'back.out(2)' });
+    /* QA bug 33: the item icons come with the card (they used to pop in one by one after it, which read as the screen loading twice) */
     SND.sfx('rise');
     await wait(4);   // QA bug 14: the level card stays long enough to read (was 2.2 s)
     await gsap.to(ov, { opacity: 0, duration: .35 }); ov.classList.add('hidden');

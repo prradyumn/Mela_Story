@@ -17,7 +17,7 @@ window.GAME_LEVELS = window.GAME_LEVELS || {};
   }
   const pre = {};
   window.GAME_PRELOAD = n => pre[n] || (pre[n] = Promise.race([
-    Promise.all(urls().filter(u => levelOf(u) === n).map(u => { const im = new Image(); im.src = u; return im.decode ? im.decode().catch(() => { }) : Promise.resolve(); })),
+    Promise.all(urls().filter(u => levelOf(u) === n).concat(n === 1 && window.LEVEL1 ? [...LEVEL1.questions, LEVEL1.howtoSample, LEVEL1.teach].filter(q => q && q.icon).map(q => new URL(GA(`ic_${q.icon}.webp`), location.href).href) : []).map(u => {   /* + L1's item icons (banner, tags, cart): QA bug 33, they used to load after the card was up */ const im = new Image(); im.src = u; return im.decode ? im.decode().catch(() => { }) : Promise.resolve(); })),
     new Promise(r => setTimeout(r, 12000))]));
 })();
 

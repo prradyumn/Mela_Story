@@ -122,6 +122,7 @@
   function calm(on) {   // QA Oct 2026: fully still during a question (it was ¼ speed): one moving thing at a time
     calmed = on;
     life.concat(twAll).forEach(t => gsap.to(t, { timeScale: on ? 0 : 1, duration: .6, overwrite: 'auto' }));
+    tw3.classList.toggle('calm', on);   // L3 bulbs (CSS animations) hold still during a question too
     const birds = amb.querySelectorAll('.gbird'); if (birds.length) gsap.to(birds, { opacity: on ? 0 : 1, duration: .5, overwrite: 'auto' });
     if (birdCall) birdCall.paused(on);
     gsap.to([amb, tw3], { opacity: on ? .8 : 1, duration: .6, overwrite: 'auto' });
@@ -197,12 +198,13 @@
   function twinkle(n) {   // stalls 0..n-1 are lit
     groups.forEach((g, i) => {
       const on = i < n;
+      /* QA bug 24 (L3 lag on the ThinkPad): the twinkle is a CSS animation now (the compositor runs it), not one script tween per bulb —
+         82 bulbs were 82 GSAP tweens updated on the main thread every frame by the end of the level. Same range (.15 → .95), random pace + phase. */
       if (on && !twOf[i]) {
-        twOf[i] = [...g.children].map(b => gsap.fromTo(b, { opacity: .15 }, { opacity: .95, duration: .5 + Math.random() * .9, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: Math.random() * 1.2 }));
-        twAll.push(...twOf[i]); if (calmed) twOf[i].forEach(t => t.timeScale(0));
-        gsap.fromTo(g, { opacity: 0 }, { opacity: 1, duration: .8 });
+        [...g.children].forEach(b => { b.style.animationDuration = (.5 + Math.random() * .9).toFixed(2) + 's'; b.style.animationDelay = (-Math.random() * 1.4).toFixed(2) + 's'; b.classList.add('twk'); });
+        twOf[i] = true; gsap.fromTo(g, { opacity: 0 }, { opacity: 1, duration: .8 });
       }
-      if (!on && twOf[i]) { twOf[i].forEach(t => t.kill()); twAll = twAll.filter(t => !twOf[i].includes(t)); twOf[i] = null; gsap.set(g, { opacity: 0 }); }
+      if (!on && twOf[i]) { [...g.children].forEach(b => b.classList.remove('twk')); twOf[i] = null; gsap.set(g, { opacity: 0 }); }
     });
   }
 

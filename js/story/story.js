@@ -237,9 +237,12 @@ async function hookA() {
   const amt = ost.querySelector('.amt');
   dropSign(tl, cut[3] - .05, ost);
   const c0 = cut[3] + .55, c1 = V + 10.77, steps = 12;
-  for (let i = 1; i <= steps; i++) tl.call(() => { amt.textContent = inr(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
+  /* QA bug 10 (the board's TEXT shook): every digit sits in a fixed-width slot, so the centred amount no longer jumps sideways on each tick
+     (the digits have different widths: the text width went 296 → 371 px in uneven steps); no scale punch on the final amount */
+  const setAmt = v => { amt.innerHTML = inr(v).split('').map(ch => /\d/.test(ch) ? `<span class="dg">${ch}</span>` : ch).join(''); };
+  setAmt(0);
+  for (let i = 1; i <= steps; i++) tl.call(() => { setAmt(i * 50000); sfx('tick', .35, .9 + i * .05); }, null, c0 + (c1 - c0) * Math.pow(i / steps, 1.3));
   tl.call(() => { sfx('coins', .9); sfx('ding', .6); }, null, c1);
-  tl.fromTo(amt, { scale: 1 }, { scale: 1.05, duration: .22, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, c1);
   // 6 "All items need to be bought before the sun goes down." the light warms and the sunset tracker appears on "sun"
   tl.to(grade, { opacity: .15, duration: 2, ease: 'sine.inOut' }, V + 14.70);
   tl.to(sunEl, { opacity: 1, duration: .6 }, V + 17.28); tl.call(() => sfx('rise', .6), null, V + 17.28);
@@ -384,7 +387,7 @@ async function hookE() {
   signGate(tl, u + 1, go);   // the child taps the sign to go
   F.clear(tl, u + 1.05);
   const e = u + 1.1;   // once Aaru's two jumps have landed (and the sign was tapped)
-  const ea = move(tl, e, aaru, 'run', 0, 1900, 1.7, { ease: 'sine.in' }), ep = move(tl, e + .1, pari, 'walk', 0, 800, 1.9, { ease: 'sine.in' });   // QA bug 32: off the screen, not back to the shouting pose
+  const ea = move(tl, e, aaru, 'run', 0, 1900, 1.7, { ease: 'sine.in', end: 'run' }), ep = move(tl, e + .1, pari, 'walk', 0, 800, 1.9, { ease: 'sine.in' });   // QA bug 32: off the screen, not back to the shouting pose
   tl.set({}, {}, Math.max(ea, ep) + .1);
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
@@ -425,13 +428,17 @@ async function level(n) {
     <div style="font-size:40px;font-family:Fredoka;font-weight:500;margin-top:10px">${L.what}</div>
     <div style="font-size:30px;font-family:Fredoka;font-weight:500;margin-top:16px;padding:10px 20px;background:#fff1c9;border-radius:14px;border:3px dashed #c98a4a">${L.rule}</div>`, { left: '960px', top: '300px', width: '1100px' }), 'card');
   gsap.set(card, { xPercent: -50, scale: 0 }); gsap.to(card, { scale: 1, duration: .6, ease: 'back.out(2)', delay: .6 });
-  reveal(10, 50);
   // Real game hook: window.GAME_LEVELS[n](api) can replace this demo later.
   if (window.GAME_LEVELS && window.GAME_LEVELS[n]) {
     gsap.set(card, { display: 'none' });
-    await window.GAME_LEVELS[n]({ n, level: L, scene: s, stage, world, ui, hud, IMG, BUF, sfx, play, voice, playMusic, char, setPose, say, reg, el, setFlowers, setChip: t => chip.textContent = t, setSun: p => { SUN.p = p; sunPos(p); }, sunTo: (p, d = 1) => gsap.to(SUN, { p, duration: d, onUpdate: () => sunPos(SUN.p) }), wait });
+    /* QA bugs 33 / 24: the level shows itself, then gets two frames to be drawn while the wipe is still closed, and only then does the
+       wipe open — the screen appears once, complete, and the first big paint no longer stalls the opening wipe */
+    const run = window.GAME_LEVELS[n]({ n, level: L, scene: s, stage, world, ui, hud, IMG, BUF, sfx, play, voice, playMusic, char, setPose, say, reg, el, setFlowers, setChip: t => chip.textContent = t, setSun: p => { SUN.p = p; sunPos(p); }, sunTo: (p, d = 1) => gsap.to(SUN, { p, duration: d, onUpdate: () => sunPos(SUN.p) }), wait });
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); reveal(10, 50);
+    await run;
   }
   else {
+    reveal(10, 50);
     const b = reg(goButton(ui, 'Play demo ▶', 960, 780), 'playdemo'); gsap.to(b, { scale: 1, duration: .5, delay: 1, ease: 'back.out(2.5)' });
     await waitClick(b);
     gsap.to([b, card], { scale: 0, duration: .3 });
@@ -469,7 +476,7 @@ async function bridge1() {
   F.on(tl, t - .2, pari);
   t = say(tl, s, t, 'p4', pari, T('p4'), { act: 'explain', end: 'happy' });
   const go = sign(s, 'Go to the office ➜', 960, 300, 58, 'gosign'); /* high enough that Pari walks under it (QA) */ dropSign(tl, t - .3, go); F.spot(tl, t - .8, go); t += 1.2; signGate(tl, t - .35, go); F.clear(tl, t - .3);
-  const ep = move(tl, t - .3, pari, 'walk', 0, 1700, 2.1, { ease: 'sine.in' }), ea = move(tl, t - .2, aaru, 'run', 0, 700, 1.4, { ease: 'sine.in' });   // off the screen, no snap back
+  const ep = move(tl, t - .3, pari, 'walk', 0, 1700, 2.1, { ease: 'sine.in' }), ea = move(tl, t - .2, aaru, 'run', 0, 700, 1.4, { ease: 'sine.in', end: 'run' });   // off the screen, no snap back
   tl.set({}, {}, Math.max(ep, ea) + .1);
   await playTL(tl);
   await irisOut(90, 50); NEXT_IN = 'iris';
@@ -654,15 +661,21 @@ async function main() {
   /* QA bug 4: the game title (t0, "The Mela Before Sunset") is spoken on the COVER. Browsers only allow sound after a tap, so it plays
      as soon as the cover appears when sound is already allowed, otherwise right on the Start tap while the cover is still showing
      (the cover stays up until the title has been said, then the welcome screen opens). Not after a Back / QA reload (?from=…). */
-  let t0Said = false;
-  const sayTitle = () => { if (t0Said || i !== 0 || !AC || AC.state !== 'running') return false; t0Said = true; voice('t0'); return true; };
-  const sayTitleSoon = async () => { if (t0Said || i !== 0) return; try { unlockAudio(); await AC.resume(); } catch (e) { } for (let k = 0; k < 20 && !(BUF.t0 && AC.state === 'running'); k++) await new Promise(r => setTimeout(r, 100)); sayTitle(); };   // QA bug 29: wait for the sound to really be running, then say it
-  sayTitle(); $('#loader').addEventListener('pointerdown', sayTitleSoon); addEventListener('keydown', sayTitleSoon, { once: true });
+  /* QA bug 29 (round 3: "doesn't autoplay on load AND doesn't play on tap"). (1) It only counts as said when the sound really runs and the
+     page is in front: before, a title started while the cover's sound was suspended (window not focused → controls.js suspends it) was
+     silent but marked as said, so no tap played it again. (2) The first tap / touch / key ANYWHERE says it (capture on the window: a tap a
+     handler stops — the language chips — still counts). (3) Start always lets it finish before the cover goes. */
+  let t0Said = false, t0At = 0;
+  const sayTitle = () => { if (t0Said || i !== 0 || !AC || AC.state !== 'running' || document.hidden || !document.hasFocus() || !BUF.t0) return false; t0Said = true; t0At = AC.currentTime; voice('t0'); return true; };
+  const sayTitleSoon = async () => { if (t0Said || i !== 0 || !document.getElementById('loader')) return; try { unlockAudio(); await AC.resume(); } catch (e) { } for (let k = 0; k < 20 && !(BUF.t0 && AC.state === 'running'); k++) await new Promise(r => setTimeout(r, 100)); sayTitle(); };
+  try { AC.resume().then(() => sayTitle(), () => { }); } catch (e) { }   // autoplay where the browser allows it
+  ['pointerdown', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, sayTitleSoon, { capture: true, passive: true }));
+  addEventListener('focus', () => setTimeout(sayTitleSoon, 50));   // came back to the window while the cover is up (autoplay allowed): say it now
   await new Promise(r => lp.addEventListener('click', e => { e.stopPropagation(); unlockAudio(); r(); }, { once: true }));
   gsap.killTweensOf(lp); gsap.to(lp, { scale: .9, duration: .12 });
   try { play('sfx_cycle_bell', { gain: 1 }); } catch (e) { }   // storyboard: cycle bell on Start
   try { await AC.resume(); } catch (e) { }
-  if (i === 0 && !t0Said) { await wait(.35); if (sayTitle()) await wait((DUR.t0 || 1.6) + .3); }
+  if (i === 0) { if (!t0Said) { await wait(.35); sayTitle(); } if (t0Said) { const left = (DUR.t0 || 1.6) - (AC.currentTime - t0At); if (left > 0) await wait(left + .3); } }   // the title always finishes before the cover goes
   gsap.to('#loader', { opacity: 0, duration: .5, onComplete: () => $('#loader').remove() });
   if (i > 0) { gsap.set(wipe, { clipPath: 'circle(150% at 50% 50%)' }); NEXT_IN = 'iris'; if (FLOW[i][0].startsWith('level') || FLOW[i][0].startsWith('bridge')) playMusic(FLOW[i][0].startsWith('level') ? 'm_hurry' : 'm_village_long'); else if (FLOW[i][0].startsWith('end') || FLOW[i][0] === 'badge') playMusic('m_festive'); else playMusic('m_village_long'); }
   const once = q.has('scene');

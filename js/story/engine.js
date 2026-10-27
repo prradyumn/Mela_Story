@@ -194,7 +194,8 @@ const CH = {
     // idle loop (user's sprite pack, Oct 2026; _source/aaru_sprites/idle → assets/story/aaru_toehop_*, 540 px): excited toe-hopping whenever
     // he rests in 'jump' (his jumps themselves still use the jump pose). Sized so his body height and feet match the stills.
     // (A breathing loop for 'shout' was tried and removed on user feedback — he keeps his still shout pose.)
-    idles: [{ pose: 'jump', file: 'aaru_toehop', n: 35, h: 491.6, fps: 14, lift: -4.2, dx: .9 }] },   // ~2.6 s a bounce
+    idles: [] },   // QA bug 18 (round 3): no toe-hop idle loop — nothing rests in 'jump' any more, and between / after his jumps the loop flashed in
+    // for a frame and then ~0.5 s before he settled (the jerk on the badge screen). Was: { pose: 'jump', file: 'aaru_toehop', n: 35, h: 491.6, fps: 14, lift: -4.2, dx: .9 }   // ~2.6 s a bounce
   baba: { name: 'Baba', h: 620, color: '#8a5a2b', poses: ['idle', 'ask'], talk: { ask: 'closed' },
     acts: { talk: { file: 'baba_talk', n: 36, h: 621, fps: 14, mode: 'pp', lift: -1 } } },
   guddu: { name: 'Guddu Bhaiya', h: 640, color: '#3b8a46', poses: ['write', 'scratch', 'surprised', 'proud'], talk: { scratch: 'closed', surprised: 'closed', proud: 'open' },
@@ -522,12 +523,15 @@ function signGate(tl, t, s) {
   tl.call(() => {
     if (SKIPPING) return;
     tl.pause();
+    gsap.set(s, { xPercent: 0, x: -Math.round(s.offsetWidth / 2), y: 0 });   // whole stage pixels (centring by xPercent left it at e.g. −314.688 px: the text shimmered)
     const board = s.querySelector('.board'), st = document.getElementById('stage').getBoundingClientRect(), k = st.width / W, r = board.getBoundingClientRect();
     const bw = r.width / k, bh = r.height / k;
     const hit = el('div', 'signhit', ui, '', { left: (r.left - st.left) / k - 20 + 'px', top: (r.top - st.top) / k - 20 + 'px', width: bw + 40 + 'px', height: bh + 40 + 'px' });
     /* user (Oct 2026): no hand on the Go-to boards at all. The board just pulses (a soft, slow swell + the CSS glow) until it is tapped. */
     board.classList.add('tapme');
-    const pulse = gsap.to(board, { scale: 1.045, duration: .85, yoyo: true, repeat: -1, ease: 'sine.inOut' }), tap = { kill() { } };
+    /* QA bugs 9/12/20 (round 3, "still feels shaky"): the board does not move AT ALL while it waits — no scale pulse (it swelled 9 px sideways
+       and 18 px in width every cycle); only the CSS glow breathes (box-shadow, no motion). */
+    const pulse = { kill() { } }, tap = { kill() { } };
     /* bugs 11/13: the tapped sign leaves AT ONCE (it used to hang there until the next screen came in) */
     const go = e => { if (e) e.stopPropagation(); pulse.kill(); tap.kill(); board.classList.remove('tapme'); hit.remove(); try { AC.resume(); } catch (x) { } sfx('pop');
       gsap.killTweensOf(s); gsap.killTweensOf(board); gsap.to(board, { scale: .92, duration: .1 }); gsap.to(s, { y: -760, rotate: 0, duration: .45, delay: .08, ease: 'back.in(1.3)' }); tl.play(); };
