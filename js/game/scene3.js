@@ -16,7 +16,9 @@
   const P = $('#cart3 .pull'); P.style.backgroundImage = `url(${A('pari_pull_sheet.webp')})`;
   let pariOn = false, pariT0 = 0;
   const REST = 23;   // standing still: feet together (frame 0 is mid-stride, looked like walking on the spot)
-  const pariFrame = k => { P.style.backgroundPosition = `${(k % 6) * 20}% ${Math.floor(k / 6) * 20}%`; };
+  /* the sheet now holds only the frames that are ever shown (Oct 2026, memory: 12 → 6.8 MP): new cells 0–17 = old frames 13–30, cell 18 = old frame 0; 5 × 4 grid */
+  const CELL = k => (k === 0 ? 18 : k - 13), cellPos = k => { const n = CELL(k); return `${(n % 5) * 25}% ${Math.floor(n / 5) * (100 / 3)}%`; };
+  const pariFrame = k => { P.style.backgroundPosition = cellPos(k); };
   gsap.ticker.add(() => { if (pariOn) pariFrame(13 + Math.floor((clock() - pariT0) * 24) % 18); });
   /* Pari talking (option 1, user Oct 2026): while her VO plays she lets go of the cart and explains (story frames pari_explain_0–35:
      0–4 hands apart, 5–30 loop, 31–35 hands together), then takes the handle again (back to the push sprite). */
@@ -374,7 +376,7 @@
       gsap.to(star, { scale: 1, duration: .4, ease: 'back.out(3)', delay: .2 + 7 * .3, onStart: () => SND.sfx('sparkle', .5) });
       const mini = MAP.querySelector('.mini'), mo = { f: 0 };   // the little Pari-cart walks the route
       gsap.to(mini, { left: 1620, duration: 3.2, ease: 'sine.inOut', delay: .4 });
-      gsap.to(mo, { f: 18 * 4, duration: 3.2, delay: .4, ease: 'none', onUpdate() { const k = 13 + Math.floor(mo.f) % 18; mini.style.backgroundPosition = `${(k % 6) * 20}% ${Math.floor(k / 6) * 20}%`; } });
+      gsap.to(mo, { f: 18 * 4, duration: 3.2, delay: .4, ease: 'none', onUpdate() { const k = 13 + Math.floor(mo.f) % 18; mini.style.backgroundPosition = cellPos(k) + ``; } });
     },
     async off(instant = false) {
       gsap.to(MAP, { opacity: 0, duration: instant ? 0 : .3, onComplete: () => { MAP.innerHTML = ''; gsap.set(MAP, { opacity: 1 }); } });

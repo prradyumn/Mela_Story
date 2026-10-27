@@ -282,7 +282,7 @@
 #game #map3 .num{position:absolute;width:52px;height:52px;border-radius:50%;background:#ffd23f;border:4px solid #5a2d0c;font:800 30px/46px Baloo;text-align:center;color:#3a220f;box-shadow:0 4px 0 rgba(58,34,15,.3)}
 #game #map3 .star{position:absolute;width:60px;height:60px;border-radius:50%;background:#f08c12;border:4px solid #fff3d6;font:800 34px/52px Baloo;text-align:center;color:#fff}
 #game #map3 .route{position:absolute;left:510px;top:700px;width:1280px;height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,#ffe7a3 0 24px,transparent 24px 40px)}
-#game #map3 .mini{position:absolute;left:330px;top:600px;width:160px;height:105px;background-size:600% 600%;background-repeat:no-repeat}
+#game #map3 .mini{position:absolute;left:330px;top:600px;width:160px;height:105px;background-size:500% 400%;background-repeat:no-repeat}
 #game #pari3{position:absolute;left:-217px;top:524px;width:563px;height:486px;background-size:600% 600%;background-repeat:no-repeat}
 #game #waves3{position:absolute;left:150px;top:600px;width:0;height:0;opacity:0;pointer-events:none}
 #game #waves3 i{position:absolute;border-radius:50%;border:5px solid transparent;border-right-color:rgba(255,248,230,.9);transform:translate(-50%,-50%)}
@@ -293,7 +293,7 @@
 /* Pari + hand-cart (pari_pull_sheet 6×6, 718×472 frames) at ×1.2. The MELA MONEY board stands in the cart behind its front
    wall, the potli sits on the rim (coins fly from it), Pari's feet and the wheel rest on the ground line y ~1000. */
 #game #cart3{position:absolute;left:-40px;top:434px;width:862px;height:566px}
-#game #cart3 .pull{position:absolute;left:0;top:0;width:862px;height:566px;background-size:600% 600%;background-repeat:no-repeat}
+#game #cart3 .pull{position:absolute;left:0;top:0;width:862px;height:566px;background-size:500% 400%;background-repeat:no-repeat}
 /* while Pari talks she lets go of the cart: cart-only image (same canvas as the sheet) + her explaining frames standing at the
    handle ends (her dress covers the cut handles); swapped back to the push sprite when she moves */
 #game #cart3 .cartonly{position:absolute;left:0;top:0;width:862px;height:566px;opacity:0}
