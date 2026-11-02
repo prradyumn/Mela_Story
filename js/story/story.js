@@ -592,7 +592,7 @@ async function badge() {
   SCN = 'badge'; hudState({ sunVis: false });
   const s = newScene();
   bgImg(s, 'bg_05_mela_dusk', { left: '0px', filter: 'blur(10px) brightness(.7)', transform: 'scale(1.05)' });
-  const card = el('div', 'card', ui, '', { left: '960px', top: '70px', width: '1000px', height: '900px' });
+  const card = el('div', 'card', ui, '', { left: '960px', top: '150px', width: '1000px', height: '760px' });   // no Play again button any more (user): shorter card, centred
   gsap.set(card, { xPercent: -50 });
   const medal = reg(el('div', '', ui, `<svg viewBox="-160 -200 320 400" width="340" height="425">
    <path d="M-70 -200 L-20 -60 L-60 -60 Z" fill="#c93b3b"/><path d="M70 -200 L20 -60 L60 -60 Z" fill="#2f63c9"/>
@@ -600,13 +600,12 @@ async function badge() {
    <circle cx="0" cy="60" r="130" fill="#f6c343" stroke="#8a5a0a" stroke-width="10"/>
    <circle cx="0" cy="60" r="104" fill="#ffd966" stroke="#c98a1a" stroke-width="6"/>
    <polygon fill="#fff4c2" stroke="#c98a1a" stroke-width="5" points="${[...Array(10)].map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 34 : 78; return (Math.cos(a) * r).toFixed(1) + ',' + (60 + Math.sin(a) * r).toFixed(1) }).join(' ')}"/>
-   <rect class="shine" x="-40" y="-80" width="30" height="300" fill="rgba(255,255,255,.55)" transform="rotate(25)"/></svg>`, { position: 'absolute', left: '960px', top: '96px', transform: 'translateX(-50%)', perspective: '800px' }), 'medal');
-  const t1 = el('div', '', ui, 'You saved the Mela!', { position: 'absolute', left: '960px', top: '540px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '64px', color: '#b5361d', whiteSpace: 'nowrap' });
-  const t2 = el('div', '', ui, 'Smart Guess Star!', { position: 'absolute', left: '960px', top: '608px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '96px', color: '#e8870e', textShadow: '0 5px 0 #6b3d16', whiteSpace: 'nowrap' });
+   <rect class="shine" x="-40" y="-80" width="30" height="300" fill="rgba(255,255,255,.55)" transform="rotate(25)"/></svg>`, { position: 'absolute', left: '960px', top: '214px', transform: 'translateX(-50%)', perspective: '800px' }), 'medal');
+  const t1 = el('div', '', ui, 'You saved the Mela!', { position: 'absolute', left: '960px', top: '652px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '64px', color: '#b5361d', whiteSpace: 'nowrap' });
+  const t2 = el('div', '', ui, 'Smart Guess Star!', { position: 'absolute', left: '960px', top: '720px', fontFamily: 'Baloo', fontWeight: 800, fontSize: '96px', color: '#e8870e', textShadow: '0 5px 0 #6b3d16', whiteSpace: 'nowrap' });
   const t3 = el('div', '', ui, 'You rounded 7 prices, added 7 bills and paid 7 shopkeepers.', { position: 'absolute', left: '960px', top: '740px', fontFamily: 'Fredoka', fontWeight: 500, fontSize: '34px', color: '#3a220f', whiteSpace: 'nowrap' });
   t3.remove();   // feedback: no summary line under "Smart Guess Star!"
   [t1, t2].forEach(x => gsap.set(x, { xPercent: -50, opacity: 0, y: 30 }));
-  const again = goButton(ui, 'Play again ↻', 960, 790);
   const tl = gsap.timeline({ paused: true });
   tl.call(() => reveal(50, 40), null, 0);
   tl.from(card, { scale: .6, opacity: 0, duration: .5, ease: 'back.out(2)' }, .1);
@@ -615,22 +614,10 @@ async function badge() {
   tl.call(() => voice('x1'), null, 2.0);
   tl.fromTo(medal.querySelector('.shine'), { x: -160 }, { x: 180, duration: 1, ease: 'power2.inOut', repeat: -1, repeatDelay: 1.6 }, 2);
   tl.to([t1, t2], { opacity: 1, y: 0, duration: .5, stagger: .2, ease: 'back.out(2)' }, .9);
-  tl.to(again, { scale: 1, duration: .5, ease: 'back.out(2.5)' }, 3.6);
   tl.to(medal, { y: -12, duration: 1.4, yoyo: true, repeat: -1, ease: 'sine.inOut' }, 3.6);
-  tl.call(() => { const iv = setInterval(() => confetti(40, 200 + Math.random() * 1520, 200), 2200); again._iv = iv; }, null, 3);
+  tl.call(() => setInterval(() => confetti(40, 200 + Math.random() * 1520, 200), 2200), null, 3);
   tl.play(0);
-  await waitClick(again);
-  location.replace(location.pathname);   // QA bug 26: back to the cover page (a clean start; no blank screen while the story reloads)
-  await new Promise(() => { });
-  clearInterval(again._iv);
-  again.style.pointerEvents = 'none';
-  await irisOut(50, 50); NEXT_IN = 'iris';
-  /* QA bug 26 (Play again froze on a slow network): start the new round from a clean slate — no paused clock, no voice or particles
-     left over from the ending, the game layer closed — so nothing from the finished round can hold up the title screen */
-  try { stopVoices(); } catch (e) { }
-  P.length = 0; window.GAME_PAUSED = false; window.EDIT_PAUSED = false; if (gsap.globalTimeline.paused()) gsap.globalTimeline.resume();
-  try { if (AC && AC.state !== 'running') AC.resume(); } catch (e) { }
-  const g = document.getElementById('game'); if (g) g.classList.add('hidden'); window.GAME_HANDBACK = null; window.GAME_RESULT = {};
+  await new Promise(() => { });   // the badge is the end of the game (user: no Play again button)
 }
 
 
