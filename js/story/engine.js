@@ -34,7 +34,8 @@ const IMG = {}, BUF = {}, DUR = {};
 const IMAGES = ['bg_01_gate', 'bg_02_chaupal', 'bg_03_bazaar', 'bg_04_office', 'bg_05_mela', 'bg_05_mela_dusk', 'bg_ins_sweets',
   'bg_02_chaupal_soft', 'bg_03_bazaar_soft', 'bg_04_office_soft', 'bg_05_mela_dusk_soft',   // pre-blurred copies for speakerFocus (story.js)
   'db5', 'db6', 'db7', 'db8', 'parch', 'office_fg', 'pari_idle', 'pari_point', 'pari_happy', 'aaru_run', 'aaru_shout', 'aaru_jump', 'baba_idle', 'baba_ask',
-  'guddu_write', 'guddu_scratch', 'guddu_surprised', 'guddu_proud', 'manju_teach', 'gudiya_idle', 'gudiya_hop'];
+  'guddu_write', 'guddu_scratch', 'guddu_surprised', 'guddu_proud', 'manju_teach', 'gudiya_idle', 'gudiya_hop',
+  'btn_l', 'btn_m', 'btn_r'];   // the .btn pill art (CSS): loaded up front, or "Get my badge" showed as bare text until it arrived (QA round 4)
 const AUDIO = ['m_title', 'm_village_long', 'm_hurry', 'm_festive',
   'sfx_boing', 'sfx_bubble', 'sfx_coins', 'sfx_confetti', 'sfx_cycle_bell', 'sfx_ding', 'sfx_drumroll_hit', 'sfx_paper', 'sfx_pop',
   'sfx_rise', 'sfx_scribble', 'sfx_sparkle', 'sfx_stamp', 'sfx_swish', 'sfx_tick', 'sfx_whoosh', 'sfx_goat', 'sfx_whoosh_soft', 'sfx_swish_soft',

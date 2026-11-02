@@ -9,6 +9,8 @@
 <meta name="format-detection" content="telephone=no">
 <title>The Mela Before Sunset</title>
 <link rel="icon" href="favicon.svg">
+<link rel="preload" as="image" href="assets/story/cover_bg.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/story/pari_happy.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/story.css">
 <link rel="stylesheet" href="css/game.css">
 <link rel="stylesheet" href="css/lang.css">
@@ -23,6 +25,15 @@
   <div id="fade"></div>
   <div id="skip">Skip ⏭</div>
   <div id="loader"><div class="cover"></div><div class="cpari"></div><div class="ctitle"><div class="csun"></div><h1><span class="l1" data-t="The Mela">The Mela</span><span class="l2" data-t="Before Sunset">Before Sunset</span></h1></div><div class="bar"><i></i></div><p id="lp" aria-label="Play">Loading Apnapur…</p></div>
+<script>/* cover (QA round 4, "loading screen glitch"): it stays a plain light screen until its own art (background, Pari, title font) is in,
+   then fades in as one picture — no empty purple frame, no title alone, no background / Pari popping in. Gives up waiting after 3.5 s. */
+(function () { const st = document.getElementById('stage'), s = Math.min(innerWidth / 1920, innerHeight / 1080);   // fit the stage now (the engine's fit() comes later: until then it showed unscaled, a light box in a corner)
+  st.style.transform = `translate(${-960 * s}px,${-540 * s}px) scale(${s})`;
+  const L = document.getElementById('loader'), art = sel => { const m = getComputedStyle(L.querySelector(sel)).backgroundImage.match(/url\("?(.*?)"?\)$/);
+  return m ? new Promise(r => { const i = new Image(); i.onload = () => (i.decode ? i.decode() : Promise.resolve()).catch(() => { }).then(r); i.onerror = r; i.src = m[1]; }) : null; };
+  const ready = Promise.all([art('.cover'), art('.cpari'), document.fonts.load('800 150px Baloo').catch(() => { })]);
+  window.COVER_IN = Promise.race([ready, new Promise(r => setTimeout(r, 3500))]).then(() => { L.classList.add('in'); return new Promise(r => setTimeout(r, 900)); });
+})();</script>
 </div></div>
 <!-- Back + Pause (before the engine: its pausable setTimeout must wrap every timer) -->
 <script src="js/controls.js"></script>

@@ -580,6 +580,7 @@ async function endC() {
   tl.to(world, { scale: 1.05, duration: 6, ease: 'sine.inOut' }, r3s);
   t = voiceOver(tl, t + .8, 'n4');
   await playTL(tl);
+  await warm(['btn_l', 'btn_m', 'btn_r']);   // QA round 4: the button comes with its pill art, never as bare text first
   const b = reg(goButton(ui, 'Get my badge ★', 960, 260), 'badgebtn'); gsap.to(b, { scale: 1, duration: .5, ease: 'back.out(2.5)' });
   await waitClick(b);
   play('sfx_drumroll_hit', { gain: .9 });
@@ -645,7 +646,15 @@ window.FLOW = FLOW;
 const NEEDS = { hookC: /^(aaru_run|gudiya_trot)_/, hookE: /^pari_walk_/, bridge1: /^(bg_03_bazaar|pari_walk_|aaru_run_|amb_bazaar)/, level1: /^(bg_03_bazaar|manju_teach|m_hurry|amb_bazaar|sfx_hoof|sfx_cart)/, level2: /^(bg_04_office|office_fg|guddu_|amb_office)/, bridge2: /^(bg_04_office|office_fg|guddu_|pari_walk_|amb_office)/, level3: /^(amb_mela|sfx_cart)/, endA: /^(bg_05_mela|m_festive|amb_mela|sfx_wheel)$/, endB: /^guddu_proud$/ };
 async function main() {
   const lp = $('#lp'), bar = $('#loader .bar i');
-  await loadAll(p => bar.style.width = (p * 100).toFixed(0) + '%');
+  /* QA round 4 ("loading screen glitch"): the bar glides instead of jumping (it shot to 54 %, crawled, then sat at 99 % for ~5 s while the
+     opening pictures decoded). Files fill 0–90 %, the decode step counts as the last 10 %. While a big file is still coming the bar keeps
+     creeping slowly (never more than 8 % ahead of the real progress, never past 98 %), so it never looks frozen; at the end it eases to 100 %. */
+  let real = 0, barTo = 0, barAt = 0, last = performance.now(); const BAR_MAX = 90;
+  (function barTick(now) { const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (barTo < 100) barTo = Math.min(98, real + 8, Math.max(real, barTo + dt * 1.6));
+    barAt = Math.min(barTo, barAt + Math.max(dt * 6, (barTo - barAt) * Math.min(1, dt * 3.5))); bar.style.width = barAt.toFixed(2) + '%';
+    if (document.getElementById('loader') && !(barTo >= 100 && barAt >= 100)) requestAnimationFrame(barTick); })(last);
+  await Promise.all([loadAll(p => real = Math.max(real, p * BAR_MAX)), window.COVER_IN]);
   await document.fonts.load('600 32px Poppins'); await document.fonts.ready;
   const q = new URLSearchParams(location.search);
   let i = Math.max(0, FLOW.findIndex(f => f[0] === (q.get('from') || q.get('scene'))));
@@ -654,29 +663,37 @@ async function main() {
   const firstPics = ['bg_01_gate', 'bg_02_chaupal', 'bg_05_mela_dusk', 'bg_ins_sweets', 'gudiya_idle', 'gudiya_hop', 'pari_happy', 'pari_idle', 'pari_point', 'aaru_shout', 'aaru_run', 'aaru_jump', 'baba_idle', 'guddu_write', 'guddu_scratch',
     ...IMAGES.filter(n => /_m$/.test(n))];
   if (i === 0) await Promise.race([warm(firstPics), wait(4)]);
+  barTo = 100; for (let k = 0; k < 40 && barAt < 100; k++) await new Promise(r => setTimeout(r, 50));   // the bar always ends full
   // the cover's Start button (the tap unlocks audio). QA bug 1: ONLY the button starts the game (taps elsewhere on the cover did too)
-  gsap.to('#loader .bar', { opacity: 0, duration: .3 });
+  // the bar and its "Loading…" text fade out first, then the round Start button grows in softly (it used to swap in at once with a hard pop)
+  await new Promise(r => gsap.to(['#loader .bar', lp], { opacity: 0, duration: .45, ease: 'power1.out', onComplete: r }));
   lp.textContent = 'Start ▶'; lp.classList.add('ready'); $('#loader').classList.add('ready');
-  gsap.fromTo(lp, { scale: 0 }, { scale: 1, duration: .6, ease: 'back.out(2.4)', onComplete: () => gsap.to(lp, { scale: 1.06, duration: .75, yoyo: true, repeat: -1, ease: 'sine.inOut' }) });
+  gsap.fromTo(lp, { scale: .4, opacity: 0 }, { scale: 1, opacity: 1, duration: .85, delay: .1, ease: 'back.out(1.6)', onComplete: () => gsap.to(lp, { scale: 1.06, duration: .9, yoyo: true, repeat: -1, ease: 'sine.inOut' }) });
   /* QA bug 4: the game title (t0, "The Mela Before Sunset") is spoken on the COVER. Browsers only allow sound after a tap, so it plays
      as soon as the cover appears when sound is already allowed, otherwise right on the Start tap while the cover is still showing
-     (the cover stays up until the title has been said, then the welcome screen opens). Not after a Back / QA reload (?from=…). */
+     (the cover stays up until the title has been said, then the welcome screen opens). QA round 4 ("plays only once"): on EVERY cover,
+     also after Back / a QA jump (?from=…); only the one-screen test mode ?scene=… stays quiet. */
   /* QA bug 29 (round 3: "doesn't autoplay on load AND doesn't play on tap"). (1) It only counts as said when the sound really runs and the
      page is in front: before, a title started while the cover's sound was suspended (window not focused → controls.js suspends it) was
      silent but marked as said, so no tap played it again. (2) The first tap / touch / key ANYWHERE says it (capture on the window: a tap a
      handler stops — the language chips — still counts). (3) Start always lets it finish before the cover goes. */
-  let t0Said = false, t0At = 0;
-  const sayTitle = () => { if (t0Said || i !== 0 || !AC || AC.state !== 'running' || document.hidden || !document.hasFocus() || !BUF.t0) return false; t0Said = true; t0At = AC.currentTime; voice('t0'); return true; };
-  const sayTitleSoon = async () => { if (t0Said || i !== 0 || !document.getElementById('loader')) return; try { unlockAudio(); await AC.resume(); } catch (e) { } for (let k = 0; k < 20 && !(BUF.t0 && AC.state === 'running'); k++) await new Promise(r => setTimeout(r, 100)); sayTitle(); };
-  try { AC.resume().then(() => sayTitle(), () => { }); } catch (e) { }   // autoplay where the browser allows it
-  ['pointerdown', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, sayTitleSoon, { capture: true, passive: true }));
-  addEventListener('focus', () => setTimeout(sayTitleSoon, 50));   // came back to the window while the cover is up (autoplay allowed): say it now
+  /* QA round 4 (user: "title voiceover should play on each tap while in the cover screen"): EVERY tap / key on the cover says the title
+     again — unless it is still being said (no stutter on a double tap; a tap on Start lets the one playing finish). */
+  let t0Said = false, t0At = -1, leaving = false; const quiet = q.has('scene');
+  const t0Playing = () => t0At >= 0 && AC && AC.currentTime - t0At < (DUR.t0 || 1.6);
+  const sayTitle = () => { if (leaving || quiet || !AC || AC.state !== 'running' || document.hidden || !document.hasFocus() || !BUF.t0) return false; if (t0Playing()) return true; t0Said = true; t0At = AC.currentTime; voice('t0'); return true; };
+  const sayTitleSoon = async () => { if (leaving || quiet || !document.getElementById('loader')) return; try { unlockAudio(); await AC.resume(); } catch (e) { } for (let k = 0; k < 20 && !(BUF.t0 && AC.state === 'running'); k++) await new Promise(r => setTimeout(r, 100)); sayTitle(); };
+  try { AC.resume().then(() => { if (!t0Said) sayTitle(); }, () => { }); } catch (e) { }   // autoplay where the browser allows it (once)
+  const onTap = () => sayTitleSoon();
+  ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, onTap, { capture: true, passive: true }));   // (touchstart dropped: with pointerdown it was 2 events per tap)
+  const onFocus = () => setTimeout(() => { if (!t0Said) sayTitleSoon(); }, 50); addEventListener('focus', onFocus);   // came back to the window before it was ever said
   await new Promise(r => lp.addEventListener('click', e => { e.stopPropagation(); unlockAudio(); r(); }, { once: true }));
   gsap.killTweensOf(lp); gsap.to(lp, { scale: .9, duration: .12 });
   try { play('sfx_cycle_bell', { gain: 1 }); } catch (e) { }   // storyboard: cycle bell on Start
   try { await AC.resume(); } catch (e) { }
-  if (i === 0) { if (!t0Said) { await wait(.35); sayTitle(); } if (t0Said) { const left = (DUR.t0 || 1.6) - (AC.currentTime - t0At); if (left > 0) await wait(left + .3); } }   // the title always finishes before the cover goes
-  gsap.to('#loader', { opacity: 0, duration: .5, onComplete: () => $('#loader').remove() });
+  if (!quiet) { if (!t0Said) { await wait(.35); sayTitle(); } leaving = true; if (t0At >= 0) { const left = (DUR.t0 || 1.6) - (AC.currentTime - t0At); if (left > 0) await wait(left + .3); } }   // the title always finishes before the cover goes
+  leaving = true; ['pointerdown', 'keydown'].forEach(ev => removeEventListener(ev, onTap, { capture: true })); removeEventListener('focus', onFocus);
+  gsap.to('#loader', { opacity: 0, duration: .8, ease: 'power1.inOut', onComplete: () => $('#loader').remove() });
   if (i > 0) { gsap.set(wipe, { clipPath: 'circle(150% at 50% 50%)' }); NEXT_IN = 'iris'; if (FLOW[i][0].startsWith('level') || FLOW[i][0].startsWith('bridge')) playMusic(FLOW[i][0].startsWith('level') ? 'm_hurry' : 'm_village_long'); else if (FLOW[i][0].startsWith('end') || FLOW[i][0] === 'badge') playMusic('m_festive'); else playMusic('m_village_long'); }
   const once = q.has('scene');
   while (true) {
