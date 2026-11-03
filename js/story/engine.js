@@ -679,7 +679,7 @@ function shake(tl, t, amp = 12) { tl.fromTo(shaker, { x: 0 }, { x: amp, duration
 (() => {
   const REACT = { pari: { h: 26, sfx: ['pop', .5, 1.2] }, aaru: { h: 46, sfx: ['boing', .55, 1.1] }, gudiya: { h: 50, sfx: ['goat', .9, 1] } };
   stage.addEventListener('pointerdown', e => {
-    if (window.GAME_PAUSED || e.target.closest('.btn, .signhit, #skip, #ctl, #pauseOv, #loader, #qa, #game:not(.hidden), .card button')) return;
+    if (window.GAME_PAUSED || e.target.closest('.btn, .signhit, #skip, #ctl, #pauseOv, #loader, #game:not(.hidden), .card button')) return;
     const g = document.getElementById('game'); if (g && !g.classList.contains('hidden')) return;
     const hits = [...world.querySelectorAll('.char')].map(w => w._o).filter(o => o && REACT[o.key] && !o.moving).filter(o => {
       return [...o.body.querySelectorAll('img')].some(i => { if (+getComputedStyle(i).opacity < .5 || i.style.visibility === 'hidden') return false; const r = i.getBoundingClientRect(); return e.clientX >= r.left + r.width * .2 && e.clientX <= r.right - r.width * .2 && e.clientY >= r.top && e.clientY <= r.bottom; });

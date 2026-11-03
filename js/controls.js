@@ -145,7 +145,7 @@
   function back() {
     const F = window.FLOW || [], cur = window.CUR_SCREEN || 'title', i = Math.max(0, F.findIndex(f => f[0] === cur));
     const q = new URLSearchParams(), old = new URLSearchParams(location.search);
-    ['speed', 'qa'].forEach(k => old.has(k) && q.set(k, old.get(k)));
+    ['speed'].forEach(k => old.has(k) && q.set(k, old.get(k)));
     const m = /^level(\d)$/.exec(cur), solved = m && typeof HUD !== 'undefined' ? Math.min(7, HUD.lit | 0) : 0;
     if (m && solved > 0) { q.set('from', cur); q.set(m[1] === '1' ? 'shop' : 'bill', solved); }   // previous question (1-based = solved)
     else q.set('from', F[Math.max(0, i - 1)] ? F[Math.max(0, i - 1)][0] : 'title');
